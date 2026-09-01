@@ -5,14 +5,35 @@ from __future__ import annotations
 from foundation_validate.model import Domain
 from foundation_validate.validator import Result
 
-BOX = "╔" + "═" * 38 + "╗\n║" + "       PROJECT FOUNDATION AUDIT       " + "║\n╚" + "═" * 38 + "╝"
+_BOX_WIDTH = 38
+_BOX_TITLE = "       PROJECT FOUNDATION AUDIT       "
+
+BOX = "╔" + "═" * _BOX_WIDTH + "╗\n║" + _BOX_TITLE + "║\n╚" + "═" * _BOX_WIDTH + "╝"
+BOX_ASCII = "+" + "-" * _BOX_WIDTH + "+\n|" + _BOX_TITLE + "|\n+" + "-" * _BOX_WIDTH + "+"
 
 _LABEL_WIDTH = 25
 
 
-def render(result: Result) -> str:
+def stream_supports_box(stream: object) -> bool:
+    """True, wenn der Rahmen auf diesem Stream darstellbar ist.
+
+    Konsolen mit einer Legacy-Codepage (Windows, cp1252) koennen die Rahmenzeichen
+    nicht encoden — dort waere die Ausgabe sonst ein UnicodeEncodeError. Streams ohne
+    eigenes Encoding (StringIO, pytest-Capture) sind nicht beschraenkt.
+    """
+    encoding = getattr(stream, "encoding", None)
+    if not encoding:
+        return True
+    try:
+        BOX.encode(encoding)
+    except (UnicodeEncodeError, LookupError):
+        return False
+    return True
+
+
+def render(result: Result, *, ascii_only: bool = False) -> str:
     """Formatiert das Validierungsergebnis als Audit-Report."""
-    lines = [BOX, ""]
+    lines = [BOX_ASCII if ascii_only else BOX, ""]
     for domain in Domain:
         lines.append(f"{domain.value.ljust(_LABEL_WIDTH)}{result.domain_status[domain]}")
     lines += [
