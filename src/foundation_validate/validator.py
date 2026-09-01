@@ -26,14 +26,49 @@ from foundation_validate.model import (
 MANIFEST_NAME = ".project-foundation.yml"
 
 #: Dateien, ohne die keine Foundation vollstaendig ist.
-REQUIRED_FILES: tuple[tuple[str, Domain], ...] = (
-    ("README.md", Domain.DOCUMENTATION),
-    ("STATUS.md", Domain.DOCUMENTATION),
-    ("CLAUDE.md", Domain.AI_FOUNDATION),
-    ("docs/PROJECT.md", Domain.PROJECT_DEFINITION),
-    ("docs/ARCHITECTURE.md", Domain.ARCHITECTURE),
-    (MANIFEST_NAME, Domain.DOCUMENTATION),
+#: Die ID steht im Tupel, damit sie stabil bleibt, wenn sich die Reihenfolge aendert.
+REQUIRED_FILES: tuple[tuple[str, str, Domain], ...] = (
+    ("STRUCT-001", "README.md", Domain.DOCUMENTATION),
+    ("STRUCT-002", "STATUS.md", Domain.DOCUMENTATION),
+    ("STRUCT-003", "CLAUDE.md", Domain.AI_FOUNDATION),
+    ("STRUCT-004", "docs/PROJECT.md", Domain.PROJECT_DEFINITION),
+    ("STRUCT-005", "docs/ARCHITECTURE.md", Domain.ARCHITECTURE),
+    ("STRUCT-006", MANIFEST_NAME, Domain.DOCUMENTATION),
 )
+
+#: Dateien, die eine fehlende Pflichtstelle offenbar vertreten.
+#:
+#: Ausschliesslich fuer die Fehlermeldung. Ein Treffer erfuellt die Pflicht NIE --
+#: der Validator bleibt strikt, sagt aber, was er stattdessen gefunden hat (ADR-0008).
+NEAR_MISS_GLOBS: dict[str, tuple[str, ...]] = {
+    "README.md": ("[Rr][Ee][Aa][Dd][Mm][Ee]*.md", "docs/README.md"),
+    "STATUS.md": ("docs/STATUS.md", "*[Ss]tatus*.md"),
+    "CLAUDE.md": ("docs/CLAUDE.md", ".claude/CLAUDE.md", "AGENTS.md"),
+    "docs/PROJECT.md": (
+        "docs/*[Pp]roject*.md",
+        "docs/*[Pp]rojekt*.md",
+        "docs/*[Kk]onzept*.md",
+        "PROJECT.md",
+        "KONZEPT.md",
+    ),
+    "docs/ARCHITECTURE.md": (
+        "docs/*[Aa]rchitect*.md",
+        "docs/*[Aa]rchitekt*.md",
+        "ARCHITECTURE.md",
+        "ARCHITEKTUR.md",
+    ),
+    MANIFEST_NAME: (
+        ".project-foundation.yaml",
+        "project-foundation.yml",
+        ".foundation.yml",
+    ),
+}
+
+#: Verzeichnisnamen, unter denen Projekte ihre ADRs ueblicherweise ablegen.
+DECISION_DIR_CANDIDATES = ("adr", "adrs", "decisions", "entscheidungen", "architecture-decisions")
+
+#: Mehr Kandidaten nennt der Report nicht -- sonst wird aus der Meldung ein Verzeichnisdump.
+MAX_NEAR_MISSES = 3
 
 #: Abschnitte, die docs/PROJECT.md zwingend braucht.
 PROJECT_SECTIONS_REQUIRED = (
@@ -88,6 +123,10 @@ MANIFEST_REQUIRED_KEYS = (
 
 ADR_FILENAME_RE = re.compile(r"^ADR-(\d{4})-[a-z0-9]+(?:-[a-z0-9]+)*\.md$")
 ADR_SECTIONS = ("Context", "Decision", "Consequences")
+
+#: Grosszuegiger als ADR_FILENAME_RE: erkennt auch fremde Nummerierungen wie
+#: "0001-titel.md". Nur fuer die Beinahe-Treffer-Meldung, nicht fuer die Pruefung.
+ADR_LIKE_RE = re.compile(r"^(?:ADR[-_]?)?\d{3,4}[-_]", re.IGNORECASE)
 
 
 @dataclass
@@ -144,28 +183,90 @@ def _find_state(text: str, label: str, states: tuple[str, ...]) -> str | None:
     return hit
 
 
+def _near_misses(root: Path, relative: str) -> list[str]:
+    """Dateien, die die fehlende Pflichtstelle offenbar vertreten sollen.
+
+    Dient nur der Meldung: der Nutzer soll nicht raten muessen, ob der Validator seine
+    vorhandene Doku uebersehen hat oder sie nur anders heisst.
+    """
+    treffer: dict[str, None] = {}
+    for muster in NEAR_MISS_GLOBS.get(relative, ()):
+        for pfad in sorted(root.glob(muster)):
+            if pfad.is_file() and pfad != (root / relative):
+                treffer[pfad.relative_to(root).as_posix()] = None
+    return list(treffer)[:MAX_NEAR_MISSES]
+
+
+def _decision_dir_near_misses(root: Path) -> list[tuple[str, int]]:
+    """Verzeichnisse, die statt docs/decisions/ die ADRs enthalten, mit ihrer Dateizahl."""
+    treffer: list[tuple[str, int]] = []
+    basen = [root, root / "docs"]
+    for basis in basen:
+        if not basis.is_dir():
+            continue
+        for kandidat in sorted(p for p in basis.iterdir() if p.is_dir()):
+            if kandidat == root / "docs" / "decisions":
+                continue
+            adrs = [p for p in kandidat.glob("*.md") if ADR_LIKE_RE.match(p.name)]
+            passt = kandidat.name.lower() in DECISION_DIR_CANDIDATES
+            if adrs or passt:
+                treffer.append((kandidat.relative_to(root).as_posix() + "/", len(adrs)))
+    return treffer[:MAX_NEAR_MISSES]
+
+
+def _hinweis(treffer: list[str]) -> str:
+    """Haengt die Beinahe-Treffer an eine Begruendung an. Leer, wenn es keine gibt."""
+    if not treffer:
+        return ""
+    return f" Gefunden wurde stattdessen: {', '.join(treffer)}."
+
+
 def _check_structure(root: Path, out: list[Finding]) -> None:
-    for index, (relative, domain) in enumerate(REQUIRED_FILES, start=1):
+    for finding_id, relative, domain in REQUIRED_FILES:
         if not (root / relative).is_file():
+            treffer = _near_misses(root, relative)
             out.append(
                 Finding(
-                    finding_id=f"STRUCT-{index:03d}",
+                    finding_id=finding_id,
                     severity=Severity.BLOCKING,
                     domain=domain,
-                    reason=f"Pflichtdatei {relative} fehlt.",
-                    required_action=f"{relative} anlegen (Vorlage im Skill unter templates/).",
+                    reason=f"Pflichtdatei {relative} fehlt." + _hinweis(treffer),
+                    required_action=(
+                        f"{relative} anlegen (Vorlage im Skill unter templates/)"
+                        + (
+                            f" - oder {treffer[0]} dorthin umbenennen, falls die Datei "
+                            "dieselbe Rolle erfuellt."
+                            if treffer
+                            else "."
+                        )
+                    ),
                     location=relative,
                 )
             )
     decisions = root / "docs" / "decisions"
     if not decisions.is_dir():
+        kandidaten = _decision_dir_near_misses(root)
+        beschreibung = ", ".join(
+            f"{pfad} ({anzahl} ADR-Dateien)" if anzahl else pfad for pfad, anzahl in kandidaten
+        )
         out.append(
             Finding(
                 finding_id="STRUCT-010",
                 severity=Severity.BLOCKING,
                 domain=Domain.ARCHITECTURE,
-                reason="Verzeichnis docs/decisions/ fehlt.",
-                required_action="docs/decisions/ anlegen und mindestens ein ADR schreiben.",
+                reason=(
+                    "Verzeichnis docs/decisions/ fehlt."
+                    + (f" Gefunden wurde stattdessen: {beschreibung}." if kandidaten else "")
+                ),
+                required_action=(
+                    "docs/decisions/ anlegen und mindestens ein ADR schreiben"
+                    + (
+                        f" - oder {kandidaten[0][0]} dorthin umbenennen, falls dort "
+                        "bereits die Architekturentscheidungen liegen."
+                        if kandidaten
+                        else "."
+                    )
+                ),
                 location="docs/decisions/",
             )
         )
@@ -383,19 +484,11 @@ def _check_status(root: Path, out: list[Finding]) -> dict[Domain, str]:
     if not path.is_file():
         return declared
     text = _read(path)
+    fehlend: list[Domain] = []
     for domain in Domain:
         state = _find_state(text, domain.value, DOMAIN_STATES)
         if state is None:
-            out.append(
-                Finding(
-                    finding_id="STAT-001",
-                    severity=Severity.WARNING,
-                    domain=Domain.DOCUMENTATION,
-                    reason=f"STATUS.md nennt keinen Status fuer '{domain.value}'.",
-                    required_action=f"'{domain.value}' mit {'/'.join(DOMAIN_STATES)} bewerten.",
-                    location="STATUS.md",
-                )
-            )
+            fehlend.append(domain)
             continue
         declared[domain] = state
         if state in ("BLOCKED", "UNKNOWN"):
@@ -406,6 +499,38 @@ def _check_status(root: Path, out: list[Finding]) -> dict[Domain, str]:
                     domain=domain,
                     reason=f"STATUS.md meldet '{domain.value}' als {state}.",
                     required_action="Blocker aufloesen oder Entscheidung treffen.",
+                    location="STATUS.md",
+                )
+            )
+
+    if len(fehlend) == len(Domain):
+        # Eine Ursache, eine Warnung: die Datei folgt dem Format gar nicht. Acht
+        # gleichlautende Zeilen wuerden nur den Report fluten.
+        out.append(
+            Finding(
+                finding_id="STAT-003",
+                severity=Severity.WARNING,
+                domain=Domain.DOCUMENTATION,
+                reason=(
+                    "STATUS.md nennt fuer keine einzige Domaene einen Status - die Datei "
+                    "folgt dem erwarteten Format nicht."
+                ),
+                required_action=(
+                    "STATUS.md nach der Vorlage aufbauen: je Domaene eine Zeile mit "
+                    f"{'/'.join(DOMAIN_STATES)}."
+                ),
+                location="STATUS.md",
+            )
+        )
+    else:
+        for domain in fehlend:
+            out.append(
+                Finding(
+                    finding_id="STAT-001",
+                    severity=Severity.WARNING,
+                    domain=Domain.DOCUMENTATION,
+                    reason=f"STATUS.md nennt keinen Status fuer '{domain.value}'.",
+                    required_action=f"'{domain.value}' mit {'/'.join(DOMAIN_STATES)} bewerten.",
                     location="STATUS.md",
                 )
             )

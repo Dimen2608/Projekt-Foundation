@@ -6,9 +6,10 @@ Validators, nicht seine interne Struktur.
 
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 
-from foundation_validate.model import Domain, Severity
+from foundation_validate.model import Domain, Finding, Severity
 from foundation_validate.validator import validate
 
 
@@ -130,3 +131,63 @@ def test_env_example_ohne_gitignore_eintrag_blockiert(project: Path) -> None:
 def test_kaputtes_manifest_blockiert(project: Path) -> None:
     (project / ".project-foundation.yml").write_text("foundation: [unbalanced\n", encoding="utf-8")
     assert "MAN-001" in _ids(project)
+
+
+def _finding(root: Path, finding_id: str) -> Finding:
+    treffer = [f for f in validate(root).findings if f.finding_id == finding_id]
+    assert treffer, f"{finding_id} nicht gemeldet"
+    return treffer[0]
+
+
+def test_beinahe_treffer_wird_in_der_meldung_genannt(project: Path) -> None:
+    """Wer seine Doku anders benannt hat, soll nicht raten muessen, ob sie uebersehen wurde."""
+    (project / "docs" / "PROJECT.md").unlink()
+    (project / "KONZEPT.md").write_text("# Konzept\n", encoding="utf-8")
+    finding = _finding(project, "STRUCT-004")
+    assert "KONZEPT.md" in finding.reason
+    assert "umbenennen" in finding.required_action
+
+
+def test_ohne_beinahe_treffer_bleibt_die_meldung_schlicht(project: Path) -> None:
+    (project / "docs" / "PROJECT.md").unlink()
+    finding = _finding(project, "STRUCT-004")
+    assert "Gefunden wurde" not in finding.reason
+    assert "umbenennen" not in finding.required_action
+
+
+def test_fremdes_adr_verzeichnis_wird_mit_anzahl_genannt(project: Path) -> None:
+    """docs/adr/ mit fremder Nummerierung (0001-titel.md) muss erkannt werden."""
+    shutil.rmtree(project / "docs" / "decisions")
+    fremd = project / "docs" / "adr"
+    fremd.mkdir()
+    for nummer in ("0001", "0002"):
+        (fremd / f"{nummer}-eine-entscheidung.md").write_text("# ADR\n", encoding="utf-8")
+    finding = _finding(project, "STRUCT-010")
+    assert "docs/adr/" in finding.reason
+    assert "2 ADR-Dateien" in finding.reason
+
+
+def test_beinahe_treffer_erfuellt_die_pflicht_nicht(project: Path) -> None:
+    """Der Validator bleibt strikt: der Hinweis ist eine Meldung, keine Anerkennung."""
+    (project / "docs" / "ARCHITECTURE.md").rename(project / "docs" / "architektur.md")
+    assert "STRUCT-005" in _ids(project)
+
+
+def test_status_ohne_erkennbares_format_gibt_eine_warnung(project: Path) -> None:
+    """Eine Ursache, eine Warnung - nicht acht gleichlautende Zeilen."""
+    (project / "STATUS.md").write_text("# Status\n\nAlles bestens.\n", encoding="utf-8")
+    result = validate(project)
+    stat = [f for f in result.warnings if f.finding_id.startswith("STAT-")]
+    assert len(stat) == 1
+    assert stat[0].finding_id == "STAT-003"
+
+
+def test_einzelne_fehlende_domaene_bleibt_eine_einzelmeldung(project: Path) -> None:
+    path = project / "STATUS.md"
+    path.write_text(
+        path.read_text(encoding="utf-8").replace("| Security | PASS |\n", ""), encoding="utf-8"
+    )
+    result = validate(project)
+    stat = [f for f in result.warnings if f.finding_id.startswith("STAT-")]
+    assert [f.finding_id for f in stat] == ["STAT-001"]
+    assert "Security" in stat[0].reason
