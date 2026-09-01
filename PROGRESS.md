@@ -41,5 +41,13 @@ Vier Grundsatzfragen wurden vom Auftraggeber beantwortet und als ADRs festgehalt
 
 **Offen geblieben**
 
-- Die CI-Pipeline ist noch nie auf GitHub gelaufen (W-2 in `STATUS.md`).
 - Ob weitere Review-Skills nötig sind, entscheidet sich erst durch Anwendung (OD-1).
+
+## 2026-09-01 — CI verifiziert
+
+Nach dem Push lief die CI erstmals auf GitHub: Run
+[#1](https://github.com/Dimen2608/Projekt-Foundation/actions/runs/33540491731),
+Jobs `quality` und `foundation`, beide `success`. Damit war W-2 nur eine
+Momentaufnahme vor dem ersten Push und ist erledigt — in `STATUS.md` entfernt.
+W-1 (Mutation Testing) bleibt bewusst offen: eine Warning ohne benennbaren
+Nutzen zu schließen wäre selbst Overengineering.

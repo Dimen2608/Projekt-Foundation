@@ -21,7 +21,7 @@
 | Security | PASS |
 
 Blockers: 0
-Warnings: 2
+Warnings: 1
 
 ## Blocker
 
@@ -31,12 +31,16 @@ Keine.
 
 | ID | Bereich | Beschreibung |
 | --- | --- | --- |
-| W-1 | Testing & Quality | Mutation Testing ist nicht konfiguriert. Bei aktuell 23 Prüfregeln steht der Aufwand in keinem Verhältnis; neu zu bewerten, wenn die Regelmenge deutlich wächst. |
-| W-2 | CI/CD & Infrastructure | Die CI-Pipeline ist definiert, aber noch nie auf GitHub gelaufen — sie wird erst mit dem ersten Push verifiziert. Die identische Command-Chain wurde lokal ausgeführt und ist grün. |
+| W-1 | Testing & Quality | Mutation Testing ist nicht konfiguriert. Bei aktuell 23 Prüfregeln steht der Aufwand in keinem Verhältnis; neu zu bewerten, wenn die Regelmenge deutlich wächst. Absichtlich offen gelassen, kein Blocker. |
+
+W-2 (CI-Pipeline noch nie auf GitHub gelaufen) ist erledigt: Run
+[#1](https://github.com/Dimen2608/Projekt-Foundation/actions/runs/33540491731)
+auf `claude/project-foundation-architect-qq5mr4`, `conclusion: success`
+(Jobs `quality` und `foundation`, letzterer prüft Repo und Beispielprojekt).
 
 ## Command-Chain
 
-Lokal ausgeführt und verifiziert.
+Lokal ausgeführt und verifiziert; identisch in CI grün (Run #1, s. o.).
 
 | Command | Zustand | Zuletzt geprüft |
 | --- | --- | --- |
