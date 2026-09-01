@@ -41,5 +41,5 @@ quality_gates: [foundation, change, architecture, security]
 foundation:
   status: READY
   blocking_issues: 0
-  warnings: 1
+  warnings: 0
   last_audit: 2026-09-01

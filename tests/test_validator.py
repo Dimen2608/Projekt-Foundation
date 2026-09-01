@@ -220,3 +220,74 @@ def test_fehlendes_decisions_verzeichnis_nennt_die_adr_abschnitte(project: Path)
     aktion = _finding(project, "STRUCT-010").required_action
     for abschnitt in ADR_SECTIONS:
         assert abschnitt in aktion
+
+
+def test_fehlende_readme_blockiert(project: Path) -> None:
+    (project / "README.md").unlink()
+    assert "STRUCT-001" in _ids(project)
+
+
+def test_fehlende_status_md_blockiert(project: Path) -> None:
+    (project / "STATUS.md").unlink()
+    assert "STRUCT-002" in _ids(project)
+
+
+def test_fehlende_claude_md_blockiert(project: Path) -> None:
+    (project / "CLAUDE.md").unlink()
+    assert "STRUCT-003" in _ids(project)
+
+
+def test_fehlendes_manifest_blockiert(project: Path) -> None:
+    (project / ".project-foundation.yml").unlink()
+    assert "STRUCT-006" in _ids(project)
+
+
+def test_manifest_ohne_mapping_blockiert(project: Path) -> None:
+    """Eine YAML-Liste statt eines Mappings ist syntaktisch gueltig, aber unbrauchbar."""
+    (project / ".project-foundation.yml").write_text("- eins\n- zwei\n", encoding="utf-8")
+    assert "MAN-002" in _ids(project)
+
+
+def test_manifest_ohne_pflichtfeld_blockiert(project: Path) -> None:
+    path = project / ".project-foundation.yml"
+    path.write_text(
+        path.read_text(encoding="utf-8").replace("  language: python\n", ""), encoding="utf-8"
+    )
+    assert "MAN-003" in _ids(project)
+
+
+def test_unzulaessiger_foundation_status_blockiert(project: Path) -> None:
+    path = project / ".project-foundation.yml"
+    path.write_text(
+        path.read_text(encoding="utf-8").replace("status: READY", "status: FAST_FERTIG"),
+        encoding="utf-8",
+    )
+    assert "MAN-004" in _ids(project)
+
+
+def test_manifest_ready_mit_blockern_ist_konflikt(project: Path) -> None:
+    path = project / ".project-foundation.yml"
+    path.write_text(
+        path.read_text(encoding="utf-8").replace("blocking_issues: 0", "blocking_issues: 3"),
+        encoding="utf-8",
+    )
+    assert "CONS-002" in _ids(project)
+
+
+def test_adr_mit_falschem_dateinamen_ist_warnung(project: Path) -> None:
+    """Der Dateiname ist Konvention, kein Blocker - der Inhalt entscheidet."""
+    quelle = project / "docs" / "decisions" / "ADR-0001-beispiel.md"
+    (project / "docs" / "decisions" / "entscheidung.md").write_text(
+        quelle.read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    result = validate(project)
+    assert "ADR-001" in {f.finding_id for f in result.warnings}
+    assert result.ready
+
+
+def test_adr_ohne_status_blockiert(project: Path) -> None:
+    (project / "docs" / "decisions" / "ADR-0002-ohne-status.md").write_text(
+        "# ADR-0002\n\n## Context\nK.\n\n## Decision\nE.\n\n## Consequences\nF.\n",
+        encoding="utf-8",
+    )
+    assert "ADR-004" in _ids(project)
