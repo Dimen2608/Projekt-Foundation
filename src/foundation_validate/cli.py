@@ -6,7 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from foundation_validate.report import render
+from foundation_validate.report import render, stream_supports_box
 from foundation_validate.validator import validate
 
 
@@ -38,7 +38,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     result = validate(root)
     if not args.quiet:
-        print(render(result), end="")
+        print(render(result, ascii_only=not stream_supports_box(sys.stdout)), end="")
     return 0 if result.ready else 1
 
 
