@@ -7,6 +7,39 @@ der dafür ausreicht.
 > **NO CODING BEFORE FOUNDATION READY.**
 > **The foundation must remain smaller than the system it enables.**
 
+<details>
+<summary><b>In English</b> — what this is, and a heads-up about the language</summary>
+
+**The documentation in this repository is written in German.** Only the structural keywords
+are English (`PASS` / `BLOCKED`, `Context` / `Decision` / `Consequences`, section names such
+as `Purpose`, `Scope`, `MVP`) — a deliberate split, recorded in
+[ADR-0005](docs/decisions/ADR-0005-dokumentationssprache.md): everything the validator reads
+is English, everything a human reads is German.
+
+**What it does.** Projekt-Foundation prepares a codebase for implementation — by humans or
+AI agents — using the smallest set of documents that makes guessing unnecessary. It ships as:
+
+- a **Claude Code skill** that walks an agent through
+  `DISCOVER → ASSESS → ASK → DECIDE → GENERATE → VALIDATE → AUDIT`, with templates for every
+  foundation file;
+- a **CLI** (`foundation-validate <path>`) that checks a project for structure, missing
+  decisions and contradictions, then prints an audit report. Exit code `0` means
+  `FOUNDATION READY`, `1` means at least one blocker.
+
+The validator only checks what is machine-decidable: file existence, structure, permitted
+status values, and contradictions between the source-of-truth documents. **A green validator
+is not a good foundation** — it only means no structural errors are left in the way.
+
+The path convention is strict on purpose: a missing `docs/decisions/` is not satisfied by an
+existing `docs/adr/`. The validator names the near miss in its message, but the finding stays
+blocking — see [ADR-0008](docs/decisions/ADR-0008-strikte-pfade-mit-beinahe-treffern.md) for
+the reasoning. Two projects with a green validator have the same structure; that is the point
+of the tool.
+
+Everything is read-only: the validator never writes into a project it inspects.
+
+</details>
+
 Es besteht aus zwei Teilen:
 
 - **Skill `project-foundation`** — führt einen Agenten durch
