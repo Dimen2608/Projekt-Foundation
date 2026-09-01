@@ -129,6 +129,34 @@ ADR_SECTIONS = ("Context", "Decision", "Consequences")
 ADR_LIKE_RE = re.compile(r"^(?:ADR[-_]?)?\d{3,4}[-_]", re.IGNORECASE)
 
 
+def _finding_id_register() -> tuple[str, ...]:
+    """Jede Finding-ID, die der Validator erzeugen kann.
+
+    Zweck ist der Abdeckungstest in tests/test_regelabdeckung.py: Er schlaegt fehl, sobald
+    eine Regel ohne schuetzenden Test existiert oder eine ID am Register vorbei eingefuehrt
+    wird. Damit ist die Repo-Regel "neue Blocking-Regel = neuer Test" erzwungen statt nur
+    vorgenommen (ADR-0009).
+
+    Die Familien DEF- und ARCH- entstehen je Abschnitt bzw. Bereich aus einer
+    Konstantenliste und wachsen automatisch mit.
+    """
+    ids: list[str] = [finding_id for finding_id, _, _ in REQUIRED_FILES]
+    ids += ["STRUCT-010", "STRUCT-011"]
+    ids += [f"DEF-{i:03d}" for i in range(1, len(PROJECT_SECTIONS_REQUIRED) + 1)]
+    ids += [f"DEF-{i:03d}" for i in range(50, 50 + len(PROJECT_SECTIONS_OPTIONAL))]
+    ids += [f"ARCH-{i:03d}" for i in range(1, len(CORE_AREAS) + 1)]
+    ids += [f"MAN-{i:03d}" for i in range(1, 5)]
+    ids += [f"ADR-{i:03d}" for i in range(1, 5)]
+    ids += [f"STAT-{i:03d}" for i in range(1, 4)]
+    ids += [f"SEC-{i:03d}" for i in range(1, 3)]
+    ids += [f"CONS-{i:03d}" for i in range(1, 5)]
+    return tuple(ids)
+
+
+#: Register aller Finding-IDs. Stabil - eine bestehende ID wird nicht umgewidmet.
+FINDING_IDS = _finding_id_register()
+
+
 @dataclass
 class Result:
     """Ergebnis eines Validierungslaufs."""

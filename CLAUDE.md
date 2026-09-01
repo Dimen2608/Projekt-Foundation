@@ -41,8 +41,9 @@ grün sein.
   unter `.claude/skills/` (ADR-0002).
 - Der Validator **schreibt nie** in ein geprüftes Projekt. Reine Lesezugriffe.
 - Neue Blocking-Regel im Validator = neuer Test, der genau diese Regel schützt. Keine
-  Tests, die nur Coverage erzeugen.
-- Finding-IDs sind stabil. Eine bestehende ID wird nicht umgewidmet.
+  Tests, die nur Coverage erzeugen. Erzwungen durch `tests/test_regelabdeckung.py` (ADR-0009).
+- Finding-IDs sind stabil. Eine bestehende ID wird nicht umgewidmet. Jede neue ID gehört
+  ins Register `FINDING_IDS`.
 - `.project-foundation.yml` ist ein Index, nie die Source of Truth (ADR-0004).
 - Deutscher Fließtext, englische Struktur-Keywords (ADR-0005).
 

@@ -21,7 +21,7 @@
 | Security | PASS |
 
 Blockers: 0
-Warnings: 1
+Warnings: 0
 
 ## Blocker
 
@@ -29,9 +29,14 @@ Keine.
 
 ## Warnungen
 
-| ID | Bereich | Beschreibung |
-| --- | --- | --- |
-| W-1 | Testing & Quality | Mutation Testing ist nicht konfiguriert. Bei aktuell 24 Prüfregeln steht der Aufwand in keinem Verhältnis; neu zu bewerten, wenn die Regelmenge deutlich wächst. Absichtlich offen gelassen, kein Blocker. |
+Keine.
+
+W-1 (Mutation Testing nicht konfiguriert) ist erledigt — nicht durch Einführung von
+`mutmut`, sondern durch das, wonach die Warnung eigentlich fragte. Die Messung ergab zehn
+Prüfregeln ohne schützenden Test (`STRUCT-001/002/003/006`, `MAN-002/003/004`,
+`ADR-001/004`, `CONS-002`). Diese Tests existieren jetzt, und `FINDING_IDS` plus die zwei
+Meta-Tests in `tests/test_regelabdeckung.py` verhindern, dass die Lücke wiederkehrt. Siehe
+[ADR-0009](docs/decisions/ADR-0009-regelabdeckung-statt-mutation-testing.md).
 
 W-2 (CI-Pipeline noch nie auf GitHub gelaufen) ist erledigt: Run
 [#1](https://github.com/Dimen2608/Projekt-Foundation/actions/runs/33540491731)
@@ -48,7 +53,7 @@ Lokal ausgeführt und verifiziert; identisch in CI grün (Run #1, s. o.).
 | format (`ruff format --check .`) | ok | 2026-09-01 |
 | lint (`ruff check .`) | ok | 2026-09-01 |
 | typecheck (`mypy`) | ok | 2026-09-01 |
-| test (`pytest`) | ok — 29 Tests | 2026-09-01 |
+| test (`pytest`) | ok — 41 Tests | 2026-09-01 |
 | build | n/a — kein Artefakt (ADR-0006) | — |
 
 ## Foundation-Validierung
@@ -62,7 +67,7 @@ Blocker durch. Das Toolkit prüft sich selbst.
 | --- | --- |
 | Skill `project-foundation` | vollständig |
 | Vorlagen (13 Stück) | vollständig |
-| Validator (`foundation_validate`) | vollständig, 24 Prüfregeln |
+| Validator (`foundation_validate`) | vollständig, 24 Prüfregeln, Abdeckung erzwungen |
 | Plugin- und Marketplace-Manifest | vollständig |
 | Beispielprojekt `examples/taskflow` | vollständig |
 | Foundation dieses Repos | vollständig |
