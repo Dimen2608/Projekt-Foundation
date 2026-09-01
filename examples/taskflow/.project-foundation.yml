@@ -1,0 +1,42 @@
+# Beispielprojekt. INDEX, nicht Source of Truth.
+
+schema_version: 1
+
+project:
+  name: taskflow
+  type: web-app
+  maturity: greenfield
+
+stack:
+  language: typescript
+  runtime: node-22
+  package_manager: pnpm
+  frameworks: [express, postgres-js]
+
+architecture:
+  style: modular-monolith
+  persistence: postgresql-16
+  authentication: session-cookie
+  deployment: container
+
+ai_support:
+  claude_md: true
+  agents_md: false
+  cursor_rules: false
+  skills: []
+
+testing:
+  levels: [unit, integration, e2e, performance]
+  command: pnpm test
+
+infrastructure:
+  ci: github-actions
+  hosting: interne-container-plattform
+
+quality_gates: [foundation, change, architecture, security]
+
+foundation:
+  status: READY
+  blocking_issues: 0
+  warnings: 1
+  last_audit: 2026-09-01

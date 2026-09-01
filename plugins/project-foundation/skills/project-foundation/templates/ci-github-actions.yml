@@ -1,0 +1,38 @@
+# CI-Mindestpipeline: Install → Lint → Typecheck → Test → Build.
+#
+# Nur die Schritte behalten, die das Projekt tatsächlich hat. Einen Schritt
+# ersatzlos zu streichen ist in Ordnung, solange docs/ARCHITECTURE.md begründet,
+# warum er NOT REQUIRED ist. Ein Schritt, der nichts prüft, ist schlechter als keiner.
+#
+# Kopieren nach .github/workflows/ci.yml und die <Platzhalter> ersetzen.
+
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup
+        run: <setup-command>
+
+      - name: Install
+        run: <install-command>
+
+      - name: Lint
+        run: <lint-command>
+
+      - name: Typecheck
+        run: <typecheck-command>
+
+      - name: Test
+        run: <test-command>
+
+      - name: Build
+        run: <build-command>

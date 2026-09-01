@@ -1,0 +1,17 @@
+---
+description: Regeln für neue oder geänderte Prüfregeln im Foundation-Validator
+globs: ["src/foundation_validate/**/*.py", "tests/**/*.py"]
+alwaysApply: false
+---
+
+# Validator-Regeln
+
+- Jede Prüfregel liefert ein `Finding` mit stabiler ID im Muster `BEREICH-NNN`.
+  Bestehende IDs werden nie umgewidmet — sie erscheinen in Reports und Tickets.
+- `required_action` beschreibt eine ausführbare Maßnahme, nicht das Problem noch einmal.
+- `Severity.BLOCKING` nur, wenn die Regel Implementierung tatsächlich verhindert.
+  Alles andere ist `WARNING`.
+- Sicherheitsrelevante Unklarheiten sind immer `BLOCKING`.
+- Jede neue Blocking-Regel bekommt genau einen Test, der ihr Verhalten schützt —
+  keinen zusätzlichen Test, der dasselbe noch einmal prüft.
+- Der Validator liest ausschließlich. Kein Schreibzugriff auf das geprüfte Projekt.

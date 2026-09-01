@@ -1,0 +1,45 @@
+# Maschinenlesbarer Index der Foundation.
+#
+# WICHTIG: INDEX, niemals Source of Truth. Bei Widersprüchen gewinnen die
+# Dokumente (STATUS.md, docs/*). Siehe ADR-0004.
+
+schema_version: 1
+
+project:
+  name: projekt-foundation
+  type: tool
+  maturity: active
+
+stack:
+  language: python
+  runtime: python-3.11
+  package_manager: pip
+  frameworks: []
+
+architecture:
+  style: cli
+  persistence: none
+  authentication: none
+  deployment: claude-code-plugin
+
+ai_support:
+  claude_md: true
+  agents_md: true
+  cursor_rules: true
+  skills: [project-foundation]
+
+testing:
+  levels: [unit, integration]
+  command: pytest
+
+infrastructure:
+  ci: github-actions
+  hosting: none
+
+quality_gates: [foundation, change, architecture, security]
+
+foundation:
+  status: READY
+  blocking_issues: 0
+  warnings: 2
+  last_audit: 2026-09-01

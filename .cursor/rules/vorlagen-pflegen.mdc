@@ -1,0 +1,16 @@
+---
+description: Regeln für das Ändern von Skill-Vorlagen und Reference-Dateien
+globs: ["plugins/project-foundation/skills/**/*.md", "plugins/project-foundation/skills/**/*.mdc", "plugins/project-foundation/skills/**/*.yml"]
+alwaysApply: false
+---
+
+# Vorlagen und Skill-Texte
+
+- Eine Vorlage enthält Platzhalter in spitzen Klammern und erklärt, **warum** ein
+  Abschnitt existiert — nicht nur, dass er auszufüllen ist.
+- Abschnittsüberschriften, die der Validator prüft, bleiben unverändert
+  (`Purpose`, `Problem`, `Target Users`, `Scope`, `MVP`, `Out of Scope`,
+  `Context`, `Decision`, `Consequences`).
+- `SKILL.md` bleibt kurz. Vertiefung gehört nach `reference/` und wird bei Bedarf geladen.
+- Keine Information doppelt in `SKILL.md` und `reference/`.
+- Ändert sich eine Vorlage strukturell, muss `examples/taskflow/` mitgezogen werden.

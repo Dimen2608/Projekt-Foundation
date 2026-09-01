@@ -1,0 +1,18 @@
+---
+description: <Wann diese Regel gilt — ein Satz>
+globs: ["<pfad/glob/**/*.ext>"]
+alwaysApply: false
+---
+
+# <Regelname>
+
+<Die Regel selbst. Kurz und fokussiert. Eine Regel pro Datei.>
+
+- <Konkrete Anweisung>
+- <Konkrete Anweisung>
+
+## Hinweise
+
+- `globs` setzen, wenn die Regel nur bestimmte Dateien betrifft — das spart Kontext.
+- `alwaysApply: true` nur, wenn die Regel wirklich global gilt.
+- Nichts wiederholen, was schon in `CLAUDE.md` oder `AGENTS.md` steht.
