@@ -31,7 +31,7 @@ Keine.
 
 | ID | Bereich | Beschreibung |
 | --- | --- | --- |
-| W-1 | Testing & Quality | Mutation Testing ist nicht konfiguriert. Bei aktuell 23 Prüfregeln steht der Aufwand in keinem Verhältnis; neu zu bewerten, wenn die Regelmenge deutlich wächst. Absichtlich offen gelassen, kein Blocker. |
+| W-1 | Testing & Quality | Mutation Testing ist nicht konfiguriert. Bei aktuell 24 Prüfregeln steht der Aufwand in keinem Verhältnis; neu zu bewerten, wenn die Regelmenge deutlich wächst. Absichtlich offen gelassen, kein Blocker. |
 
 W-2 (CI-Pipeline noch nie auf GitHub gelaufen) ist erledigt: Run
 [#1](https://github.com/Dimen2608/Projekt-Foundation/actions/runs/33540491731)
@@ -48,7 +48,7 @@ Lokal ausgeführt und verifiziert; identisch in CI grün (Run #1, s. o.).
 | format (`ruff format --check .`) | ok | 2026-09-01 |
 | lint (`ruff check .`) | ok | 2026-09-01 |
 | typecheck (`mypy`) | ok | 2026-09-01 |
-| test (`pytest`) | ok — 18 Tests | 2026-09-01 |
+| test (`pytest`) | ok — 26 Tests | 2026-09-01 |
 | build | n/a — kein Artefakt (ADR-0006) | — |
 
 ## Foundation-Validierung
@@ -62,7 +62,7 @@ Blocker durch. Das Toolkit prüft sich selbst.
 | --- | --- |
 | Skill `project-foundation` | vollständig |
 | Vorlagen (13 Stück) | vollständig |
-| Validator (`foundation_validate`) | vollständig, 23 Prüfregeln |
+| Validator (`foundation_validate`) | vollständig, 24 Prüfregeln |
 | Plugin- und Marketplace-Manifest | vollständig |
 | Beispielprojekt `examples/taskflow` | vollständig |
 | Foundation dieses Repos | vollständig |

@@ -5,6 +5,45 @@
 >
 > Neueste Einträge oben.
 
+## 2026-09-01 — Erster Einsatz gegen ein Fremdprojekt
+
+**Anlass**
+
+Das Toolkit wurde zum ersten Mal gegen ein Repo gerichtet, das nicht mit ihm gebaut wurde
+(ein gewachsenes Godot-Projekt). Drei Mängel traten sofort zutage — alle drei erst dann,
+weil das Repo bis dahin nur sich selbst geprüft hatte.
+
+**1. Der Validator lief unter Windows überhaupt nicht**
+
+`UnicodeEncodeError` beim allerersten Aufruf, ausgelöst von den Rahmenzeichen der Kopfzeile
+auf einer cp1252-Konsole. Behoben durch `stream_supports_box()` mit ASCII-Rahmen als
+Rückfallebene; als Regel festgehalten in ADR-0007. Der Regressionstest erzwingt die Codepage
+über einen `TextIOWrapper` und läuft damit auch auf dem Linux-CI.
+
+**2. Vier Blocker, davon zwei reine Benennungsdifferenzen**
+
+`docs/adr/` statt `docs/decisions/`, `docs/v2-architektur.md` statt `docs/ARCHITECTURE.md`.
+Die Substanz war da, der Validator sah sie nicht. Entschieden wurde gegen Aliase und für
+strikte Pfade mit aussagekräftiger Meldung (ADR-0008): Das Finding bleibt BLOCKING, nennt
+aber den gefundenen Kandidaten samt Anzahl der ADR-Dateien. Aliase im Manifest schieden aus,
+weil im konkreten Fall das Manifest selbst fehlte — eine Konfiguration, die Konformität
+voraussetzt, hilft dem nicht-konformen Projekt nicht.
+
+**3. Eine Ursache erzeugte acht identische Warnungen**
+
+Wenn `STATUS.md` dem Format gar nicht folgt, meldete der Validator achtmal STAT-001, einmal
+je Domäne. Jetzt gibt es dafür eine einzige Warnung STAT-003; STAT-001 bleibt für den Fall,
+dass tatsächlich nur einzelne Domänen fehlen.
+
+**Nebenbei**
+
+Die `STRUCT-`IDs hingen an der Position in `REQUIRED_FILES` und hätten sich beim Umsortieren
+verschoben — trotz Docstring „stabile ID". Sie stehen jetzt im Tupel.
+
+**Stand**
+
+24 Prüfregeln, 26 Tests, alle Gates grün. Die Selbstprüfung bleibt `FOUNDATION READY`.
+
 ## 2026-09-01 — Foundation aufgesetzt
 
 **Ausgangslage**
