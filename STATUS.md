@@ -48,7 +48,7 @@ Lokal ausgeführt und verifiziert; identisch in CI grün (Run #1, s. o.).
 | format (`ruff format --check .`) | ok | 2026-09-01 |
 | lint (`ruff check .`) | ok | 2026-09-01 |
 | typecheck (`mypy`) | ok | 2026-09-01 |
-| test (`pytest`) | ok — 26 Tests | 2026-09-01 |
+| test (`pytest`) | ok — 29 Tests | 2026-09-01 |
 | build | n/a — kein Artefakt (ADR-0006) | — |
 
 ## Foundation-Validierung

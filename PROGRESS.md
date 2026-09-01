@@ -5,6 +5,35 @@
 >
 > Neueste Einträge oben.
 
+## 2026-09-01 — Folgeprüfungen werden angekündigt
+
+**Anlass**
+
+Rückmeldung aus dem Projekt, das als erster Fremdtestfall diente: Das Erfüllen von
+STRUCT-005 erzeugte dort drei *neue* Blocker (ARCH-006, ARCH-007, ARCH-013). Die
+Blockerzahl stieg von 4 auf 6, bevor sie fiel.
+
+**Ursache**
+
+`_check_architecture()` und `_check_project()` kehren sofort zurück, wenn ihre Datei fehlt.
+Solange sie fehlt, meldet der Validator genau einen Blocker; sobald sie existiert, kommen
+bis zu drei blockierende und zehn warnende ARCH-Befunde hinzu. Für den Anwender sieht das
+aus, als habe das Beheben eines Blockers die Lage verschlechtert.
+
+Dieselbe Falle steckt in `docs/PROJECT.md` (sechs Pflichtabschnitte) und in
+`docs/decisions/` (ADR-Format). Bei PROJECT.md war sie bekannt und wurde dem Fremdprojekt
+vorab mitgeteilt — aber eben mündlich, aus dem Kopf dessen, der den Validator kennt. Genau
+dieses Wissen fehlt jedem, der das Werkzeug zum ersten Mal benutzt.
+
+**Änderung**
+
+`required_action` kündigt jetzt an, was nach dem Anlegen zusätzlich geprüft wird. Die Zahlen
+und Namen stammen aus den Konstanten (`PROJECT_SECTIONS_REQUIRED`, `CORE_AREAS`,
+`SECURITY_CRITICAL_AREAS`, `ADR_SECTIONS`), damit der Hinweis nicht veraltet, wenn jemand
+eine Prüfregel ergänzt.
+
+Keine neue Prüfregel, keine geänderte Schwere — nur der Aufwand ist vorher sichtbar.
+
 ## 2026-09-01 — Erster Einsatz gegen ein Fremdprojekt
 
 **Anlass**

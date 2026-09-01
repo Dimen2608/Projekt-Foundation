@@ -214,6 +214,28 @@ def _decision_dir_near_misses(root: Path) -> list[tuple[str, int]]:
     return treffer[:MAX_NEAR_MISSES]
 
 
+def _folgepruefung(relative: str) -> str:
+    """Kuendigt an, was nach dem Anlegen dieser Pflichtstelle zusaetzlich geprueft wird.
+
+    Ohne diesen Hinweis sieht es aus, als verschlechtere das Beheben eines Blockers die
+    Lage: Solange docs/ARCHITECTURE.md fehlt, meldet der Validator einen Blocker -- sobald
+    sie existiert, koennen drei blockierende ARCH-Befunde dazukommen. Die Zahlen stammen
+    aus den Konstanten, damit der Hinweis nicht veraltet.
+    """
+    if relative == "docs/PROJECT.md":
+        return (
+            f" Danach werden {len(PROJECT_SECTIONS_REQUIRED)} Pflichtabschnitte geprueft: "
+            f"{', '.join(PROJECT_SECTIONS_REQUIRED)}."
+        )
+    if relative == "docs/ARCHITECTURE.md":
+        return (
+            f" Danach werden {len(CORE_AREAS)} Architekturbereiche geprueft; "
+            f"{', '.join(SECURITY_CRITICAL_AREAS)} blockieren, solange sie unbewertet "
+            "oder UNKNOWN sind."
+        )
+    return ""
+
+
 def _hinweis(treffer: list[str]) -> str:
     """Haengt die Beinahe-Treffer an eine Begruendung an. Leer, wenn es keine gibt."""
     if not treffer:
@@ -239,6 +261,7 @@ def _check_structure(root: Path, out: list[Finding]) -> None:
                             if treffer
                             else "."
                         )
+                        + _folgepruefung(relative)
                     ),
                     location=relative,
                 )
@@ -266,6 +289,8 @@ def _check_structure(root: Path, out: list[Finding]) -> None:
                         if kandidaten
                         else "."
                     )
+                    + f" Danach wird jedes ADR auf {', '.join(ADR_SECTIONS)} und einen "
+                    "gueltigen Status geprueft."
                 ),
                 location="docs/decisions/",
             )

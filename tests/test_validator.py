@@ -10,7 +10,13 @@ import shutil
 from pathlib import Path
 
 from foundation_validate.model import Domain, Finding, Severity
-from foundation_validate.validator import validate
+from foundation_validate.validator import (
+    ADR_SECTIONS,
+    CORE_AREAS,
+    PROJECT_SECTIONS_REQUIRED,
+    SECURITY_CRITICAL_AREAS,
+    validate,
+)
 
 
 def _ids(root: Path) -> set[str]:
@@ -191,3 +197,26 @@ def test_einzelne_fehlende_domaene_bleibt_eine_einzelmeldung(project: Path) -> N
     stat = [f for f in result.warnings if f.finding_id.startswith("STAT-")]
     assert [f.finding_id for f in stat] == ["STAT-001"]
     assert "Security" in stat[0].reason
+
+
+def test_fehlende_architecture_md_kuendigt_die_folgepruefung_an(project: Path) -> None:
+    """Ohne Vorwarnung sieht es aus, als erzeuge das Beheben eines Blockers neue."""
+    (project / "docs" / "ARCHITECTURE.md").unlink()
+    aktion = _finding(project, "STRUCT-005").required_action
+    assert str(len(CORE_AREAS)) in aktion
+    for bereich in SECURITY_CRITICAL_AREAS:
+        assert bereich in aktion
+
+
+def test_fehlende_project_md_nennt_die_pflichtabschnitte(project: Path) -> None:
+    (project / "docs" / "PROJECT.md").unlink()
+    aktion = _finding(project, "STRUCT-004").required_action
+    for abschnitt in PROJECT_SECTIONS_REQUIRED:
+        assert abschnitt in aktion
+
+
+def test_fehlendes_decisions_verzeichnis_nennt_die_adr_abschnitte(project: Path) -> None:
+    shutil.rmtree(project / "docs" / "decisions")
+    aktion = _finding(project, "STRUCT-010").required_action
+    for abschnitt in ADR_SECTIONS:
+        assert abschnitt in aktion
