@@ -290,6 +290,13 @@ def _decision_dir_near_misses(root: Path) -> list[tuple[str, int]]:
     return treffer[:MAX_NEAR_MISSES]
 
 
+def _decision_dir_beschreibung(kandidaten: list[tuple[str, int]]) -> str:
+    """Zaehlt die gefundenen Fremdverzeichnisse auf: 'docs/adr/ (14 ADR-Dateien)'."""
+    return ", ".join(
+        f"{pfad} ({anzahl} ADR-Dateien)" if anzahl else pfad for pfad, anzahl in kandidaten
+    )
+
+
 def _folgepruefung(relative: str) -> str:
     """Kuendigt an, was nach dem Anlegen dieser Pflichtstelle zusaetzlich geprueft wird.
 
@@ -367,6 +374,12 @@ def _check_decisions(root: Path, out: list[Finding]) -> None:
         if state is None and not vorhandene_adrs:
             # Kein ADR und keine Aussage: die Frage ist offen. Das ist eine Warnung,
             # kein Blocker - der Validator kann nicht wissen, ob hier etwas fehlt.
+            #
+            # Die Beinahe-Treffer gehoeren in die Meldung: Ein Projekt, dessen ADRs in
+            # docs/adr/ liegen, bekaeme sonst zu hoeren, es habe keine - was schlicht
+            # falsch ist und die Regel aus ADR-0008 verletzt. Gemessen am 02.09.2026
+            # gegen ein Fremdprojekt mit 14 ADRs in docs/adr/.
+            kandidaten = _decision_dir_near_misses(root)
             out.append(
                 Finding(
                     finding_id="ADR-010",
@@ -375,11 +388,24 @@ def _check_decisions(root: Path, out: list[Finding]) -> None:
                     reason=(
                         "Es ist nicht beantwortet, ob dieses Projekt ADRs braucht: "
                         f"docs/ARCHITECTURE.md nennt fuer '{DECISION_LABEL}' weder "
-                        "REQUIRED noch NOT REQUIRED, und es gibt kein ADR."
+                        "REQUIRED noch NOT REQUIRED. In docs/decisions/ liegt kein ADR."
+                        + (
+                            f" Gefunden wurde stattdessen: "
+                            f"{_decision_dir_beschreibung(kandidaten)}."
+                            if kandidaten
+                            else ""
+                        )
                     ),
                     required_action=(
                         f"'{DECISION_LABEL}' mit REQUIRED oder NOT REQUIRED beantworten. "
                         "NOT REQUIRED ist ein gueltiger Zustand - dann aber mit Begruendung."
+                        + (
+                            " Achtung vor REQUIRED: Die Pfadkonvention verlangt "
+                            f"docs/decisions/; {kandidaten[0][0]} erfuellt sie nicht "
+                            "und wuerde dann als Blocker gemeldet (ADR-0008)."
+                            if kandidaten
+                            else ""
+                        )
                     ),
                     location="docs/ARCHITECTURE.md",
                 )
@@ -388,9 +414,7 @@ def _check_decisions(root: Path, out: list[Finding]) -> None:
 
     if not decisions.is_dir():
         kandidaten = _decision_dir_near_misses(root)
-        beschreibung = ", ".join(
-            f"{pfad} ({anzahl} ADR-Dateien)" if anzahl else pfad for pfad, anzahl in kandidaten
-        )
+        beschreibung = _decision_dir_beschreibung(kandidaten)
         out.append(
             Finding(
                 finding_id="STRUCT-010",

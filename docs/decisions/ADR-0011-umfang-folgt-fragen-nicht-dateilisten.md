@@ -98,3 +98,18 @@ Verworfene Alternativen:
 Neu zu bewerten, wenn sich zeigt, dass `NOT REQUIRED` in der Praxis als Schlupfloch
 benutzt wird — dann nicht durch eine härtere Maschinenregel, sondern durch eine schärfere
 Prüfung im Review.
+
+## Nachtrag — 2026-09-02
+
+Der erste Lauf gegen ein Fremdprojekt nach dieser Entscheidung hat eine Wechselwirkung mit
+ADR-0008 gezeigt, die beim Entwurf nicht bedacht war:
+
+Ein Projekt mit 14 ADRs in `docs/adr/` bekommt bei ehrlichem `REQUIRED` den Blocker
+`STRUCT-010` — bleibt die Zeile weg, nur eine Warnung. **Die ehrlichere Antwort ist die
+teurere.** Zusätzlich behauptete die Warnung wörtlich, es gebe kein ADR, obwohl der
+Validator die 14 Dateien kannte und im alten Blockertext sogar genannt hatte.
+
+Behoben wurde der falsche Text: `ADR-010` nennt jetzt das gefundene Verzeichnis samt Anzahl
+und warnt vor dem Blocker, den `REQUIRED` auslösen würde. Die Schieflage selbst bleibt
+bestehen und ist als `OD-2` in `docs/PROJECT.md` festgehalten — die Strenge aus ADR-0008
+wird nicht auf Verdacht aufgeweicht.
