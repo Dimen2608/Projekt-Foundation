@@ -326,3 +326,21 @@ def test_adr_ohne_status_blockiert(project: Path) -> None:
         encoding="utf-8",
     )
     assert "ADR-004" in _ids(project)
+
+
+def test_warnung_nennt_ein_fremdes_adr_verzeichnis(project: Path) -> None:
+    """Wer seine ADRs in docs/adr/ hat, darf nicht hoeren, er habe keine (ADR-0008)."""
+    shutil.rmtree(project / "docs" / "decisions")
+    path = project / "docs" / "ARCHITECTURE.md"
+    path.write_text(
+        path.read_text(encoding="utf-8").replace("| Architecture Decisions | REQUIRED |\n", ""),
+        encoding="utf-8",
+    )
+    fremd = project / "docs" / "adr"
+    fremd.mkdir()
+    for nummer in ("0001", "0002"):
+        (fremd / f"{nummer}-eine-entscheidung.md").write_text("# ADR\n", encoding="utf-8")
+    finding = _finding(project, "ADR-010")
+    assert "docs/adr/" in finding.reason
+    assert "2 ADR-Dateien" in finding.reason
+    assert "docs/decisions/" in finding.required_action

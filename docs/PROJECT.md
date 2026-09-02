@@ -114,3 +114,18 @@ Aktuell keine offenen Entscheidungen mit Blocking-Charakter.
 | ID | Frage | Status |
 | --- | --- | --- |
 | OD-1 | Ob zusätzliche Review-Skills nötig sind | vertagt bis V1, entscheidet sich durch Anwendung |
+| OD-2 | Ob ein fremdes ADR-Verzeichnis bei `Architecture Decisions: REQUIRED` weiter blockieren soll | offen, entschieden bleibt vorerst A (siehe unten) |
+
+**Zu OD-2.** Der Fremdtest am 2026-09-02 hat eine Schieflage gezeigt: Ein Projekt, das seine
+ADRs in `docs/adr/` hält, bekommt bei ehrlichem `REQUIRED` einen Blocker (`STRUCT-010`,
+ADR-0008) — schweigt es zur Frage, nur eine Warnung. Damit ist die ehrlichere Antwort die
+teurere.
+
+Entschieden wurde **A**: Es bleibt so, die Strenge von ADR-0008 wird nicht aufgeweicht. Die
+Warnung `ADR-010` nennt seit demselben Tag das gefundene Verzeichnis samt Anzahl und warnt
+ausdrücklich vor dem Blocker, den `REQUIRED` auslösen würde. Damit ist die Lage wenigstens
+sichtbar, statt eine Falle zu sein.
+
+Neu aufzumachen, wenn ein zweites Fremdprojekt zeigt, dass die Schieflage in der Praxis dazu
+führt, dass Projekte die Frage bewusst offenlassen. Dann wäre die Wahl zwischen einer
+Abschwächung von ADR-0008 und dem Zurücknehmen von ADR-0011 neu zu treffen.

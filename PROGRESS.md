@@ -5,6 +5,57 @@
 >
 > Neueste Einträge oben.
 
+## 2026-09-02 — Zweiter Fremdtest: das Werkzeug gegen sich selbst
+
+**Anlass**
+
+Nach dem Refinement wurde `foundation-validate` erneut gegen `AI-Idle-Agent` gerichtet — dasselbe
+gewachsene Godot-Repo, das schon der erste Fremdtestfall war. Diesmal als Vorher/Nachher: Stand
+`687a557` (vor dem Refinement) gegen `0.2.0`, beide gegen denselben Commit des Zielprojekts.
+Gelesen wurde nur; im Zielprojekt wurde nichts geändert.
+
+| | Blocker | Warnungen | Ergebnis |
+| --- | --- | --- | --- |
+| vorher | 1 (`STRUCT-010`) | 1 (`STAT-003`) | `FOUNDATION NOT READY` |
+| nachher | 0 | 2 (`ADR-010`, `STAT-003`) | `FOUNDATION VALID` |
+
+**Befund 1: Die neue Warnung sagte etwas Falsches**
+
+`ADR-010` meldete „und es gibt kein ADR". Das Projekt hat 14 ADRs in `docs/adr/` — der Validator
+kannte sie sogar, `_decision_dir_near_misses()` hatte sie im alten Blockertext korrekt als
+„docs/adr/ (14 ADR-Dateien)" genannt. Die neue Meldung benutzte dieses Wissen nicht und behauptete
+das Gegenteil. Das verletzt ADR-0008: den Beinahe-Treffer nennen, statt den Anwender raten zu
+lassen.
+
+Behoben. `ADR-010` nennt jetzt Verzeichnis und Anzahl und warnt zusätzlich vor dem Blocker, den
+ein `REQUIRED` auslösen würde — dieselbe Vorwarnung, die `_folgepruefung()` schon für fehlende
+Pflichtdateien gibt. Ein Test sichert es ab.
+
+**Befund 2: Der Anreiz steht falsch herum**
+
+Der Blocker verschwand nicht, weil jemand ihn für falsch hielt, sondern weil das Zielprojekt die
+Zeile `Architecture Decisions` nicht hat. Trüge es ehrlich `REQUIRED` ein — und es hat tragende
+Entscheidungen, dokumentiert bis ADR 0013 —, bekäme es `STRUCT-010` zurück. **Wer die Frage ehrlich
+beantwortet, zahlt; wer schweigt, kommt billiger weg.** Beim Entwurf von ADR-0011 nicht bedacht.
+
+Entschieden: Die Strenge aus ADR-0008 wird nicht auf Verdacht aufgeweicht. Die Schieflage ist als
+`OD-2` in `docs/PROJECT.md` festgehalten und wird neu aufgemacht, wenn ein zweites Fremdprojekt
+zeigt, dass sie in der Praxis beißt.
+
+**Nebenbei bestätigt**
+
+- Rückwärtskompatibilität: Das dortige Manifest hat noch alle elf früher verlangten Felder und
+  läuft anstandslos durch. „Es entfallen nur Anforderungen" stimmt nicht nur auf dem Papier.
+- Windows: Lauf gegen ein gewachsenes Repo, ASCII-Rahmen, kein Absturz (NFR-5).
+- Das Manifest des Zielprojekts ist jetzt veraltet (`blocking_issues: 1` für einen Blocker, den es
+  nicht mehr gibt). Kein `CONS`-Befund, weil nur „READY trotz Blockern" geprüft wird — richtig so,
+  `READY` ist eine Ebene-2-Aussage. Nachzuziehen ist das drüben, nicht hier.
+
+**Lehre**
+
+Die Selbstprüfung konnte beides nicht finden. Beide Befunde brauchten ein Repo, das nicht mit
+diesem Werkzeug gebaut wurde — wie schon beim ersten Mal.
+
 ## 2026-09-02 — Ehrlichkeit statt Reichweite
 
 **Anlass**
