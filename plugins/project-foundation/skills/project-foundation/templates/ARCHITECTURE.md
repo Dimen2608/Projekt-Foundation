@@ -25,6 +25,14 @@ Ein nicht bewerteter Bereich ist eine offene Frage.
 | Security | <...> | <...> |
 | Configuration | <...> | <...> |
 | Secrets | <...> | <...> |
+| Architecture Decisions | <REQUIRED / NOT REQUIRED> | <...> |
+
+`Architecture Decisions` beantwortet, ob dieses Projekt ADRs braucht:
+
+- `REQUIRED` — es gibt mindestens eine tragende Entscheidung; sie liegt in
+  `docs/decisions/`. Kriterien in `SKILL.md`.
+- `NOT REQUIRED` — keine Entscheidung dieses Projekts erfüllt die Kriterien. Gültiger
+  Zustand, aber die Begründungsspalte ist dann Pflicht, kein Freitextrest.
 
 Optionale Bereiche nur aufnehmen, wenn sie relevant sind: Storage, Background Jobs,
 Messaging, Events, Caching, Search, Multi-Tenancy, Networking, Observability, Scalability,

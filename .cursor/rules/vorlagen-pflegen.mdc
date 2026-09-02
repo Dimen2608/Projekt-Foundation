@@ -10,7 +10,8 @@ alwaysApply: false
   Abschnitt existiert — nicht nur, dass er auszufüllen ist.
 - Abschnittsüberschriften, die der Validator prüft, bleiben unverändert
   (`Purpose`, `Problem`, `Target Users`, `Scope`, `MVP`, `Out of Scope`,
-  `Context`, `Decision`, `Consequences`).
+  `Context`, `Decision`, `Consequences`). Dasselbe gilt für die Zeilenbeschriftungen
+  in den Bewertungstabellen — die Bereichsnamen und `Architecture Decisions`.
 - `SKILL.md` bleibt kurz. Vertiefung gehört nach `reference/` und wird bei Bedarf geladen.
 - Keine Information doppelt in `SKILL.md` und `reference/`.
 - Ändert sich eine Vorlage strukturell, muss `examples/taskflow/` mitgezogen werden.

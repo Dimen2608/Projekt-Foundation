@@ -2,7 +2,9 @@
 
 Der Validator prueft ausschliesslich, was maschinell entscheidbar ist:
 Existenz, Struktur, erlaubte Statuswerte und Widersprueche zwischen den
-Source-of-Truth-Dateien. Inhaltliche Qualitaet bleibt Aufgabe des Reviews.
+Source-of-Truth-Dateien. Sein Ergebnis heisst FOUNDATION VALID -- nicht
+FOUNDATION READY. Ob eine Foundation inhaltlich taugt, kann dieser Code nicht
+entscheiden; das ist Aufgabe des Reviews (Skill) und des Menschen (ADR-0010).
 """
 
 from __future__ import annotations
@@ -25,15 +27,39 @@ from foundation_validate.model import (
 
 MANIFEST_NAME = ".project-foundation.yml"
 
-#: Dateien, ohne die keine Foundation vollstaendig ist.
-#: Die ID steht im Tupel, damit sie stabil bleibt, wenn sich die Reihenfolge aendert.
-REQUIRED_FILES: tuple[tuple[str, str, Domain], ...] = (
-    ("STRUCT-001", "README.md", Domain.DOCUMENTATION),
-    ("STRUCT-002", "STATUS.md", Domain.DOCUMENTATION),
-    ("STRUCT-003", "CLAUDE.md", Domain.AI_FOUNDATION),
-    ("STRUCT-004", "docs/PROJECT.md", Domain.PROJECT_DEFINITION),
-    ("STRUCT-005", "docs/ARCHITECTURE.md", Domain.ARCHITECTURE),
-    ("STRUCT-006", MANIFEST_NAME, Domain.DOCUMENTATION),
+#: Pflichtstellen: je Eintrag die ID, die Frage, die erlaubten Dateien und die Domaene.
+#:
+#: Eine Datei steht hier, weil eine Frage ohne sie unbeantwortet bleibt -- nicht, weil
+#: sie zum Standardsatz gehoert (ADR-0011). Die erste Datei ist die kanonische; weitere
+#: sind gleichwertige Antworten auf dieselbe Frage. Die ID steht im Tupel, damit sie
+#: stabil bleibt, wenn sich die Reihenfolge aendert. STRUCT-002 (STATUS.md) ist
+#: entfallen und wird nicht neu vergeben.
+REQUIRED_FILES: tuple[tuple[str, str, tuple[str, ...], Domain], ...] = (
+    ("STRUCT-001", "Wie starte und benutze ich das Projekt?", ("README.md",), Domain.DOCUMENTATION),
+    (
+        "STRUCT-003",
+        "Was muss ein AI-Agent wissen?",
+        ("CLAUDE.md", "AGENTS.md"),
+        Domain.AI_FOUNDATION,
+    ),
+    (
+        "STRUCT-004",
+        "Was bauen wir, und was ausdruecklich nicht?",
+        ("docs/PROJECT.md",),
+        Domain.PROJECT_DEFINITION,
+    ),
+    (
+        "STRUCT-005",
+        "Wie ist das System strukturiert?",
+        ("docs/ARCHITECTURE.md",),
+        Domain.ARCHITECTURE,
+    ),
+    (
+        "STRUCT-006",
+        "Woran erkennt ein Werkzeug die Foundation?",
+        (MANIFEST_NAME,),
+        Domain.DOCUMENTATION,
+    ),
 )
 
 #: Dateien, die eine fehlende Pflichtstelle offenbar vertreten.
@@ -42,8 +68,7 @@ REQUIRED_FILES: tuple[tuple[str, str, Domain], ...] = (
 #: der Validator bleibt strikt, sagt aber, was er stattdessen gefunden hat (ADR-0008).
 NEAR_MISS_GLOBS: dict[str, tuple[str, ...]] = {
     "README.md": ("[Rr][Ee][Aa][Dd][Mm][Ee]*.md", "docs/README.md"),
-    "STATUS.md": ("docs/STATUS.md", "*[Ss]tatus*.md"),
-    "CLAUDE.md": ("docs/CLAUDE.md", ".claude/CLAUDE.md", "AGENTS.md"),
+    "CLAUDE.md": ("docs/CLAUDE.md", ".claude/CLAUDE.md", ".github/copilot-instructions.md"),
     "docs/PROJECT.md": (
         "docs/*[Pp]roject*.md",
         "docs/*[Pp]rojekt*.md",
@@ -63,6 +88,14 @@ NEAR_MISS_GLOBS: dict[str, tuple[str, ...]] = {
         ".foundation.yml",
     ),
 }
+
+#: Domaenen, fuer die dieser Code keine eigene Regel hat.
+#:
+#: Sie erscheinen im Report als NOT CHECKED statt als OK. "Development Setup: OK" waere
+#: eine Behauptung ueber etwas, das nie geprueft wurde - genau die Sorte falsches
+#: Qualitaetsversprechen, die der Validator nicht abgeben darf (ADR-0010). Meldet
+#: STATUS.md eine dieser Domaenen als BLOCKED, wird das als STAT-002 trotzdem sichtbar.
+UNCHECKED_DOMAINS = (Domain.DEVELOPMENT_SETUP, Domain.CICD_INFRASTRUCTURE)
 
 #: Verzeichnisnamen, unter denen Projekte ihre ADRs ueblicherweise ablegen.
 DECISION_DIR_CANDIDATES = ("adr", "adrs", "decisions", "entscheidungen", "architecture-decisions")
@@ -87,6 +120,17 @@ PROJECT_SECTIONS_OPTIONAL = (
     "Open Decisions",
 )
 
+#: Zeile in ARCHITECTURE.md, die erklaert, ob dieses Projekt ADRs braucht.
+#:
+#: Ohne diese Erklaerung koennte der Validator nur raten: "kein ADR" heisst entweder
+#: "es gab keine tragende Entscheidung" oder "sie wurde nicht festgehalten". Die beiden
+#: Faelle sind maschinell nicht unterscheidbar, also wird die Antwort verlangt statt
+#: unterstellt (ADR-0011).
+DECISION_LABEL = "Architecture Decisions"
+#: Nur diese beiden Werte zaehlen als Antwort. Alles andere - auch ein ausdrueckliches
+#: UNKNOWN - ist keine Antwort und faellt in dieselbe Warnung wie eine fehlende Zeile.
+DECISION_STATES = ("REQUIRED", "NOT REQUIRED")
+
 #: Architektur-Bereiche, die bewertet sein muessen.
 CORE_AREAS = (
     "Application Architecture",
@@ -107,17 +151,13 @@ CORE_AREAS = (
 SECURITY_CRITICAL_AREAS = ("Authentication", "Authorization", "Secrets")
 
 #: Pflichtschluessel des Manifests, als Punktpfade.
+#:
+#: Nur das, was der Validator tatsaechlich braucht. Alles Weitere steht schon in den
+#: Dokumenten; es zusaetzlich im Manifest zu verlangen wuerde eine zweite Quelle
+#: erzeugen, die auseinanderdriftet (ADR-0004, ADR-0011). Optionale Bloecke
+#: (ai_support, testing, foundation.blocking_issues) werden geprueft, wenn sie da sind.
 MANIFEST_REQUIRED_KEYS = (
     "schema_version",
-    "project.name",
-    "project.type",
-    "project.maturity",
-    "stack.language",
-    "architecture",
-    "ai_support",
-    "testing",
-    "infrastructure",
-    "quality_gates",
     "foundation.status",
 )
 
@@ -140,13 +180,14 @@ def _finding_id_register() -> tuple[str, ...]:
     Die Familien DEF- und ARCH- entstehen je Abschnitt bzw. Bereich aus einer
     Konstantenliste und wachsen automatisch mit.
     """
-    ids: list[str] = [finding_id for finding_id, _, _ in REQUIRED_FILES]
+    ids: list[str] = [finding_id for finding_id, _, _, _ in REQUIRED_FILES]
     ids += ["STRUCT-010", "STRUCT-011"]
     ids += [f"DEF-{i:03d}" for i in range(1, len(PROJECT_SECTIONS_REQUIRED) + 1)]
     ids += [f"DEF-{i:03d}" for i in range(50, 50 + len(PROJECT_SECTIONS_OPTIONAL))]
     ids += [f"ARCH-{i:03d}" for i in range(1, len(CORE_AREAS) + 1)]
     ids += [f"MAN-{i:03d}" for i in range(1, 5)]
     ids += [f"ADR-{i:03d}" for i in range(1, 5)]
+    ids += ["ADR-010"]
     ids += [f"STAT-{i:03d}" for i in range(1, 4)]
     ids += [f"SEC-{i:03d}" for i in range(1, 3)]
     ids += [f"CONS-{i:03d}" for i in range(1, 5)]
@@ -173,13 +214,20 @@ class Result:
         return [f for f in self.findings if f.severity is Severity.WARNING]
 
     @property
-    def ready(self) -> bool:
+    def valid(self) -> bool:
+        """True, wenn kein struktureller Blocker offen ist.
+
+        Ausdruecklich *nicht* `ready`: ueber FOUNDATION READY entscheidet der
+        vollstaendige Prozess, nicht dieser Code (ADR-0010).
+        """
         return not self.blocking
 
 
 def _read(path: Path) -> str:
+    # utf-8-sig, weil unter Windows erzeugte Dateien oft mit BOM beginnen -- die stuende
+    # sonst vor der ersten Ueberschrift und liesse sie durch die Abschnittspruefung fallen.
     try:
-        return path.read_text(encoding="utf-8")
+        return path.read_text(encoding="utf-8-sig")
     except (OSError, UnicodeDecodeError):
         return ""
 
@@ -259,7 +307,8 @@ def _folgepruefung(relative: str) -> str:
         return (
             f" Danach werden {len(CORE_AREAS)} Architekturbereiche geprueft; "
             f"{', '.join(SECURITY_CRITICAL_AREAS)} blockieren, solange sie unbewertet "
-            "oder UNKNOWN sind."
+            f"oder UNKNOWN sind. Ausserdem wird dort die Zeile '{DECISION_LABEL}' "
+            "erwartet."
         )
     return ""
 
@@ -272,29 +321,71 @@ def _hinweis(treffer: list[str]) -> str:
 
 
 def _check_structure(root: Path, out: list[Finding]) -> None:
-    for finding_id, relative, domain in REQUIRED_FILES:
-        if not (root / relative).is_file():
-            treffer = _near_misses(root, relative)
+    for finding_id, frage, erlaubt, domain in REQUIRED_FILES:
+        if any((root / kandidat).is_file() for kandidat in erlaubt):
+            continue
+        relative = erlaubt[0]
+        alternative = f" Gleichwertig waere: {', '.join(erlaubt[1:])}." if len(erlaubt) > 1 else ""
+        treffer = _near_misses(root, relative)
+        out.append(
+            Finding(
+                finding_id=finding_id,
+                severity=Severity.BLOCKING,
+                domain=domain,
+                reason=(
+                    f"Die Frage '{frage}' hat keine Heimat: {relative} fehlt."
+                    + alternative
+                    + _hinweis(treffer)
+                ),
+                required_action=(
+                    f"{relative} anlegen (Vorlage im Skill unter templates/)"
+                    + (
+                        f" - oder {treffer[0]} dorthin umbenennen, falls die Datei "
+                        "dieselbe Rolle erfuellt."
+                        if treffer
+                        else "."
+                    )
+                    + _folgepruefung(relative)
+                ),
+                location=relative,
+            )
+        )
+
+
+def _check_decisions(root: Path, out: list[Finding]) -> None:
+    """Prueft ADRs nur, wenn das Projekt erklaert hat, dass es welche braucht.
+
+    "Kein ADR vorhanden" ist fuer sich kein Mangel: ein kleines Projekt kann korrekt
+    sein, ohne je eine tragende Entscheidung getroffen zu haben. Verlangt wird deshalb
+    nicht das ADR, sondern die Aussage darueber (ADR-0011).
+    """
+    decisions = root / "docs" / "decisions"
+    vorhandene_adrs = list(decisions.glob("ADR-*.md")) if decisions.is_dir() else []
+    state = _find_state(_read(root / "docs" / "ARCHITECTURE.md"), DECISION_LABEL, DECISION_STATES)
+
+    if state != "REQUIRED":
+        if state is None and not vorhandene_adrs:
+            # Kein ADR und keine Aussage: die Frage ist offen. Das ist eine Warnung,
+            # kein Blocker - der Validator kann nicht wissen, ob hier etwas fehlt.
             out.append(
                 Finding(
-                    finding_id=finding_id,
-                    severity=Severity.BLOCKING,
-                    domain=domain,
-                    reason=f"Pflichtdatei {relative} fehlt." + _hinweis(treffer),
-                    required_action=(
-                        f"{relative} anlegen (Vorlage im Skill unter templates/)"
-                        + (
-                            f" - oder {treffer[0]} dorthin umbenennen, falls die Datei "
-                            "dieselbe Rolle erfuellt."
-                            if treffer
-                            else "."
-                        )
-                        + _folgepruefung(relative)
+                    finding_id="ADR-010",
+                    severity=Severity.WARNING,
+                    domain=Domain.ARCHITECTURE,
+                    reason=(
+                        "Es ist nicht beantwortet, ob dieses Projekt ADRs braucht: "
+                        f"docs/ARCHITECTURE.md nennt fuer '{DECISION_LABEL}' weder "
+                        "REQUIRED noch NOT REQUIRED, und es gibt kein ADR."
                     ),
-                    location=relative,
+                    required_action=(
+                        f"'{DECISION_LABEL}' mit REQUIRED oder NOT REQUIRED beantworten. "
+                        "NOT REQUIRED ist ein gueltiger Zustand - dann aber mit Begruendung."
+                    ),
+                    location="docs/ARCHITECTURE.md",
                 )
             )
-    decisions = root / "docs" / "decisions"
+        return
+
     if not decisions.is_dir():
         kandidaten = _decision_dir_near_misses(root)
         beschreibung = ", ".join(
@@ -306,7 +397,8 @@ def _check_structure(root: Path, out: list[Finding]) -> None:
                 severity=Severity.BLOCKING,
                 domain=Domain.ARCHITECTURE,
                 reason=(
-                    "Verzeichnis docs/decisions/ fehlt."
+                    f"docs/ARCHITECTURE.md sagt '{DECISION_LABEL}: REQUIRED', "
+                    "aber das Verzeichnis docs/decisions/ fehlt."
                     + (f" Gefunden wurde stattdessen: {beschreibung}." if kandidaten else "")
                 ),
                 required_action=(
@@ -323,15 +415,19 @@ def _check_structure(root: Path, out: list[Finding]) -> None:
                 location="docs/decisions/",
             )
         )
-    elif not list(decisions.glob("ADR-*.md")):
+    elif not vorhandene_adrs:
         out.append(
             Finding(
                 finding_id="STRUCT-011",
                 severity=Severity.BLOCKING,
                 domain=Domain.ARCHITECTURE,
-                reason="docs/decisions/ enthaelt kein einziges ADR.",
+                reason=(
+                    f"docs/ARCHITECTURE.md sagt '{DECISION_LABEL}: REQUIRED', "
+                    "docs/decisions/ enthaelt aber kein einziges ADR."
+                ),
                 required_action=(
-                    "Mindestens die tragende Architekturentscheidung als ADR festhalten."
+                    "Die tragende Entscheidung als ADR festhalten - oder, falls es keine "
+                    f"gibt, '{DECISION_LABEL}' auf NOT REQUIRED setzen."
                 ),
                 location="docs/decisions/",
             )
@@ -591,6 +687,13 @@ def _check_status(root: Path, out: list[Finding]) -> dict[Domain, str]:
 
 
 def _check_secrets(root: Path, out: list[Finding]) -> None:
+    """Prueft Secret-*Hygiene*, nicht Secrets.
+
+    Der Validator liest keine Dateiinhalte auf Geheimnisse hin und kann daher nie sagen,
+    dass ein Projekt frei von Secrets ist. Er prueft zwei strukturelle Bedingungen, deren
+    Verletzung erfahrungsgemaess Secrets ins Repository traegt. Echtes Secret Scanning
+    ist Aufgabe eines dafuer gebauten Werkzeugs (gitleaks, GitHub Secret Scanning).
+    """
     if (root / ".env").is_file():
         out.append(
             Finding(
@@ -692,7 +795,13 @@ def _check_consistency(
         )
 
 
-def _domain_status(findings: list[Finding], declared: dict[Domain, str]) -> dict[Domain, str]:
+def _domain_status(findings: list[Finding]) -> dict[Domain, str]:
+    """Leitet den Domaenenstatus ausschliesslich aus eigenen Befunden ab.
+
+    Frueher galt hilfsweise der in STATUS.md erklaerte Wert - damit gab der Validator
+    eine fremde Selbstauskunft als eigenes Urteil aus. Jetzt steht dort nur, was er
+    selbst geprueft hat (ADR-0010).
+    """
     result: dict[Domain, str] = {}
     for domain in Domain:
         severities = {f.severity for f in findings if f.domain is domain}
@@ -700,8 +809,10 @@ def _domain_status(findings: list[Finding], declared: dict[Domain, str]) -> dict
             result[domain] = "BLOCKED"
         elif Severity.WARNING in severities:
             result[domain] = "WARNING"
+        elif domain in UNCHECKED_DOMAINS:
+            result[domain] = "NOT CHECKED"
         else:
-            result[domain] = declared.get(domain, "PASS")
+            result[domain] = "OK"
     return result
 
 
@@ -712,8 +823,9 @@ def validate(root: Path) -> Result:
     manifest = _check_manifest(root, findings)
     _check_project(root, findings)
     _check_architecture(root, findings)
+    _check_decisions(root, findings)
     _check_adrs(root, findings)
     declared = _check_status(root, findings)
     _check_secrets(root, findings)
     _check_consistency(root, manifest, declared, findings)
-    return Result(findings=findings, domain_status=_domain_status(findings, declared))
+    return Result(findings=findings, domain_status=_domain_status(findings))

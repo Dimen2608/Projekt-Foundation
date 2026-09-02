@@ -15,3 +15,7 @@ alwaysApply: false
 - Jede neue Blocking-Regel bekommt genau einen Test, der ihr Verhalten schützt —
   keinen zusätzlichen Test, der dasselbe noch einmal prüft.
 - Der Validator liest ausschließlich. Kein Schreibzugriff auf das geprüfte Projekt.
+- Keine Regel darf mehr behaupten, als sie prüft. Kein `PASS` für Ungeprüftes, kein
+  `FOUNDATION READY`, keine Aussage über Secret-Freiheit (ADR-0010).
+- Eine Pflicht wird an eine **Aussage** geknüpft, wo das Artefakt selbst projektabhängig
+  ist — wie `Architecture Decisions: REQUIRED / NOT REQUIRED` (ADR-0011).

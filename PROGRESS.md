@@ -5,6 +5,67 @@
 >
 > Neueste Einträge oben.
 
+## 2026-09-02 — Ehrlichkeit statt Reichweite
+
+**Anlass**
+
+Eine Architektur- und Produktkritik am eigenen Werkzeug. Kern: Das Toolkit behauptete an
+drei Stellen mehr, als es belegen kann, und zwang jedem Projekt denselben Umfang auf.
+
+**1. Der Validator sagte READY**
+
+Ein Programm, das Dateien und Statuswerte liest, gab denselben Satz aus, mit dem der
+vollständige Prozess endet. Der Warnsatz daneben („ein grüner Validator ist keine gute
+Foundation") verliert diesen Wettbewerb — zitiert wird, was auf dem Bildschirm steht.
+
+Jetzt: `FOUNDATION VALID` / `FOUNDATION INVALID`, Kopfzeile `PROJECT FOUNDATION
+VALIDATION`. Dazu zwei kleinere Unehrlichkeiten beseitigt: Der Domänenstatus übernahm
+hilfsweise den in `STATUS.md` **erklärten** Wert (fremde Selbstauskunft als eigenes
+Urteil), und `Development Setup` sowie `CI/CD & Infrastructure` wurden als `PASS`
+gemeldet, obwohl es für sie keine einzige Regel gibt — jetzt `NOT CHECKED`. Siehe
+ADR-0010.
+
+**2. Jedes Projekt brauchte mindestens ein ADR**
+
+`ADR count == 0 → BLOCKED` behandelt „es gab keine tragende Entscheidung" wie „sie wurde
+verschwiegen". Bei kleinen Projekten ist der erste Fall der Normalfall, und die Regel
+produzierte dort Alibi-ADRs.
+
+Jetzt beantwortet das Projekt die Frage selbst: eine Zeile `Architecture Decisions` mit
+`REQUIRED` oder `NOT REQUIRED` in `docs/ARCHITECTURE.md`. Bei `REQUIRED` blockiert ein
+fehlendes ADR wie bisher, bei `NOT REQUIRED` nicht. Fehlt die Aussage ganz und gibt es
+kein ADR: Warnung `ADR-010`. Dieselbe Logik traf `STATUS.md` — jetzt optional
+(`STRUCT-002` zurückgezogen) — und die AI-Frage, die `AGENTS.md` genauso beantwortet wie
+`CLAUDE.md`. Siehe ADR-0011.
+
+**3. Das Manifest wuchs zur zweiten Dokumentation**
+
+Elf Pflichtfelder, vier davon gelesen. `stack`, `architecture`, `infrastructure`,
+`quality_gates`, `project.type`, `project.maturity` standen doppelt — einmal im Dokument,
+einmal maschinenlesbar. Pflicht sind jetzt `schema_version` und `foundation.status`;
+alles andere wird geprüft, wenn es da ist. Bestehende Manifeste bleiben gültig, es
+entfallen nur Anforderungen, deshalb weiter `schema_version: 1`.
+
+**Nebenbei**
+
+- „NO CODING BEFORE FOUNDATION READY" ist präzisiert: Foundation Work immer erlaubt,
+  Bugfixes mit bekanntem Scope erlaubt, nur Feature-Arbeit wartet. Die Regel richtet sich
+  gegen stillschweigend durch Code getroffene Architekturentscheidungen, nicht gegen
+  einen Einzeiler.
+- Secret-*Hygiene* heißt jetzt so und wird nicht mehr „Secret-Erkennung" genannt. Für
+  echtes Scanning wird auf `gitleaks` und GitHub Secret Scanning verwiesen, ohne selbst
+  eine Engine zu bauen.
+- Windows: Dateien werden als `utf-8-sig` gelesen (BOM), die Ausgabe fängt
+  `UnicodeEncodeError` ab, und die CI läuft zusätzlich auf `windows-latest`.
+- Tests: zwei redundante entfernt (eine zweite Prüfung derselben Pflichtdatei, eine
+  Abwesenheitsprüfung, die die positive Variante schon abdeckt), fünf für die neuen
+  Regeln ergänzt. 44 Tests.
+
+**Nicht geändert**
+
+Der Audit-Report des Skills bleibt Wort für Wort, inklusive `FOUNDATION READY`. Er gehört
+zu Ebene 2 — dort ist der Satz richtig. Geändert wurde nur, wer ihn sagen darf.
+
 ## 2026-09-01 — Folgeprüfungen werden angekündigt
 
 **Anlass**

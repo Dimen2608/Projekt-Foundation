@@ -1,13 +1,14 @@
 # Status — Projekt-Foundation
 
 > Source of Truth für **den aktuellen Zustand**. Keine Historie (`PROGRESS.md`),
-> keine Pläne (`docs/PROJECT.md`).
+> keine Pläne (`docs/PROJECT.md`), keine Architektur (`docs/ARCHITECTURE.md`).
 >
-> Stand: 2026-09-01
+> Stand: 2026-09-02
 
 ## Foundation
 
-**FOUNDATION READY**
+**FOUNDATION READY** — Review durchgeführt, `foundation-validate .` meldet
+`FOUNDATION VALID`.
 
 | Domain | Status |
 | --- | --- |
@@ -31,29 +32,15 @@ Keine.
 
 Keine.
 
-W-1 (Mutation Testing nicht konfiguriert) ist erledigt — nicht durch Einführung von
-`mutmut`, sondern durch das, wonach die Warnung eigentlich fragte. Die Messung ergab zehn
-Prüfregeln ohne schützenden Test (`STRUCT-001/002/003/006`, `MAN-002/003/004`,
-`ADR-001/004`, `CONS-002`). Diese Tests existieren jetzt, und `FINDING_IDS` plus die zwei
-Meta-Tests in `tests/test_regelabdeckung.py` verhindern, dass die Lücke wiederkehrt. Siehe
-[ADR-0009](docs/decisions/ADR-0009-regelabdeckung-statt-mutation-testing.md).
-
-W-2 (CI-Pipeline noch nie auf GitHub gelaufen) ist erledigt: Run
-[#1](https://github.com/Dimen2608/Projekt-Foundation/actions/runs/33540491731)
-auf `claude/project-foundation-architect-qq5mr4`, `conclusion: success`
-(Jobs `quality` und `foundation`, letzterer prüft Repo und Beispielprojekt).
-
 ## Command-Chain
-
-Lokal ausgeführt und verifiziert; identisch in CI grün (Run #1, s. o.).
 
 | Command | Zustand | Zuletzt geprüft |
 | --- | --- | --- |
 | install (`pip install -e ".[dev]"`) | ok | 2026-09-01 |
-| format (`ruff format --check .`) | ok | 2026-09-01 |
-| lint (`ruff check .`) | ok | 2026-09-01 |
-| typecheck (`mypy`) | ok | 2026-09-01 |
-| test (`pytest`) | ok — 41 Tests | 2026-09-01 |
+| format (`ruff format --check .`) | ok | 2026-09-02 |
+| lint (`ruff check .`) | ok | 2026-09-02 |
+| typecheck (`mypy`) | ok | 2026-09-02 |
+| test (`pytest`) | ok — 44 Tests | 2026-09-02 |
 | build | n/a — kein Artefakt (ADR-0006) | — |
 
 ## Foundation-Validierung
@@ -67,7 +54,7 @@ Blocker durch. Das Toolkit prüft sich selbst.
 | --- | --- |
 | Skill `project-foundation` | vollständig |
 | Vorlagen (13 Stück) | vollständig |
-| Validator (`foundation_validate`) | vollständig, 24 Prüfregeln, Abdeckung erzwungen |
+| Validator (`foundation_validate`) | vollständig, 48 mögliche Finding-IDs, Abdeckung erzwungen |
 | Plugin- und Marketplace-Manifest | vollständig |
 | Beispielprojekt `examples/taskflow` | vollständig |
 | Foundation dieses Repos | vollständig |

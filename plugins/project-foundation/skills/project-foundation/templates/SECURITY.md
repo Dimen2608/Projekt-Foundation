@@ -19,6 +19,8 @@
 - Secrets stehen niemals im Repository.
 - `.env` ist in `.gitignore` eingetragen; `.env.example` enthält nur Platzhalter.
 - <Wie Secrets in Produktion bereitgestellt werden>
+- <Ob ein Secret Scanner läuft — GitHub Secret Scanning, `gitleaks` o. ä. Der
+  Foundation-Validator prüft nur Hygiene und kann Secret-Freiheit nicht zusichern.>
 
 ## Sicherheitsrelevante Änderungen
 

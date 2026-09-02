@@ -58,6 +58,8 @@ ARCHITECTURE_MD = """# Architecture
 | Security | RELEVANT |
 | Configuration | RELEVANT |
 | Secrets | NOT REQUIRED |
+
+| Architecture Decisions | REQUIRED |
 """
 
 ADR_MD = """# ADR-0001: Beispielentscheidung
@@ -92,12 +94,6 @@ STATUS_MD = """# Status
 MANIFEST_YML = """schema_version: 1
 project:
   name: beispiel
-  type: tool
-  maturity: greenfield
-stack:
-  language: python
-architecture:
-  style: cli
 ai_support:
   claude_md: true
   agents_md: false
@@ -105,13 +101,9 @@ ai_support:
 testing:
   levels: [unit]
   command: pytest
-infrastructure:
-  ci: github-actions
-quality_gates: [foundation, change]
 foundation:
   status: READY
   blocking_issues: 0
-  warnings: 0
 """
 
 

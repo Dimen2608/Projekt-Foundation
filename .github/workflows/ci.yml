@@ -13,7 +13,13 @@ permissions:
 
 jobs:
   quality:
-    runs-on: ubuntu-latest
+    # Windows steht in der Matrix, weil der Validator dort schon einmal gar nicht lief
+    # (UnicodeEncodeError auf cp1252, ADR-0007). Nur Tests, keine Sonderbehandlung im
+    # Code - genau das soll der Job nachweisen.
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 

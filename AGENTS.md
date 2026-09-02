@@ -41,5 +41,7 @@ pytest
 
 - Keine tragende Entscheidung ohne ADR in `docs/decisions/`.
 - Keine Secrets im Repository.
-- Der Validator verändert geprüfte Projekte nicht.
+- Der Validator verändert geprüfte Projekte nicht und behauptet nichts, was er nicht
+  geprüft hat (ADR-0010).
+- Neue Pflichtbestandteile nur mit der Frage, die sie beantworten (ADR-0011).
 - Bei Unklarheit: fragen, nicht raten.

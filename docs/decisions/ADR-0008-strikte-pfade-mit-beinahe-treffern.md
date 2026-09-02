@@ -43,7 +43,8 @@ Der Validator sucht bei einer fehlenden Pflichtstelle jedoch nach plausiblen Kan
 (`NEAR_MISS_GLOBS`, `DECISION_DIR_CANDIDATES`) und nennt sie in der Meldung:
 
 ```
-Verzeichnis docs/decisions/ fehlt. Gefunden wurde stattdessen: docs/adr/ (11 ADR-Dateien).
+docs/ARCHITECTURE.md sagt 'Architecture Decisions: REQUIRED', aber das Verzeichnis
+docs/decisions/ fehlt. Gefunden wurde stattdessen: docs/adr/ (11 ADR-Dateien).
 
 Required action:
 docs/decisions/ anlegen und mindestens ein ADR schreiben - oder docs/adr/ dorthin

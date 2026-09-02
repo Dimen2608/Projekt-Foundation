@@ -23,6 +23,7 @@ Jeder Bereich ist bewertet mit `RELEVANT`, `NOT REQUIRED`, `FUTURE` oder `UNKNOW
 | Security | RELEVANT | Der Validator prüft fremde Projekte auf Secret-Leaks. |
 | Configuration | RELEVANT | `.project-foundation.yml` im Zielprojekt. |
 | Secrets | NOT REQUIRED | Das Toolkit selbst braucht keine Secrets. |
+| Architecture Decisions | REQUIRED | Verteilung, Sprache, Manifest-Rolle und Report-Wortlaut sind tragende Entscheidungen — ADR-0001 bis ADR-0011. |
 | Storage | NOT REQUIRED | Nur Dateisystem-Lesezugriffe im Zielprojekt. |
 | Background Jobs | NOT REQUIRED | Ein Lauf ist synchron und in Millisekunden fertig. |
 | Messaging / Events | NOT REQUIRED | Kein verteiltes System. |
@@ -77,8 +78,19 @@ sonst gilt der in `STATUS.md` erklärte Wert.
 
 **Bewusste Grenze:** Der Validator prüft nur, was maschinell entscheidbar ist. Ob ein
 `PROJECT.md` inhaltlich gut ist, kann er nicht beurteilen — er stellt nur sicher, dass die
-Frage überhaupt beantwortet wurde. Diese Grenze ist wichtig, damit ein grüner Validator
-nicht mit einer guten Foundation verwechselt wird.
+Frage überhaupt beantwortet wurde. Deshalb endet er auf `FOUNDATION VALID`, nie auf
+`FOUNDATION READY` (ADR-0010), meldet Domänen ohne eigene Regel als `NOT CHECKED` und
+leitet den Domänenstatus ausschließlich aus eigenen Befunden ab.
+
+### Drei Ebenen
+
+| Ebene | Träger | Ergebnis |
+| --- | --- | --- |
+| 1 — Validierung | `src/foundation_validate/` | `FOUNDATION VALID` / `INVALID` |
+| 2 — Review | Skill, `reference/audit.md` | Domänenstatus, `FOUNDATION READY` / `NOT READY` |
+| 3 — Entscheidung | Mensch | kritische, schwer reversible Festlegungen |
+
+Ebene 1 ist Voraussetzung für Ebene 2, nie Ersatz. Der Code kennt Ebene 2 und 3 nicht.
 
 ## Configuration
 
@@ -103,35 +115,39 @@ eingebunden oder direkt mit `python -m foundation_validate <pfad>` ausgeführt.
 
 Relevant sind zwei Punkte, beide betreffen fremde Projekte:
 
-1. **Secret-Erkennung.** Eine vorhandene `.env` und ein `.gitignore` ohne `.env`-Eintrag
-   sind Blocker (`SEC-001`, `SEC-002`).
+1. **Secret-Hygiene.** Eine vorhandene `.env` und ein `.gitignore` ohne `.env`-Eintrag
+   sind Blocker (`SEC-001`, `SEC-002`). Das ist ausdrücklich **kein** Secret Scanning:
+   Der Validator liest keine Dateiinhalte auf Geheimnisse hin und behauptet nie, ein
+   Projekt sei frei von Secrets. Projekte, die diese Zusicherung brauchen, richten ein
+   dafür gebautes Werkzeug ein (GitHub Secret Scanning, `gitleaks`).
 2. **Nur-Lesen.** Der Validator schreibt nie in das geprüfte Projekt. Ein Prüfwerkzeug,
    das Dateien verändert, wäre in fremden Repos nicht vertretbar.
 
 Ungeklärte sicherheitsrelevante Entscheidungen im Zielprojekt (`Authentication`,
-`Authorization`, `Secrets` auf `UNKNOWN`) blockieren `FOUNDATION READY`.
+`Authorization`, `Secrets` auf `UNKNOWN`) blockieren `FOUNDATION VALID` — und damit
+alles, was darauf aufbaut.
 
 ## Quality Gates
 
 | Gate | Wann | Bedingungen |
 | --- | --- | --- |
-| Foundation Gate | Vor jeder Implementierung | `foundation-validate` grün, alle Pflichtdomänen PASS |
+| Foundation Gate | Vor Feature-Arbeit (nicht vor Bugfixes) | `foundation-validate` meldet `FOUNDATION VALID`, Review ohne Blocker |
 | Change Gate | Vor jedem Commit | Format, Lint, Typecheck, Tests grün; keine bekannte Regression |
 | Architecture Gate | Bei Struktur-/Schnittstellenänderung | ADR erstellt oder aktualisiert, `ARCHITECTURE.md` nachgezogen |
 | Security Gate | Bei Änderungen an Secret-/Pfadlogik | Nur-Lesen-Eigenschaft geprüft, keine Secrets im Diff |
 
 ## Teststrategie
 
-Risikobasiert. Getestet wird, was über `FOUNDATION READY` entscheidet.
+Risikobasiert. Getestet wird, was über `FOUNDATION VALID` entscheidet.
 
 | Level | Status | Begründung |
 | --- | --- | --- |
-| Unit | aktiv | Jede Blocking-Regel hat genau einen Test. |
+| Unit | aktiv | Jede Blocking-Regel hat genau einen Test, erzwungen durch `tests/test_regelabdeckung.py`. |
 | Integration | aktiv | CLI-Tests prüfen Exit-Code und Reportstruktur — die Schnittstelle, auf die CI sich verlässt. |
 | E2E | NOT REQUIRED | Es gibt keine Schicht jenseits des CLI. |
 | Contract | NOT REQUIRED | Keine externen Schnittstellenpartner. |
 | Performance | NOT REQUIRED | Laufzeit im Millisekundenbereich. |
-| Mutation | FUTURE | Erst sinnvoll, wenn die Regelmenge deutlich wächst. |
+| Mutation | NOT REQUIRED | Die Frage dahinter — hat jede Regel einen Test? — beantwortet der Abdeckungstest direkt (ADR-0009). |
 
 Nicht getestet werden bewusst: Getter, Dataclass-Konstruktion, YAML-Parsing von PyYAML,
 `argparse`-Verhalten. Das wäre Test von Framework-Verhalten ohne Schutzwirkung.

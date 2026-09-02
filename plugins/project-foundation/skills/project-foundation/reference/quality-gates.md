@@ -10,11 +10,16 @@ ist Dekoration.
 
 **Wann:** Vor jeder Implementierung.
 
-- Alle Pflichtdomänen `PASS`
+- Validator meldet `FOUNDATION VALID` (Ebene 1)
+- Alle Pflichtdomänen `PASS` im Review (Ebene 2)
 - Null Blocking Issues
 - Command-Chain nachweislich ausgeführt
 - Keine Widersprüche zwischen den Source-of-Truth-Dateien
 - AI-Readiness-Test bestanden
+- Keine offene kritische Entscheidung (Ebene 3)
+
+Dieses Gate steht vor **Feature-Arbeit**. Foundation Work und Bugfixes mit bekanntem
+Scope sind davon nicht betroffen — siehe `SKILL.md`.
 
 ## Change Gate
 
@@ -44,7 +49,10 @@ Eingabeverarbeitung oder Mandantentrennung.
 
 - Authentication geprüft
 - Authorization geprüft — insbesondere: prüft jeder Zugriffspfad die Berechtigung?
-- Secrets geprüft: nichts im Diff, nichts im Log, nichts in Fehlermeldungen
+- Secrets geprüft: nichts im Diff, nichts im Log, nichts in Fehlermeldungen.
+  Das ist eine Sichtprüfung. Wer die Zusicherung braucht, richtet ein dafür gebautes
+  Werkzeug ein (GitHub Secret Scanning, `gitleaks`) — der Foundation-Validator prüft
+  nur Hygiene (`.env` nicht committet, `.env` ignoriert)
 - Datenisolation geprüft; bei SaaS zusätzlich Tenant-Isolation und Cross-Tenant-Zugriff
 - Eingabevalidierung an der Systemgrenze geprüft
 - Abhängigkeiten auf bekannte Schwachstellen geprüft

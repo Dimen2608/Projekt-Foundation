@@ -6,7 +6,8 @@
 
 ## Foundation
 
-**FOUNDATION READY**
+**FOUNDATION READY** — Review durchgeführt, `foundation-validate` meldet
+`FOUNDATION VALID`.
 
 | Domain | Status |
 | --- | --- |

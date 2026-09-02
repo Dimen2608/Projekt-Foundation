@@ -24,6 +24,7 @@
 | Observability | NOT REQUIRED | Container-Logs genügen bei dieser Nutzerzahl. |
 | Caching | NOT REQUIRED | NFR-1 wird durch einen Index auf `(team_id, status)` erreicht. |
 | Backup / Recovery | RELEVANT | Täglicher Datenbank-Dump durch die Plattform. |
+| Architecture Decisions | REQUIRED | Persistenz, Mandantenmodell und Session-Verfahren sind schwer reversibel — ADR-0001 bis ADR-0004. |
 
 ## Aufbau
 
