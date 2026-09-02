@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "Toolkit, das Projekte auf Implementierung durch Menschen und AI-Agents vorbereitet.",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "plugins": [
     {
       "name": "project-foundation",
       "source": "./plugins/project-foundation",
       "description": "Führt ein Projekt durch DISCOVER → ASSESS → ASK → DECIDE → GENERATE → VALIDATE → AUDIT und liefert eine prüfbare Foundation-Ready-Entscheidung.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "workflow",
       "keywords": ["foundation", "architecture", "adr", "documentation", "audit"]
     }
