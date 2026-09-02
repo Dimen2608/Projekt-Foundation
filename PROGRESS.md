@@ -60,6 +60,10 @@ entfallen nur Anforderungen, deshalb weiter `schema_version: 1`.
 - Tests: zwei redundante entfernt (eine zweite Prüfung derselben Pflichtdatei, eine
   Abwesenheitsprüfung, die die positive Variante schon abdeckt), fünf für die neuen
   Regeln ergänzt. 44 Tests.
+- Version auf `0.2.0`. Die Ausgabe hat sich gebrochen geändert (`FOUNDATION READY` →
+  `FOUNDATION VALID`, `Result.ready` → `Result.valid`); wer dagegen skriptet, soll das
+  an der Nummer sehen und nicht erst am Laufen. Ein Release-Artefakt gibt es weiterhin
+  nicht (ADR-0006) — die Nummer steht nur in den Manifesten.
 
 **Nicht geändert**
 
