@@ -8,15 +8,15 @@ from pathlib import Path
 
 import pytest
 
-from foundation_validate.cli import main
+from foundation_validate.cli import _write, main
 
 
-def test_ready_liefert_exitcode_null(project: Path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_valid_liefert_exitcode_null(project: Path, capsys: pytest.CaptureFixture[str]) -> None:
     assert main([str(project)]) == 0
     ausgabe = capsys.readouterr().out
-    assert "PROJECT FOUNDATION AUDIT" in ausgabe
-    assert "FOUNDATION READY" in ausgabe
-    assert "NOT READY" not in ausgabe
+    assert "PROJECT FOUNDATION VALIDATION" in ausgabe
+    assert "FOUNDATION VALID" in ausgabe
+    assert "INVALID" not in ausgabe
 
 
 def test_blocker_liefert_exitcode_eins_und_nennt_massnahme(
@@ -25,7 +25,7 @@ def test_blocker_liefert_exitcode_eins_und_nennt_massnahme(
     (project / "CLAUDE.md").unlink()
     assert main([str(project)]) == 1
     ausgabe = capsys.readouterr().out
-    assert "FOUNDATION NOT READY" in ausgabe
+    assert "FOUNDATION INVALID" in ausgabe
     assert "Required action:" in ausgabe
     assert "Affected Area:" in ausgabe
 
@@ -49,7 +49,7 @@ def test_report_laeuft_auf_konsole_ohne_utf8(
 ) -> None:
     """Windows-Standardkonsole (cp1252): kein Absturz, ASCII-Rahmen statt Rahmenzeichen."""
     ausgabe = _lauf_mit_konsole(project, monkeypatch, "cp1252")
-    assert "PROJECT FOUNDATION AUDIT" in ausgabe
+    assert "PROJECT FOUNDATION VALIDATION" in ausgabe
     assert "+" + "-" * 38 + "+" in ausgabe
     assert "?" not in ausgabe
 
@@ -59,3 +59,14 @@ def test_report_behaelt_den_rahmen_auf_utf8_konsole(
 ) -> None:
     ausgabe = _lauf_mit_konsole(project, monkeypatch, "utf-8")
     assert "╔" + "═" * 38 + "╗" in ausgabe
+
+
+def test_nicht_darstellbares_zeichen_bricht_die_ausgabe_nicht_ab(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Ein Pfad aus einem fremden Projekt darf den Lauf nicht mit einem Absturz beenden."""
+    puffer = io.BytesIO()
+    monkeypatch.setattr(sys, "stdout", io.TextIOWrapper(puffer, encoding="cp1252", newline=""))
+    _write("Gefunden: docs/proćekt.md\n")
+    sys.stdout.flush()
+    assert b"docs/pro" in puffer.getvalue()

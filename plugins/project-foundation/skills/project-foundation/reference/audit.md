@@ -1,4 +1,37 @@
-# Consistency Audit, AI-Readiness und Report
+# Review, Consistency Audit, AI-Readiness und Report
+
+Dieser Teil ist **Ebene 2**. Der Validator (Ebene 1) hat vorher geprüft, was maschinell
+entscheidbar ist, und `FOUNDATION VALID` gemeldet oder eben nicht. Hier wird beurteilt,
+was ein Programm nicht beurteilen kann.
+
+## 0 — Foundation Review
+
+Jeder Punkt bekommt `PASS`, `WARNING` oder `BLOCKED` **mit Begründung**. Keine Punktzahl,
+keine Prozentangabe, kein Score — eine Zahl würde Genauigkeit vortäuschen, die hier nicht
+existiert.
+
+| Prüfpunkt | Frage |
+| --- | --- |
+| Scope | Ist der Scope entscheidbar und abgegrenzt? Gibt es ein benanntes `Out of Scope`? |
+| Anforderungen | Sind sie konkret genug, um daraus zu implementieren — oder Absichtserklärungen? |
+| Architektur | Trägt die Struktur den beschriebenen Scope? Sind die Grenzen begründet? |
+| Overengineering | Welche Komponente, Abhängigkeit, Schicht oder Infrastruktur hat keine benennbare Anforderung hinter sich? |
+| Unterdimensionierung | Wo fehlt Struktur, die der Scope tatsächlich verlangt? |
+| Dokumentationsqualität | Beantworten die Dokumente ihre Frage, oder sind sie nur ausgefüllt? Stehen noch Platzhalter drin? |
+| Konsistenz | Siehe Abschnitt 1. |
+| Teststrategie | Schützt sie das Risiko dieses Projekts — oder erzeugt sie Zahlen? |
+| Security-Konzept | Sind Auth, Datengrenzen und Secret-Handhabung entschieden und dokumentiert? |
+| Deployment | Ist der Weg in Betrieb beschrieben, inklusive Fehlschlag? |
+| AI-Readiness | Siehe Abschnitt 2. |
+| Offene kritische Entscheidungen | Steht etwas offen, das die Implementierung faktisch vorwegnehmen müsste? |
+
+Zwei Regeln für dieses Review:
+
+- **Nicht raten.** Was sich aus dem Repository nicht bestimmen lässt, wird gefragt —
+  nicht wohlwollend interpretiert.
+- **`NOT REQUIRED` wird geprüft, nicht geglaubt.** Sowohl bei Architektur-Bereichen als
+  auch bei `Architecture Decisions`. Ein `NOT REQUIRED`, dem der Code widerspricht, ist
+  ein Blocker.
 
 ## 1 — Consistency Audit
 
@@ -14,7 +47,7 @@ Gesucht wird nach:
 | Architektur | ARCHITECTURE beschreibt Schichten, die im Code nicht existieren |
 | Commands | README nennt `npm test`, das Projekt nutzt `pnpm` |
 | Veraltete Entscheidung | ADR `Accepted`, aber die Umsetzung ging anders — Status auf `Superseded` und neues ADR |
-| Fehlendes ADR | Tragende Entscheidung existiert im Code, aber nirgends dokumentiert |
+| Fehlendes ADR | Tragende Entscheidung existiert im Code, aber nirgends dokumentiert - auch dann, wenn `Architecture Decisions` auf `NOT REQUIRED` steht |
 | Doppelte Rules | Dieselbe Regel in `CLAUDE.md` und in einer Cursor-Rule |
 | Architecture Drift | Code hat sich von der dokumentierten Struktur entfernt |
 | Manifest-Konflikt | Manifest meldet `READY`, `STATUS.md` meldet `BLOCKED` |
@@ -61,13 +94,16 @@ benennbare Datei geben, die die Frage beantwortet.
 
 **WARNING** — unter anderem:
 
-- Optionale Dokumentation fehlt
-- Mutation Testing nicht konfiguriert
+- Optionale Dokumentation fehlt, obwohl ein Zweck erkennbar wäre
+- Ein bewusst hingenommener Zustand ist nirgends als solcher festgehalten
 - Staging fehlt, ist aber nicht erforderlich
-- Monitoring könnte besser sein
 - Optionale Automatisierung fehlt
 
 Warnings blockieren nicht. Sie werden trotzdem genannt.
+
+Eine Warnung braucht einen benennbaren Nutzen ihrer Auflösung. „Werkzeug X ist nicht
+konfiguriert" ist keine Warnung, solange niemand sagen kann, wovor X hier schützen würde
+— sonst erzeugt der Audit Aufgaben, deren einziger Zweck es ist, den Audit zu beruhigen.
 
 ## 4 — Report-Format
 
@@ -136,6 +172,12 @@ Implementation is blocked.
 
 Jeder Blocker nennt: **ID**, **Reason**, **Required Action**, **Affected Area**.
 
+Dieser Report ist der **Audit** (Ebene 2) und endet auf `FOUNDATION READY` /
+`FOUNDATION NOT READY`. Der Validator gibt einen eigenen, ähnlich aufgebauten Report aus,
+der auf `FOUNDATION VALID` / `FOUNDATION INVALID` endet. Die beiden werden nicht
+vermischt und nicht gegeneinander ausgetauscht: kein Programm gibt `FOUNDATION READY`
+aus, und kein Review gibt `FOUNDATION VALID` aus.
+
 ## 5 — Endentscheidung
 
 Es gibt keinen Prozentwert. Nicht `92% READY`. Nur:
@@ -155,7 +197,8 @@ FOUNDATION NOT READY
 ```
 ALL REQUIRED DOMAINS PASS
 + ZERO BLOCKING ISSUES
-+ REQUIRED VALIDATION PASSED
++ REQUIRED VALIDATION PASSED   (Command-Chain ausgeführt, Validator FOUNDATION VALID)
++ NO UNRESOLVED CRITICAL DECISION
 ```
 
 **Nichts verschweigen.** Ein verschwiegener Blocker taucht später als Fehler in der

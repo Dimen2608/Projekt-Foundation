@@ -40,6 +40,11 @@ grün sein.
 - Der Skill existiert nur unter `plugins/project-foundation/` — keine zweite Kopie
   unter `.claude/skills/` (ADR-0002).
 - Der Validator **schreibt nie** in ein geprüftes Projekt. Reine Lesezugriffe.
+- Der Validator behauptet nur, was er geprüft hat: `FOUNDATION VALID`, nie
+  `FOUNDATION READY`; `NOT CHECKED` statt `OK` für Domänen ohne Regel; Secret-*Hygiene*
+  statt Secret Scanning (ADR-0010).
+- Pflicht ist ein Artefakt nur, wenn ohne es eine notwendige Frage unbeantwortet bliebe
+  (ADR-0011). Keine neue Pflichtdatei ohne die Frage, die sie beantwortet.
 - Neue Blocking-Regel im Validator = neuer Test, der genau diese Regel schützt. Keine
   Tests, die nur Coverage erzeugen. Erzwungen durch `tests/test_regelabdeckung.py` (ADR-0009).
 - Finding-IDs sind stabil. Eine bestehende ID wird nicht umgewidmet. Jede neue ID gehört
@@ -51,14 +56,16 @@ grün sein.
 
 - Python ≥ 3.11.
 - Der Validator läuft ohne Netzwerkzugriff.
-- Der Audit-Report-Wortlaut ist festgelegt und wird nicht umformuliert
-  (`plugins/project-foundation/skills/project-foundation/reference/audit.md`).
+- Der Audit-Report-Wortlaut (Ebene 2, `reference/audit.md`) und der Validierungs-Report
+  (Ebene 1, `report.py`) sind festgelegt und werden nicht umformuliert. Sie werden auch
+  nicht gegeneinander ausgetauscht: kein Programm gibt `FOUNDATION READY` aus.
 
 ## Stop Conditions
 
 Anhalten und fragen, wenn:
 
 - Eine neue Prüfregel den Unterschied zwischen `BLOCKING` und `WARNING` verschieben würde.
+- Ein Artefakt zur Pflicht würde, ohne dass eine Frage benannt ist, die es beantwortet.
 - Eine Änderung das Manifest-Schema bricht (`schema_version`).
 - Eine weitere Laufzeit-Abhängigkeit nötig erscheint.
 - Die Plugin-Verzeichnisstruktur geändert werden müsste (ADR-0001).

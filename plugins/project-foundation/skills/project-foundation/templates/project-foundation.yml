@@ -4,31 +4,35 @@
 # Bei Widersprüchen gewinnen immer die Dokumente (STATUS.md, docs/*).
 #
 # Kopieren nach .project-foundation.yml im Projektwurzelverzeichnis.
+#
+# Hier steht nur, was ein Werkzeug braucht und nirgends sonst maschinenlesbar
+# ablesen kann. Alles, was schon in docs/ steht, gehört ausdrücklich NICHT hierher:
+# eine zweite Fassung driftet, und dann muss jemand entscheiden, welche stimmt.
+
+# --- Pflicht ---------------------------------------------------------------
 
 schema_version: 1
 
+foundation:
+  # Ergebnis des vollständigen Foundation-Prozesses (Review + Entscheidung),
+  # nicht die Ausgabe des Validators. Der prüft nur, ob diese Angabe zu
+  # STATUS.md und blocking_issues passt.
+  status: <READY | NOT_READY>
+  # Optional. Muss zu status passen: READY mit offenen Blockern ist ein Widerspruch.
+  blocking_issues: 0
+
+# --- Optional: wird geprüft, wenn vorhanden --------------------------------
+
+# project.name taucht in Reports und Werkzeugen auf, sonst nichts.
 project:
   name: <projektname>
-  type: <cli | web-app | api | library | service | data-pipeline | tool>
-  maturity: <greenfield | prototype | active | maintenance>
 
-stack:
-  language: <python | typescript | go | ...>
-  runtime: <z. B. python-3.11, node-22>
-  package_manager: <pip | uv | pnpm | npm | cargo | ...>
-  frameworks: []
-
-architecture:
-  style: <z. B. cli, modular-monolith, layered>
-  persistence: <none | postgres | sqlite | ...>
-  authentication: <none | session | oauth2 | ...>
-  deployment: <none | container | managed-hosting | ...>
-
+# Behauptungen über vorhandene Agent-Dateien. Stimmen sie nicht, ist das ein
+# Blocker - ein Index, der lügt, ist schlechter als keiner.
 ai_support:
   claude_md: true
   agents_md: false
   cursor_rules: false
-  skills: []
 
 testing:
   # Nur Level nennen, die tatsächlich aktiv sind.
@@ -37,14 +41,5 @@ testing:
   # ausführbaren Command ist keine Teststrategie.
   command: <z. B. pytest>
 
-infrastructure:
-  ci: <none | github-actions | gitlab-ci | ...>
-  hosting: <none | ...>
-
-quality_gates: [foundation, change, architecture, security]
-
-foundation:
-  status: <READY | NOT_READY>
-  blocking_issues: 0
-  warnings: 0
-  last_audit: <YYYY-MM-DD>
+# Weitere Schlüssel sind erlaubt, werden aber von keinem Werkzeug gelesen. Jeder
+# zusätzliche Eintrag ist eine Kopie aus den Dokumenten - und Kopien driften.

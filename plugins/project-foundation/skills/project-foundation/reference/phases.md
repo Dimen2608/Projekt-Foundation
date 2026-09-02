@@ -85,6 +85,14 @@ Entscheidungen festhalten. Für jede tragende Entscheidung ein ADR (Kriterien in
 Bei jeder Entscheidung die einfachste ausreichende Lösung bevorzugen und **die verworfenen
 Alternativen im ADR benennen** — ein ADR ohne verworfene Optionen erklärt nichts.
 
+Am Ende dieser Phase steht eine der beiden Aussagen in `docs/ARCHITECTURE.md`:
+
+- `Architecture Decisions | REQUIRED` — mit den ADRs, die es dann auch gibt.
+- `Architecture Decisions | NOT REQUIRED` — mit der Begründung, warum keine Entscheidung
+  dieses Projekts die Kriterien erfüllt.
+
+Beides ist ein gültiger Abschluss. Was nicht geht: die Frage offenlassen.
+
 ---
 
 ## 5 — GENERATE
@@ -92,9 +100,13 @@ Alternativen im ADR benennen** — ein ADR ohne verworfene Optionen erklärt nic
 Reihenfolge, weil spätere Dokumente auf früheren aufbauen:
 
 ```
-docs/PROJECT.md → docs/ARCHITECTURE.md → docs/decisions/ → README.md
-→ CLAUDE.md (+ AGENTS.md, .cursor/rules/) → STATUS.md → .project-foundation.yml
+docs/PROJECT.md → docs/ARCHITECTURE.md → [docs/decisions/] → README.md
+→ CLAUDE.md oder AGENTS.md (+ .cursor/rules/) → [STATUS.md] → .project-foundation.yml
 ```
+
+Die eckigen Klammern sind ernst gemeint: `docs/decisions/` entsteht nur, wenn es eine
+tragende Entscheidung gibt; `STATUS.md` nur, wenn der Zustand nicht ohnehin sichtbar ist.
+Die Tabelle in `SKILL.md` sagt, welche Frage welches Artefakt rechtfertigt.
 
 Regeln:
 
@@ -102,6 +114,7 @@ Regeln:
   Keine Dokumentation hineinkopieren.
 - Jede Information genau einmal. Bei Bedarf verweisen statt wiederholen.
 - Optionale Dokumente nur mit konkretem Zweck.
+- Das Manifest bekommt nur, was maschinell gebraucht wird — kein Abbild der Dokumente.
 - `.env.example` anlegen, sobald Environment-Variablen existieren. Niemals echte Werte.
 
 ### Architektur-Bereiche
@@ -116,6 +129,9 @@ Configuration, Secrets.
 Multi-Tenancy, Networking, Observability, Scalability, Backup/Recovery.
 
 `UNKNOWN` bei Authentication, Authorization oder Secrets ist **BLOCKING**.
+
+Zusätzlich, in derselben Tabelle: `Architecture Decisions` mit `REQUIRED` oder
+`NOT REQUIRED` (siehe `SKILL.md`).
 
 ### Development Setup
 
@@ -148,8 +164,9 @@ install → lint → typecheck → test → build
 
 Eine dokumentierte, aber kaputte Command-Chain ist **BLOCKED**.
 
-Wenn `foundation-validate` verfügbar ist, zusätzlich ausführen. Der Validator ersetzt das
-inhaltliche Review nicht.
+Wenn `foundation-validate` verfügbar ist, zusätzlich ausführen. Er endet auf
+`FOUNDATION VALID` oder `FOUNDATION INVALID` und ersetzt das inhaltliche Review nicht —
+das ist Ebene 2 und kommt danach.
 
 ---
 

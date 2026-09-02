@@ -1,7 +1,13 @@
 # Status — <PROJEKTNAME>
 
+> **Optional.** Diese Datei lohnt sich, sobald mehr als eine Person oder mehr als eine
+> Session am Projekt arbeitet. Ein Ein-Personen-Projekt, dessen Zustand ohnehin sichtbar
+> ist, braucht sie nicht — ein ungepflegtes STATUS.md ist schlechter als keins.
+>
 > Source of Truth für **den aktuellen Zustand**. Ausschließlich Gegenwart — keine Historie
-> (die gehört in `PROGRESS.md`), keine Pläne (die gehören in `docs/PROJECT.md`).
+> (die gehört in `PROGRESS.md`), keine Pläne (die gehören in `docs/PROJECT.md`), keine
+> Architektur (die gehört in `docs/ARCHITECTURE.md`) und nichts, was ein Werkzeug ohnehin
+> ausrechnet (Testanzahl, Coverage, letzter Commit).
 >
 > Stand: <YYYY-MM-DD>
 

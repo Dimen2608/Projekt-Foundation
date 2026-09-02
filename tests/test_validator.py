@@ -1,4 +1,4 @@
-"""Prueft die Regeln, die ueber FOUNDATION READY entscheiden.
+"""Prueft die Regeln, die ueber FOUNDATION VALID entscheiden.
 
 Jeder Test schuetzt genau eine Blocking-Regel. Getestet wird das Verhalten des
 Validators, nicht seine interne Struktur.
@@ -15,6 +15,7 @@ from foundation_validate.validator import (
     CORE_AREAS,
     PROJECT_SECTIONS_REQUIRED,
     SECURITY_CRITICAL_AREAS,
+    UNCHECKED_DOMAINS,
     validate,
 )
 
@@ -23,16 +24,9 @@ def _ids(root: Path) -> set[str]:
     return {f.finding_id for f in validate(root).blocking}
 
 
-def test_vollstaendiges_projekt_ist_ready(project: Path) -> None:
+def test_vollstaendiges_projekt_ist_valid(project: Path) -> None:
     result = validate(project)
-    assert result.ready, [str(f) for f in result.blocking]
-
-
-def test_fehlende_pflichtdatei_blockiert(project: Path) -> None:
-    (project / "docs" / "PROJECT.md").unlink()
-    result = validate(project)
-    assert not result.ready
-    assert any(f.domain is Domain.PROJECT_DEFINITION for f in result.blocking)
+    assert result.valid, [str(f) for f in result.blocking]
 
 
 def test_fehlender_pflichtabschnitt_in_project_md_blockiert(project: Path) -> None:
@@ -40,7 +34,7 @@ def test_fehlender_pflichtabschnitt_in_project_md_blockiert(project: Path) -> No
     (project / "docs" / "PROJECT.md").write_text(
         text.replace("## Target Users", "## Irgendwas"), encoding="utf-8"
     )
-    assert not validate(project).ready
+    assert not validate(project).valid
 
 
 def test_unbekannte_authentifizierung_blockiert(project: Path) -> None:
@@ -52,7 +46,7 @@ def test_unbekannte_authentifizierung_blockiert(project: Path) -> None:
         encoding="utf-8",
     )
     result = validate(project)
-    assert not result.ready
+    assert not result.valid
     assert any(f.domain is Domain.SECURITY for f in result.blocking)
 
 
@@ -63,7 +57,7 @@ def test_nicht_bewerteter_unkritischer_bereich_ist_nur_warnung(project: Path) ->
         encoding="utf-8",
     )
     result = validate(project)
-    assert result.ready
+    assert result.valid
     assert any(f.severity is Severity.WARNING for f in result.warnings)
 
 
@@ -82,9 +76,56 @@ def test_adr_ohne_pflichtabschnitte_blockiert(project: Path) -> None:
     assert "ADR-003" in _ids(project)
 
 
-def test_kein_adr_vorhanden_blockiert(project: Path) -> None:
+def test_kein_adr_trotz_required_blockiert(project: Path) -> None:
+    """Wer 'Architecture Decisions: REQUIRED' erklaert, muss das ADR auch liefern."""
     (project / "docs" / "decisions" / "ADR-0001-beispiel.md").unlink()
     assert "STRUCT-011" in _ids(project)
+
+
+def test_kein_adr_bei_not_required_ist_gueltig(project: Path) -> None:
+    """Ein Projekt ohne tragende Entscheidung braucht kein ADR - der Kern von ADR-0011."""
+    shutil.rmtree(project / "docs" / "decisions")
+    path = project / "docs" / "ARCHITECTURE.md"
+    path.write_text(
+        path.read_text(encoding="utf-8").replace(
+            "| Architecture Decisions | REQUIRED |", "| Architecture Decisions | NOT REQUIRED |"
+        ),
+        encoding="utf-8",
+    )
+    assert validate(project).valid
+
+
+def test_fehlende_aussage_zu_entscheidungen_ist_eine_warnung(project: Path) -> None:
+    """Unbeantwortet ist nicht dasselbe wie beantwortet - aber auch kein Blocker."""
+    shutil.rmtree(project / "docs" / "decisions")
+    path = project / "docs" / "ARCHITECTURE.md"
+    path.write_text(
+        path.read_text(encoding="utf-8").replace("| Architecture Decisions | REQUIRED |\n", ""),
+        encoding="utf-8",
+    )
+    result = validate(project)
+    assert result.valid
+    assert "ADR-010" in {f.finding_id for f in result.warnings}
+
+
+def test_agents_md_erfuellt_die_ai_frage_ebenso(project: Path) -> None:
+    """Die Pflicht haengt an der Frage, nicht am Dateinamen CLAUDE.md."""
+    (project / "CLAUDE.md").rename(project / "AGENTS.md")
+    manifest = project / ".project-foundation.yml"
+    manifest.write_text(
+        manifest.read_text(encoding="utf-8")
+        .replace("claude_md: true", "claude_md: false")
+        .replace("agents_md: false", "agents_md: true"),
+        encoding="utf-8",
+    )
+    assert validate(project).valid
+
+
+def test_ungepruefte_domaenen_werden_nicht_als_ok_gemeldet(project: Path) -> None:
+    """Ein OK fuer etwas, das nie geprueft wurde, waere ein falsches Qualitaetsversprechen."""
+    status = validate(project).domain_status
+    for domain in UNCHECKED_DOMAINS:
+        assert status[domain] == "NOT CHECKED"
 
 
 def test_status_blocked_blockiert(project: Path) -> None:
@@ -154,13 +195,6 @@ def test_beinahe_treffer_wird_in_der_meldung_genannt(project: Path) -> None:
     assert "umbenennen" in finding.required_action
 
 
-def test_ohne_beinahe_treffer_bleibt_die_meldung_schlicht(project: Path) -> None:
-    (project / "docs" / "PROJECT.md").unlink()
-    finding = _finding(project, "STRUCT-004")
-    assert "Gefunden wurde" not in finding.reason
-    assert "umbenennen" not in finding.required_action
-
-
 def test_fremdes_adr_verzeichnis_wird_mit_anzahl_genannt(project: Path) -> None:
     """docs/adr/ mit fremder Nummerierung (0001-titel.md) muss erkannt werden."""
     shutil.rmtree(project / "docs" / "decisions")
@@ -227,9 +261,10 @@ def test_fehlende_readme_blockiert(project: Path) -> None:
     assert "STRUCT-001" in _ids(project)
 
 
-def test_fehlende_status_md_blockiert(project: Path) -> None:
+def test_fehlende_status_md_ist_kein_mangel(project: Path) -> None:
+    """STATUS.md ist optional: ein Projekt ohne laufenden Zustandsbericht ist gueltig."""
     (project / "STATUS.md").unlink()
-    assert "STRUCT-002" in _ids(project)
+    assert validate(project).valid
 
 
 def test_fehlende_claude_md_blockiert(project: Path) -> None:
@@ -251,7 +286,7 @@ def test_manifest_ohne_mapping_blockiert(project: Path) -> None:
 def test_manifest_ohne_pflichtfeld_blockiert(project: Path) -> None:
     path = project / ".project-foundation.yml"
     path.write_text(
-        path.read_text(encoding="utf-8").replace("  language: python\n", ""), encoding="utf-8"
+        path.read_text(encoding="utf-8").replace("schema_version: 1\n", ""), encoding="utf-8"
     )
     assert "MAN-003" in _ids(project)
 
@@ -282,7 +317,7 @@ def test_adr_mit_falschem_dateinamen_ist_warnung(project: Path) -> None:
     )
     result = validate(project)
     assert "ADR-001" in {f.finding_id for f in result.warnings}
-    assert result.ready
+    assert result.valid
 
 
 def test_adr_ohne_status_blockiert(project: Path) -> None:

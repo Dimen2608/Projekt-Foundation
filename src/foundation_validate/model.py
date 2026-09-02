@@ -9,7 +9,7 @@ from enum import StrEnum
 class Severity(StrEnum):
     """Schweregrad eines Findings.
 
-    BLOCKING verhindert FOUNDATION READY, WARNING nicht.
+    BLOCKING verhindert FOUNDATION VALID, WARNING nicht.
     """
 
     BLOCKING = "BLOCKING"

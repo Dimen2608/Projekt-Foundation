@@ -1,4 +1,8 @@
-"""Erzeugt den Foundation-Audit-Report im festgelegten Format."""
+"""Erzeugt den Report der maschinellen Foundation-Pruefung.
+
+Bewusst nicht der Audit-Report: der Audit umfasst das inhaltliche Review und endet auf
+FOUNDATION READY. Dieser Report endet auf FOUNDATION VALID (ADR-0010).
+"""
 
 from __future__ import annotations
 
@@ -6,7 +10,7 @@ from foundation_validate.model import Domain
 from foundation_validate.validator import Result
 
 _BOX_WIDTH = 38
-_BOX_TITLE = "       PROJECT FOUNDATION AUDIT       "
+_BOX_TITLE = "PROJECT FOUNDATION VALIDATION".center(_BOX_WIDTH)
 
 BOX = "╔" + "═" * _BOX_WIDTH + "╗\n║" + _BOX_TITLE + "║\n╚" + "═" * _BOX_WIDTH + "╝"
 BOX_ASCII = "+" + "-" * _BOX_WIDTH + "+\n|" + _BOX_TITLE + "|\n+" + "-" * _BOX_WIDTH + "+"
@@ -32,11 +36,13 @@ def stream_supports_box(stream: object) -> bool:
 
 
 def render(result: Result, *, ascii_only: bool = False) -> str:
-    """Formatiert das Validierungsergebnis als Audit-Report."""
+    """Formatiert das Validierungsergebnis."""
     lines = [BOX_ASCII if ascii_only else BOX, ""]
     for domain in Domain:
         lines.append(f"{domain.value.ljust(_LABEL_WIDTH)}{result.domain_status[domain]}")
     lines += [
+        "",
+        "OK = no structural finding. NOT CHECKED = no machine-checkable rule here.",
         "",
         f"Blocking Issues: {len(result.blocking)}",
         f"Warnings: {len(result.warnings)}",
@@ -45,10 +51,17 @@ def render(result: Result, *, ascii_only: bool = False) -> str:
         "",
     ]
 
-    if result.ready:
-        lines += ["FOUNDATION READY", "", "Implementation may begin."]
+    if result.valid:
+        lines += [
+            "FOUNDATION VALID",
+            "",
+            "Structural requirements are met. This is not a statement about the",
+            "quality of the foundation: scope, architecture and completeness are",
+            "judged by the review, not by this program. FOUNDATION READY is the",
+            "result of that review.",
+        ]
     else:
-        lines += ["FOUNDATION NOT READY", "", "Blocking Issues:", ""]
+        lines += ["FOUNDATION INVALID", "", "Blocking Issues:", ""]
         for finding in result.blocking:
             lines += [
                 finding.finding_id,
@@ -61,7 +74,7 @@ def render(result: Result, *, ascii_only: bool = False) -> str:
                 finding.required_action,
                 "",
             ]
-        lines.append("Implementation is blocked.")
+        lines.append("Structural errors remain. Fix them before the review.")
 
     if result.warnings:
         lines += ["", "Warnings:", ""]

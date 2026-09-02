@@ -1,8 +1,8 @@
 """Foundation Validate - prueft die Foundation-Dateien eines Projekts.
 
-Das Paket implementiert die VALIDATE- und AUDIT-Phase des Project-Foundation-
-Prozesses maschinell. Es ersetzt nicht das inhaltliche Review durch Mensch oder
-Agent, sondern faengt strukturelle Fehler und Widersprueche ab.
+Das Paket implementiert Level 1 des Project-Foundation-Prozesses: die maschinell
+entscheidbaren Pruefungen. Level 2 (inhaltliches Review durch einen Agenten) und
+Level 3 (Entscheidung durch den Menschen) liegen ausserhalb dieses Codes.
 """
 
 from foundation_validate.model import Domain, Finding, Severity

@@ -11,19 +11,52 @@ Dokumenten, der dafür ausreicht.
 
 ## Zentrales Prinzip
 
-> **NO CODING BEFORE FOUNDATION READY.**
+> **NO FEATURE WORK ON AN UNRESOLVED FOUNDATION.**
 >
 > **The foundation must remain smaller than the system it enables.**
 
 Komplexität wird nicht eingeführt, weil sie als „Best Practice" gilt, sondern nur, wenn
 eine konkrete Anforderung sie fordert.
 
+## Was blockiert ist — und was nicht
+
+Die Regel soll verhindern, dass ein Agent eine offene Architekturentscheidung stillschweigend
+durch Code entscheidet. Sie soll keinen Tippfehler-Fix aufhalten.
+
+| Art der Arbeit | Bedingung |
+| --- | --- |
+| **Foundation Work** — Dokumente, ADRs, Discovery, Aufräumen der Foundation | Jederzeit erlaubt. Das ist der Weg zu `FOUNDATION READY`. |
+| **Maintenance / Bugfix** — Fehlverhalten gegen dokumentierte oder offensichtliche Absicht | Erlaubt, sobald Scope und Kontext des Fehlers bekannt sind. Berührt der Fix eine offene Architektur- oder Security-Entscheidung, ist er kein Bugfix mehr. |
+| **Feature Development** — neue Fähigkeit, neue Schnittstelle, neue Abhängigkeit | Erst nach `FOUNDATION READY`. |
+
+Im Zweifel gilt die Frage: *Müsste ich für diese Änderung etwas festlegen, das niemand
+entschieden hat?* Wenn ja — anhalten und fragen, unabhängig von der Größe der Änderung.
+
+## Drei Ebenen
+
+Was hier geprüft wird, wird auf drei verschiedenen Ebenen entschieden. Sie werden nicht
+vermischt.
+
+| Ebene | Wer | Was | Ergebnis |
+| --- | --- | --- | --- |
+| **1 — Validator** | `foundation-validate` | Maschinell entscheidbar: Existenz, Struktur, erlaubte Statuswerte, Widersprüche | `FOUNDATION VALID` / `INVALID` |
+| **2 — Review** | Du, mit diesem Skill | Scope, Architektur, Overengineering, Konsistenz, Teststrategie, Security-Konzept, AI-Readiness | `PASS` / `WARNING` / `BLOCKED` je Domäne |
+| **3 — Mensch** | Der Auftraggeber | Fachlich kritische, schwer reversible, rechtliche Entscheidungen | Entscheidung |
+
+**Ebene 1 kann Ebene 2 nicht ersetzen.** Ein grüner Validator sagt nur: keine strukturellen
+Fehler mehr im Weg. Er sagt nichts darüber, ob die Architektur trägt oder der Scope stimmt.
+
+**Ebene 2 darf Ebene 3 nicht überschreiben.** Vorschlagen ja, festlegen nein.
+
+`FOUNDATION READY` ist ausschließlich das Ergebnis des vollständigen Prozesses — nie die
+Ausgabe eines Programms.
+
 ## Absolute Regeln
 
 Diese Regeln haben Vorrang vor allem anderen in diesem Skill:
 
-1. **NO CODING BEFORE FOUNDATION READY.** Keine Feature-Implementierung, bevor der Audit
-   `FOUNDATION READY` ergibt.
+1. **NO FEATURE WORK ON AN UNRESOLVED FOUNDATION.** Siehe die Tabelle oben: Foundation Work
+   und Bugfixes sind erlaubt, neue Features erst nach `FOUNDATION READY`.
 2. **DO NOT INVENT REQUIREMENTS.** Fehlt eine fachliche Information — fragen.
 3. **DO NOT INVENT CRITICAL ARCHITECTURE DECISIONS.** Vorschlagen ja, festlegen nein.
 4. **DO NOT ADD COMPLEXITY WITHOUT JUSTIFICATION.**
@@ -48,7 +81,7 @@ DISCOVER → ASSESS → ASK → DECIDE → GENERATE → VALIDATE → AUDIT → F
 | DISCOVER | Bestandsaufnahme, ohne eine einzige Datei zu ändern |
 | ASSESS | Jede Domäne als PASS / WARNING / BLOCKED / UNKNOWN |
 | ASK | Offene kritische Entscheidungen als konkrete Fragen an den Menschen |
-| DECIDE | Entscheidungen festhalten, tragende als ADR |
+| DECIDE | Entscheidungen festhalten, tragende als ADR — oder begründet festhalten, dass es keine gibt |
 | GENERATE | Foundation-Dateien schreiben |
 | VALIDATE | Command-Chain tatsächlich ausführen |
 | AUDIT | Konsistenzprüfung + Report |
@@ -67,34 +100,61 @@ AI Foundation, Documentation, Testing & Quality, CI/CD & Infrastructure, Securit
 geraten. Fragen bündeln statt einzeln nachhaken. Bei Wahlmöglichkeiten: Optionen mit
 Trade-offs vorlegen, eine Empfehlung nennen, den Menschen entscheiden lassen.
 
-**DECIDE** — Für jede tragende Entscheidung ein ADR. Kein ADR für Triviales.
+**DECIDE** — Für jede tragende Entscheidung ein ADR. Kein ADR für Triviales. Am Ende steht
+`Architecture Decisions: REQUIRED` oder `NOT REQUIRED` in `docs/ARCHITECTURE.md` — die Frage
+bleibt nicht offen.
 
 **GENERATE** — Vorlagen aus `templates/` als Ausgangspunkt, dann projektspezifisch füllen.
 Keine Vorlage unausgefüllt liegen lassen: ein Template mit Platzhaltern ist keine Foundation.
 
 **VALIDATE** — Die dokumentierten Commands ausführen. Eine dokumentierte, aber kaputte
-Command-Chain ist `BLOCKED`, nicht `WARNING`.
+Command-Chain ist `BLOCKED`, nicht `WARNING`. Danach `foundation-validate`, falls verfügbar
+(Ebene 1).
 
-**AUDIT** — Widersprüche zwischen den Quellen suchen, AI-Readiness-Test durchführen,
-Report erzeugen.
+**AUDIT** — Das inhaltliche Review (Ebene 2): Scope, Architektur, Overengineering,
+Konsistenz, Teststrategie, Security-Konzept, AI-Readiness, offene kritische Entscheidungen.
+Prüfliste und Report-Format: `reference/audit.md`.
 
-## Pflichtdateien
+## Fragen, nicht Dateilisten
 
-| Datei | Beantwortet |
-| --- | --- |
-| `README.md` | Wie starte und benutze ich es? |
-| `docs/PROJECT.md` | Was bauen wir? Was nicht? |
-| `docs/ARCHITECTURE.md` | Wie ist es strukturiert? |
-| `docs/decisions/ADR-NNNN-*.md` | Warum wurde so entschieden? |
-| `STATUS.md` | Was gilt gerade? |
-| `CLAUDE.md` | Welche Regeln gelten für Agents? |
-| `.project-foundation.yml` | Maschinenlesbarer Index |
+Die Foundation entsteht aus den Fragen, die beantwortet sein müssen — nicht aus einem
+festen Dateisatz. Ein Artefakt wird angelegt, weil eine Frage sonst unbeantwortet bliebe.
 
-Optional, nur mit konkretem Zweck: `PROGRESS.md`, `AGENTS.md`, `.cursor/rules/`,
-`SECURITY.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `.env.example`, CI-Workflow.
+| Frage | Artefakt | Wann nötig |
+| --- | --- | --- |
+| Wie starte und benutze ich es? | `README.md` | immer |
+| Was bauen wir, was nicht? | `docs/PROJECT.md` | immer |
+| Wie ist es strukturiert? | `docs/ARCHITECTURE.md` | immer |
+| Woran erkennt ein Werkzeug die Foundation? | `.project-foundation.yml` | immer |
+| Was muss ein AI-Agent wissen? | `CLAUDE.md` **oder** `AGENTS.md` | immer — dieses Werkzeug setzt AI-gestützte Entwicklung voraus |
+| Warum wurde eine tragende Entscheidung so getroffen? | `docs/decisions/ADR-NNNN-*.md` | nur wenn es eine tragende Entscheidung gibt |
+| Was gilt gerade — Blocker, Command-Chain, offene Punkte? | `STATUS.md` | wenn der Zustand nicht ohnehin sichtbar ist |
+| Werkzeugspezifische Regeln für Cursor | `.cursor/rules/*.mdc` | nur bei Cursor-Einsatz |
+| Was ist passiert? | `PROGRESS.md` | wenn die Historie später Wert hat |
+| Wie melde ich eine Schwachstelle? | `SECURITY.md` | bei externen Nutzern |
+| Welche Environment-Variablen gibt es? | `.env.example` | sobald welche existieren |
+
+Die fünf „immer"-Artefakte sind der Boden: ohne sie kann niemand ohne Raten arbeiten.
+Alles darunter ist begründungspflichtig — **in beide Richtungen**. Ein weggelassenes
+Artefakt braucht denselben Satz Begründung wie ein zusätzliches.
 
 **Jede Information hat genau eine Heimat.** Widersprüche zwischen diesen Dateien sind ein
 Foundation-Fehler, kein Schönheitsfehler.
+
+### Wann `STATUS.md` sich lohnt
+
+`STATUS.md` beantwortet: *Was ist gerade wahr?* — offene Blocker, Zustand der
+Command-Chain, bewusst hingenommene Warnungen. Es lohnt sich, sobald mehr als eine Person
+oder mehr als eine Session am Projekt arbeitet.
+
+Es lohnt sich **nicht** als zweite Architektur- oder Projektbeschreibung. Nichts gehört
+hinein, was:
+
+- ein Werkzeug ohnehin ermitteln kann (Testanzahl, Coverage, letzter Commit),
+- in `docs/PROJECT.md`, `docs/ARCHITECTURE.md` oder einem ADR steht,
+- Historie ist (das ist `PROGRESS.md`).
+
+Ein `STATUS.md`, das niemand pflegt, ist schlechter als keins — es lügt irgendwann.
 
 ## Source of Truth
 
@@ -103,7 +163,7 @@ README        → Wie starte/benutze ich es?
 PROJECT.md    → Was bauen wir?
 ARCHITECTURE  → Wie ist es strukturiert?
 ADR           → Warum wurde eine wichtige Entscheidung so getroffen?
-STATUS.md     → Was ist gerade wahr?
+STATUS.md     → Was ist gerade wahr?  (optional, siehe oben)
 PROGRESS.md   → Was ist passiert?  (nie Wahrheit über Architektur oder Zustand)
 ```
 
@@ -111,15 +171,39 @@ Das Manifest `.project-foundation.yml` ist ein **Index**, niemals Source of Trut
 
 ## Wann ein ADR nötig ist
 
+**Ein ADR ist kein Pflichtbestandteil einer Foundation.** Ein kleines Projekt kann
+vollständig in Ordnung sein, ohne je eine Entscheidung getroffen zu haben, die ein ADR
+verdient. Erzwungen wird nicht das ADR, sondern die **Aussage darüber**.
+
 Ein ADR ist erforderlich, wenn eine Entscheidung mindestens eines davon tut:
 
 - die Architektur beeinflussen
-- Security- oder Data-Boundaries beeinflussen
+- Security-, Daten- oder Mandantengrenzen beeinflussen
 - das Deployment beeinflussen
 - die langfristige Wartbarkeit beeinflussen
-- schwer rückgängig zu machen sein
+- schwer oder gar nicht rückgängig zu machen sein
+- zwischen mehreren realistischen Varianten wählen, die alle vertretbar wären
 
-Kein ADR für Formatierungsregeln, Variablennamen oder Bibliotheksversionen ohne Bruch.
+Kein ADR für: Implementierungsdetails, offensichtliche Bibliotheksnutzung,
+Namensgebung, Formatierungsregeln, Bibliotheksversionen ohne Bruch — kurz: alles ohne
+langfristige Folge.
+
+**Die Antwort gehört nach `docs/ARCHITECTURE.md`**, als eine Zeile in derselben
+Bereichstabelle:
+
+```
+| Architecture Decisions | REQUIRED     | ADR-0001 hält die Wahl der Persistenz fest. |
+| Architecture Decisions | NOT REQUIRED | Ein CLI ohne Persistenz, ohne Netzwerk, ohne Alternativen mit Folgen. |
+```
+
+`REQUIRED` heißt: es gibt mindestens eine tragende Entscheidung, und sie liegt als ADR in
+`docs/decisions/`. `NOT REQUIRED` ist ein gültiger Endzustand — aber nur mit Begründung,
+nicht als Ausweichmöglichkeit. Fehlt die Zeile, meldet der Validator eine Warnung: die
+Frage ist dann schlicht nicht beantwortet.
+
+Beim Review (Ebene 2) wird `NOT REQUIRED` **überprüft**, nicht geglaubt: Wenn im Code oder
+in der Architektur erkennbar eine tragende Entscheidung steckt, die nirgends steht, ist das
+ein Blocker — genau der Fall „fehlendes ADR" aus dem Consistency Audit.
 
 Format: `docs/decisions/ADR-NNNN-kurzer-titel.md`, Abschnitte `Status`, `Context`,
 `Decision`, `Consequences`. Status: `Proposed` / `Accepted` / `Rejected` / `Superseded` /
@@ -138,19 +222,30 @@ Anhalten und fragen, sobald einer dieser Punkte eintritt:
 
 Sicherheitsrelevante unbekannte Entscheidungen sind immer **BLOCKING**.
 
-## Validierung
+## Validierung (Ebene 1)
 
-Wenn `foundation-validate` verfügbar ist, vor dem Audit ausführen:
+Wenn `foundation-validate` verfügbar ist, vor dem Review ausführen:
 
 ```bash
 foundation-validate .          # oder: python -m foundation_validate .
 ```
 
-Exit-Code 0 = keine Blocker, 1 = Blocker vorhanden, 2 = ungültiger Pfad.
+Exit-Code 0 = `FOUNDATION VALID`, 1 = struktureller Blocker, 2 = ungültiger Pfad.
 
-Der Validator prüft nur Struktur und Widersprüche. **Ein grüner Validator ist keine gute
-Foundation** — er bedeutet nur, dass keine strukturellen Fehler mehr im Weg stehen. Die
-inhaltliche Bewertung bleibt deine Aufgabe.
+Was er prüft: Existenz der Pflichtstellen, Pflichtabschnitte, erlaubte Statuswerte,
+ADR-Format, Secret-**Hygiene** (`.env` nicht im Repo, `.env` in `.gitignore`), und
+Widersprüche zwischen Manifest und `STATUS.md`.
+
+Was er **nicht** prüft und auch nicht behauptet:
+
+- ob die Architektur trägt oder der Scope stimmt
+- ob die Dokumente inhaltlich stimmen oder nur ausgefüllt aussehen
+- ob das Projekt frei von Secrets ist — er liest keine Dateiinhalte auf Geheimnisse hin.
+  Dafür gibt es dedizierte Werkzeuge (GitHub Secret Scanning, `gitleaks`); ein Projekt,
+  das das braucht, richtet eins davon ein.
+
+`FOUNDATION VALID` heißt: keine strukturellen Fehler mehr im Weg. Die inhaltliche
+Bewertung ist Ebene 2 — deine Aufgabe.
 
 ## Abschluss
 
@@ -168,7 +263,10 @@ FOUNDATION NOT READY
 ```
 
 `FOUNDATION READY` nur, wenn **alle** Pflichtdomänen `PASS` sind, **null** Blocking Issues
-offen sind und die geforderte Validierung tatsächlich gelaufen ist. Warnings blockieren nicht.
+offen sind, die Command-Chain tatsächlich gelaufen ist und keine kritische Entscheidung
+offensteht. Warnings blockieren nicht.
+
+Ein `FOUNDATION VALID` des Validators ist eine Voraussetzung davon, nie ein Ersatz dafür.
 
 ## Vertiefung
 
