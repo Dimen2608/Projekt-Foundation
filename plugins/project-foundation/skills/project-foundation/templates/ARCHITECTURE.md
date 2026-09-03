@@ -30,7 +30,8 @@ Ein nicht bewerteter Bereich ist eine offene Frage.
 `Architecture Decisions` beantwortet, ob dieses Projekt ADRs braucht:
 
 - `REQUIRED` — es gibt mindestens eine tragende Entscheidung; sie liegt in
-  `docs/decisions/`. Kriterien in `SKILL.md`.
+  `docs/decisions/` oder an dem Ort, den die dritte Spalte nennt (Verzeichnis oder
+  Sammeldatei, z. B. `docs/adr/`). Kriterien in `SKILL.md`.
 - `NOT REQUIRED` — keine Entscheidung dieses Projekts erfüllt die Kriterien. Gültiger
   Zustand, aber die Begründungsspalte ist dann Pflicht, kein Freitextrest.
 

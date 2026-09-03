@@ -144,9 +144,18 @@ Bereichstabelle:
 ```
 
 `REQUIRED` heißt: es gibt mindestens eine tragende Entscheidung, und sie liegt als ADR in
-`docs/decisions/`. `NOT REQUIRED` ist ein gültiger Endzustand — aber nur mit Begründung,
-nicht als Ausweichmöglichkeit. Fehlt die Zeile, meldet der Validator eine Warnung: die
-Frage ist dann schlicht nicht beantwortet.
+`docs/decisions/` — oder an dem Ort, den die dritte Spalte nennt. Ein bestehendes Projekt mit
+`docs/adr/` oder einer ADR-Sammeldatei schreibt diesen Pfad in die Zeile, statt umzubauen:
+
+```
+| Architecture Decisions | REQUIRED | `docs/architektur/decisions.md` — 45 ADRs |
+```
+
+Ein genanntes Verzeichnis wird wie `docs/decisions/` geprüft; bei einer Sammeldatei zählt der
+Validator nur die Einträge (`## ADR-001: …`) und prüft kein Format — das ist dann Aufgabe des
+Reviews. `NOT REQUIRED` ist ein gültiger Endzustand — aber nur mit Begründung, nicht als
+Ausweichmöglichkeit. Fehlt die Zeile, meldet der Validator eine Warnung: die Frage ist dann
+schlicht nicht beantwortet.
 
 Beim Review (Ebene 2) wird `NOT REQUIRED` **überprüft**, nicht geglaubt: Wenn im Code oder
 in der Architektur erkennbar eine tragende Entscheidung steckt, die nirgends steht, ist das

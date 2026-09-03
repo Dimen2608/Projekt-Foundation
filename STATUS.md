@@ -40,7 +40,7 @@ Keine.
 | format (`ruff format --check .`) | ok | 2026-09-02 |
 | lint (`ruff check .`) | ok | 2026-09-02 |
 | typecheck (`mypy`) | ok | 2026-09-02 |
-| test (`pytest`) | ok — 46 Tests | 2026-09-03 |
+| test (`pytest`) | ok — 54 Tests | 2026-09-03 |
 | build | n/a — kein Artefakt (ADR-0006) | — |
 
 ## Foundation-Validierung

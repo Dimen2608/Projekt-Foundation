@@ -134,6 +134,15 @@ DECISION_LABEL = "Architecture Decisions"
 #: Nur diese beiden Werte zaehlen als Antwort. Alles andere - auch ein ausdrueckliches
 #: UNKNOWN - ist keine Antwort und faellt in dieselbe Warnung wie eine fehlende Zeile.
 DECISION_STATES = ("REQUIRED", "NOT REQUIRED")
+#: Der Ort der Entscheidungen darf in derselben Zeile stehen, in der dritten Spalte:
+#: `| Architecture Decisions | REQUIRED | docs/architektur/decisions.md |`. Ohne Angabe
+#: gilt docs/decisions/. Erkannt wird das erste Token mit Schraegstrich oder .md-Endung,
+#: mit oder ohne Backticks (ADR-0012). Ein Verzeichnis wird wie docs/decisions/ geprueft;
+#: bei einer Sammeldatei zaehlt der Validator nur Eintraege und prueft kein Format.
+DECISION_LOCATION_DEFAULT = "docs/decisions/"
+DECISION_LOCATION_RE = re.compile(r"((?:[\w.\-]+/)+[\w.\-]*|[\w.\-]+\.md)")
+#: Ueberschrift eines Eintrags in einer ADR-Sammeldatei: `## ADR-007: ...`.
+ADR_ENTRY_RE = re.compile(r"^#{1,6}\s*ADR[-_ ]?\d+\b", re.IGNORECASE | re.MULTILINE)
 
 #: Architektur-Bereiche, die bewertet sein muessen.
 CORE_AREAS = (
@@ -363,15 +372,50 @@ def _check_structure(root: Path, out: list[Finding]) -> None:
         )
 
 
+def _declared_decision_location(text: str) -> str | None:
+    """Liest den Ort, den die Architecture-Decisions-Zeile hinter dem Statuswert nennt."""
+    for line in text.splitlines():
+        if DECISION_LABEL.lower() not in line.lower():
+            continue
+        teile = re.split(r"\bREQUIRED\b", line, maxsplit=1, flags=re.IGNORECASE)
+        if len(teile) < 2:
+            return None
+        match = DECISION_LOCATION_RE.search(teile[1])
+        return match.group(1) if match else None
+    return None
+
+
+def _resolve_decision_location(root: Path) -> tuple[str, Path | None]:
+    """Erklaerter Ort (oder Default) und sein Pfad; None, wenn er aus dem Projekt zeigt."""
+    declared = _declared_decision_location(_read(root / "docs" / "ARCHITECTURE.md"))
+    location = declared or DECISION_LOCATION_DEFAULT
+    kandidat = (root / location).resolve()
+    try:
+        kandidat.relative_to(root.resolve())
+    except ValueError:
+        return location, None
+    return location, kandidat
+
+
+def _adr_dateien(verzeichnis: Path) -> list[Path]:
+    """Dateien, die wie ein ADR benannt sind - auch mit fremder Nummerierung."""
+    return [p for p in sorted(verzeichnis.glob("*.md")) if ADR_LIKE_RE.match(p.name)]
+
+
 def _check_decisions(root: Path, out: list[Finding]) -> None:
     """Prueft ADRs nur, wenn das Projekt erklaert hat, dass es welche braucht.
 
     "Kein ADR vorhanden" ist fuer sich kein Mangel: ein kleines Projekt kann korrekt
     sein, ohne je eine tragende Entscheidung getroffen zu haben. Verlangt wird deshalb
-    nicht das ADR, sondern die Aussage darueber (ADR-0011).
+    nicht das ADR, sondern die Aussage darueber (ADR-0011). Wo die ADRs liegen, darf
+    dieselbe Zeile sagen (ADR-0012); sonst gilt docs/decisions/.
     """
-    decisions = root / "docs" / "decisions"
-    vorhandene_adrs = list(decisions.glob("ADR-*.md")) if decisions.is_dir() else []
+    location, decisions = _resolve_decision_location(root)
+    erklaert = location != DECISION_LOCATION_DEFAULT
+    ist_verzeichnis = decisions is not None and decisions.is_dir()
+    ist_datei = decisions is not None and decisions.is_file()
+    vorhandene_adrs = _adr_dateien(decisions) if ist_verzeichnis and decisions else []
+    eintraege = len(ADR_ENTRY_RE.findall(_read(decisions))) if ist_datei and decisions else 0
     state = _find_state(_read(root / "docs" / "ARCHITECTURE.md"), DECISION_LABEL, DECISION_STATES)
 
     if state != "REQUIRED":
@@ -404,9 +448,9 @@ def _check_decisions(root: Path, out: list[Finding]) -> None:
                         f"'{DECISION_LABEL}' mit REQUIRED oder NOT REQUIRED beantworten. "
                         "NOT REQUIRED ist ein gueltiger Zustand - dann aber mit Begruendung."
                         + (
-                            " Achtung vor REQUIRED: Die Pfadkonvention verlangt "
-                            f"docs/decisions/; {kandidaten[0][0]} erfuellt sie nicht "
-                            "und wuerde dann als Blocker gemeldet (ADR-0008)."
+                            f" Bei REQUIRED entweder {kandidaten[0][0]} nach "
+                            "docs/decisions/ umbenennen oder es in derselben Zeile als "
+                            "Ort nennen (ADR-0012); sonst wird es als Blocker gemeldet."
                             if kandidaten
                             else ""
                         )
@@ -416,34 +460,70 @@ def _check_decisions(root: Path, out: list[Finding]) -> None:
             )
         return
 
-    if not decisions.is_dir():
-        kandidaten = _decision_dir_near_misses(root)
-        beschreibung = _decision_dir_beschreibung(kandidaten)
+    formatpruefung = (
+        f" Danach wird jedes ADR auf {', '.join(ADR_SECTIONS)} und einen gueltigen Status "
+        "geprueft; bei einer Sammeldatei werden nur die Eintraege gezaehlt."
+    )
+    if decisions is None:
         out.append(
             Finding(
                 finding_id="STRUCT-010",
                 severity=Severity.BLOCKING,
                 domain=Domain.ARCHITECTURE,
                 reason=(
-                    f"docs/ARCHITECTURE.md sagt '{DECISION_LABEL}: REQUIRED', "
-                    "aber das Verzeichnis docs/decisions/ fehlt."
-                    + (f" Gefunden wurde stattdessen: {beschreibung}." if kandidaten else "")
+                    f"docs/ARCHITECTURE.md sagt '{DECISION_LABEL}: REQUIRED' und nennt als "
+                    f"Ort {location}, aber der zeigt aus dem Projekt heraus."
                 ),
                 required_action=(
-                    "docs/decisions/ anlegen und mindestens ein ADR schreiben"
+                    "Den Ort der Entscheidungen relativ zum Projektverzeichnis angeben."
+                ),
+                location="docs/ARCHITECTURE.md",
+            )
+        )
+    elif not ist_verzeichnis and not ist_datei:
+        kandidaten = _decision_dir_near_misses(root)
+        beschreibung = _decision_dir_beschreibung(kandidaten)
+        if erklaert:
+            reason = (
+                f"docs/ARCHITECTURE.md sagt '{DECISION_LABEL}: REQUIRED' und nennt als Ort "
+                f"{location}, aber der existiert nicht."
+            )
+            aktion = (
+                f"{location} anlegen oder die Angabe in der Zeile '{DECISION_LABEL}' korrigieren"
+            )
+        else:
+            reason = (
+                f"docs/ARCHITECTURE.md sagt '{DECISION_LABEL}: REQUIRED', "
+                "aber das Verzeichnis docs/decisions/ fehlt."
+            )
+            aktion = "docs/decisions/ anlegen und mindestens ein ADR schreiben"
+        out.append(
+            Finding(
+                finding_id="STRUCT-010",
+                severity=Severity.BLOCKING,
+                domain=Domain.ARCHITECTURE,
+                reason=reason
+                + (f" Gefunden wurde stattdessen: {beschreibung}." if kandidaten else ""),
+                required_action=(
+                    aktion
                     + (
-                        f" - oder {kandidaten[0][0]} dorthin umbenennen, falls dort "
-                        "bereits die Architekturentscheidungen liegen."
+                        f" - oder {kandidaten[0][0]} als Ort eintragen bzw. nach "
+                        "docs/decisions/ umbenennen, falls dort bereits die "
+                        "Architekturentscheidungen liegen."
                         if kandidaten
                         else "."
                     )
-                    + f" Danach wird jedes ADR auf {', '.join(ADR_SECTIONS)} und einen "
-                    "gueltigen Status geprueft."
+                    + formatpruefung
                 ),
-                location="docs/decisions/",
+                location=location,
             )
         )
-    elif not vorhandene_adrs:
+    elif (ist_verzeichnis and not vorhandene_adrs) or (ist_datei and not eintraege):
+        was_fehlt = (
+            "kein einziges ADR"
+            if ist_verzeichnis
+            else "keinen Eintrag mit einer Ueberschrift wie '## ADR-001: ...'"
+        )
         out.append(
             Finding(
                 finding_id="STRUCT-011",
@@ -451,13 +531,13 @@ def _check_decisions(root: Path, out: list[Finding]) -> None:
                 domain=Domain.ARCHITECTURE,
                 reason=(
                     f"docs/ARCHITECTURE.md sagt '{DECISION_LABEL}: REQUIRED', "
-                    "docs/decisions/ enthaelt aber kein einziges ADR."
+                    f"{location} enthaelt aber {was_fehlt}."
                 ),
                 required_action=(
                     "Die tragende Entscheidung als ADR festhalten - oder, falls es keine "
                     f"gibt, '{DECISION_LABEL}' auf NOT REQUIRED setzen."
                 ),
-                location="docs/decisions/",
+                location=location,
             )
         )
 
@@ -589,8 +669,13 @@ def _check_architecture(root: Path, out: list[Finding]) -> None:
 
 
 def _check_adrs(root: Path, out: list[Finding]) -> None:
-    decisions = root / "docs" / "decisions"
-    if not decisions.is_dir():
+    """Prueft das Format jeder ADR-Datei im (erklaerten oder Default-)Verzeichnis.
+
+    Eine Sammeldatei wird hier nicht geprueft: Der Validator kennt ihr Format nicht und
+    behauptet deshalb auch nicht, es geprueft zu haben (ADR-0012).
+    """
+    _, decisions = _resolve_decision_location(root)
+    if decisions is None or not decisions.is_dir():
         return
     seen: dict[str, str] = {}
     for path in sorted(decisions.glob("*.md")):
