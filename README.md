@@ -38,11 +38,13 @@ Which files a project needs follows from the questions it must answer, not from 
 list: an ADR is required only when a load-bearing decision exists, and `STATUS.md` only
 when the current state is not otherwise visible.
 
-The path convention is strict on purpose: a missing `docs/decisions/` is not satisfied by an
-existing `docs/adr/`. The validator names the near miss in its message, but the finding stays
+The path convention is strict on purpose: a missing `docs/PROJECT.md` is not satisfied by an
+existing `KONZEPT.md`. The validator names the near miss in its message, but the finding stays
 blocking — see [ADR-0008](docs/decisions/ADR-0008-strikte-pfade-mit-beinahe-treffern.md) for
-the reasoning. Two projects with a green validator have the same structure; that is the point
-of the tool.
+the reasoning. The one exception is the location of ADRs: a project that keeps them in
+`docs/adr/` or in a single decisions file states that path in its `Architecture Decisions` row
+([ADR-0012](docs/decisions/ADR-0012-entscheidungsort-ist-deklarierbar.md)) instead of
+restructuring.
 
 Everything is read-only: the validator never writes into a project it inspects.
 
@@ -156,7 +158,8 @@ notwendige Frage unbeantwortet bliebe (ADR-0011):
 | Was gilt gerade? | `STATUS.md` | wenn der Zustand nicht ohnehin sichtbar ist |
 
 Ob ADRs nötig sind, beantwortet das Projekt selbst — mit einer Zeile
-`Architecture Decisions | REQUIRED` oder `NOT REQUIRED` in `docs/ARCHITECTURE.md`.
+`Architecture Decisions | REQUIRED` oder `NOT REQUIRED` in `docs/ARCHITECTURE.md`. Liegen die
+ADRs woanders als in `docs/decisions/`, nennt dieselbe Zeile den Ort (ADR-0012).
 
 ## Wann Implementierung blockiert ist
 

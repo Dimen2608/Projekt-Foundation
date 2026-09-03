@@ -114,7 +114,7 @@ Aktuell keine offenen Entscheidungen mit Blocking-Charakter.
 | ID | Frage | Status |
 | --- | --- | --- |
 | OD-1 | Ob zusätzliche Review-Skills nötig sind | vertagt bis V1, entscheidet sich durch Anwendung |
-| OD-2 | Ob ein fremdes ADR-Verzeichnis bei `Architecture Decisions: REQUIRED` weiter blockieren soll | offen, entschieden bleibt vorerst A (siehe unten) |
+| OD-2 | Ob ein fremdes ADR-Verzeichnis bei `Architecture Decisions: REQUIRED` weiter blockieren soll | entschieden 2026-09-03: B, der Ort ist deklarierbar (ADR-0012) |
 
 **Zu OD-2.** Der Fremdtest am 2026-09-02 hat eine Schieflage gezeigt: Ein Projekt, das seine
 ADRs in `docs/adr/` hält, bekommt bei ehrlichem `REQUIRED` einen Blocker (`STRUCT-010`,
@@ -126,6 +126,8 @@ Warnung `ADR-010` nennt seit demselben Tag das gefundene Verzeichnis samt Anzahl
 ausdrücklich vor dem Blocker, den `REQUIRED` auslösen würde. Damit ist die Lage wenigstens
 sichtbar, statt eine Falle zu sein.
 
-Neu aufzumachen, wenn ein zweites Fremdprojekt zeigt, dass die Schieflage in der Praxis dazu
-führt, dass Projekte die Frage bewusst offenlassen. Dann wäre die Wahl zwischen einer
-Abschwächung von ADR-0008 und dem Zurücknehmen von ADR-0011 neu zu treffen.
+**Neu entschieden am 2026-09-03, nach dem dritten Fremdtest: B.** Atemluft.Cloud führt 45
+ADRs in einer Sammeldatei und kann nicht umbenennen; die Annahme hinter A hielt nicht. Der Ort
+darf jetzt in der Zeile `Architecture Decisions` stehen (ADR-0012). Die Strenge bleibt für die
+vier anderen Pflichtstellen, weil sie dort Fragen erzwingt — der Fremdtest hat gezeigt, dass
+genau `Out of Scope` und die Security-Tabelle dem Projekt fehlten.

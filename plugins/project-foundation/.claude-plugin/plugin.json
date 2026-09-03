@@ -1,7 +1,7 @@
 {
   "name": "project-foundation",
   "description": "Bereitet neue oder bestehende Projekte so vor, dass Menschen und AI-Agents ohne Raten daran arbeiten können: Projektdefinition, Architektur, ADRs, Dev-Setup, AI-Instruktionen, Teststrategie, Quality Gates und ein prüfbarer Foundation-Audit.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": {
     "name": "Dimen2608"
   },

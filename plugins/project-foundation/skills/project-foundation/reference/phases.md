@@ -87,7 +87,8 @@ Alternativen im ADR benennen** — ein ADR ohne verworfene Optionen erklärt nic
 
 Am Ende dieser Phase steht eine der beiden Aussagen in `docs/ARCHITECTURE.md`:
 
-- `Architecture Decisions | REQUIRED` — mit den ADRs, die es dann auch gibt.
+- `Architecture Decisions | REQUIRED` — mit den ADRs, die es dann auch gibt; liegen sie
+  nicht in `docs/decisions/`, nennt die dritte Spalte den Ort.
 - `Architecture Decisions | NOT REQUIRED` — mit der Begründung, warum keine Entscheidung
   dieses Projekts die Kriterien erfüllt.
 

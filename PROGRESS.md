@@ -5,6 +5,28 @@
 >
 > Neueste Einträge oben.
 
+## 2026-09-03 — OD-2 entschieden: der Entscheidungsort ist deklarierbar (0.3.0)
+
+**Anlass**
+
+Atemluft.Cloud führt 45 ADRs in einer Sammeldatei mit eigenem Indexwerkzeug. Bei ehrlichem
+`REQUIRED` hätte das Projekt umbauen, lügen oder ein Alibi-ADR ablegen müssen. ADR-0008 hatte als
+Preis „umbenennen" angenommen; das trifft hier nicht. Gleichzeitig hat der Test gezeigt, dass die
+Strenge bei `docs/PROJECT.md` und `docs/ARCHITECTURE.md` genau die Fragen erzwingt, die dem Projekt
+fehlten (`Out of Scope`, Security-Tabelle). Also nicht die Konvention aufgeben, sondern die eine
+Stelle öffnen, an der sie keine Frage beantwortet.
+
+**Entschieden (ADR-0012)**
+
+Die Zeile `Architecture Decisions | REQUIRED | <Ort>` darf den Ort nennen. Verzeichnis: geprüft
+wie `docs/decisions/`. Sammeldatei: nur Einträge gezählt, Format ausdrücklich nicht geprüft. Ort
+fehlt oder zeigt aus dem Projekt: `STRUCT-010`. Ohne Angabe bleibt alles wie bisher. Acht neue
+Tests in `tests/test_entscheidungsort.py`, keine neue Finding-ID. Version 0.3.0, weil sich das
+Verhalten des Validators ändert.
+
+**Wirkung auf Atemluft:** mit einer Zeile in einer künftigen `docs/ARCHITECTURE.md` ehrlich
+`REQUIRED` — und damit ein Blocker weniger, ohne eine Datei zu verschieben.
+
 ## 2026-09-03 — Dritter Fremdtest: Atemluft.Cloud, und drei Modelle auf Ebene 2
 
 **Anlass**

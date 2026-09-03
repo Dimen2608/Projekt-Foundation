@@ -23,7 +23,7 @@ Jeder Bereich ist bewertet mit `RELEVANT`, `NOT REQUIRED`, `FUTURE` oder `UNKNOW
 | Security | RELEVANT | Secret-Hygiene in fremden Projekten (`.env`), kein Secret Scanning — und der Validator schreibt dort nie. |
 | Configuration | RELEVANT | `.project-foundation.yml` im Zielprojekt. |
 | Secrets | NOT REQUIRED | Das Toolkit selbst braucht keine Secrets. |
-| Architecture Decisions | REQUIRED | Verteilung, Sprache, Manifest-Rolle und Report-Wortlaut sind tragende Entscheidungen — ADR-0001 bis ADR-0011. |
+| Architecture Decisions | REQUIRED | Verteilung, Sprache, Manifest-Rolle und Report-Wortlaut sind tragende Entscheidungen — ADR-0001 bis ADR-0012. |
 | Storage | NOT REQUIRED | Nur Dateisystem-Lesezugriffe im Zielprojekt. |
 | Background Jobs | NOT REQUIRED | Ein Lauf ist synchron und in Millisekunden fertig. |
 | Messaging / Events | NOT REQUIRED | Kein verteiltes System. |

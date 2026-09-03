@@ -79,3 +79,11 @@ ein Verzeichnisdump.
 - Die Kandidatenlisten sind Heuristik und werden nie vollständig sein. Sie dürfen wachsen,
   aber nur als Hinweisquelle — sobald ein Eintrag anfängt, eine Pflicht zu *erfüllen*, ist
   dieses ADR verletzt.
+
+## Nachtrag — 2026-09-03
+
+In einem Punkt ergänzt durch ADR-0012: Der Ort der Architekturentscheidungen darf in der
+Zeile `Architecture Decisions` genannt werden, weil ein Bestandsprojekt mit einer
+ADR-Sammeldatei nicht „umbenennen" kann — die Annahme oben, der Preis sei eine Umbenennung,
+hielt dem dritten Fremdtest nicht stand. Für `README.md`, `docs/PROJECT.md`,
+`docs/ARCHITECTURE.md` und das Manifest gilt dieses ADR unverändert.
