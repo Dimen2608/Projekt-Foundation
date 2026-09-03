@@ -709,19 +709,26 @@ def _check_secrets(root: Path, out: list[Finding]) -> None:
     Verletzung erfahrungsgemaess Secrets ins Repository traegt. Echtes Secret Scanning
     ist Aufgabe eines dafuer gebauten Werkzeugs (gitleaks, GitHub Secret Scanning).
     """
-    if (root / ".env").is_file():
+    gitignore = _read(root / ".gitignore")
+    env_ignoriert = re.search(r"^\.env\b", gitignore, re.MULTILINE) is not None
+    # Ein lokales .env, das .gitignore ausschliesst, ist der Normalfall jedes Checkouts und
+    # kein Befund. Ob die Datei trotzdem getrackt ist, weiss nur git; das prueft der
+    # Validator nicht. Er meldet die Kombination, die Secrets erfahrungsgemaess ins
+    # Repository traegt: Datei da und nicht ignoriert. (Fremdtest Atemluft.Cloud, 03.09.2026)
+    if (root / ".env").is_file() and not env_ignoriert:
         out.append(
             Finding(
                 finding_id="SEC-001",
                 severity=Severity.BLOCKING,
                 domain=Domain.SECURITY,
-                reason="Eine .env-Datei liegt im Projektverzeichnis.",
-                required_action=".env aus der Versionskontrolle nehmen und ignorieren.",
+                reason="Eine .env-Datei liegt im Projektverzeichnis und ist nicht ignoriert.",
+                required_action=(
+                    "'.env' in .gitignore aufnehmen und sicherstellen, dass sie nicht getrackt ist."
+                ),
                 location=".env",
             )
         )
-    gitignore = _read(root / ".gitignore")
-    if (root / ".env.example").is_file() and not re.search(r"^\.env\b", gitignore, re.MULTILINE):
+    if (root / ".env.example").is_file() and not env_ignoriert:
         out.append(
             Finding(
                 finding_id="SEC-002",
