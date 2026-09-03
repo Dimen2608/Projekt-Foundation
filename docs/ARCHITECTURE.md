@@ -20,7 +20,7 @@ Jeder Bereich ist bewertet mit `RELEVANT`, `NOT REQUIRED`, `FUTURE` oder `UNKNOW
 | APIs | NOT REQUIRED | Keine Netzwerk-API. Die öffentliche Schnittstelle ist das CLI. |
 | External Services | NOT REQUIRED | Keine externen Aufrufe zur Laufzeit. |
 | Deployment | RELEVANT | Verteilung als Claude-Code-Plugin, siehe ADR-0001. |
-| Security | RELEVANT | Der Validator prüft fremde Projekte auf Secret-Leaks. |
+| Security | RELEVANT | Secret-Hygiene in fremden Projekten (`.env`), kein Secret Scanning — und der Validator schreibt dort nie. |
 | Configuration | RELEVANT | `.project-foundation.yml` im Zielprojekt. |
 | Secrets | NOT REQUIRED | Das Toolkit selbst braucht keine Secrets. |
 | Architecture Decisions | REQUIRED | Verteilung, Sprache, Manifest-Rolle und Report-Wortlaut sind tragende Entscheidungen — ADR-0001 bis ADR-0011. |
@@ -82,15 +82,9 @@ Frage überhaupt beantwortet wurde. Deshalb endet er auf `FOUNDATION VALID`, nie
 `FOUNDATION READY` (ADR-0010), meldet Domänen ohne eigene Regel als `NOT CHECKED` und
 leitet den Domänenstatus ausschließlich aus eigenen Befunden ab.
 
-### Drei Ebenen
-
-| Ebene | Träger | Ergebnis |
-| --- | --- | --- |
-| 1 — Validierung | `src/foundation_validate/` | `FOUNDATION VALID` / `INVALID` |
-| 2 — Review | Skill, `reference/audit.md` | Domänenstatus, `FOUNDATION READY` / `NOT READY` |
-| 3 — Entscheidung | Mensch | kritische, schwer reversible Festlegungen |
-
-Ebene 1 ist Voraussetzung für Ebene 2, nie Ersatz. Der Code kennt Ebene 2 und 3 nicht.
+Der Validator ist Ebene 1 von dreien (Validierung → Review → Mensch); die Ebenen sind in
+`SKILL.md` definiert. Ebene 1 ist Voraussetzung für Ebene 2, nie Ersatz. Der Code kennt
+Ebene 2 und 3 nicht.
 
 ## Configuration
 

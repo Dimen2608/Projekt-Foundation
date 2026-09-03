@@ -17,7 +17,7 @@ class Severity(StrEnum):
 
 
 class Domain(StrEnum):
-    """Die acht Pflicht-Domaenen des Foundation-Audits."""
+    """Die acht Domaenen des Foundation-Audits (Ebene 2) - hier nur als Vokabular."""
 
     PROJECT_DEFINITION = "Project Definition"
     ARCHITECTURE = "Architecture"

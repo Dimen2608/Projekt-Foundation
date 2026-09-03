@@ -82,38 +82,11 @@ DISCOVER → ASSESS → ASK → DECIDE → GENERATE → VALIDATE → AUDIT → F
 | ASSESS | Jede Domäne als PASS / WARNING / BLOCKED / UNKNOWN |
 | ASK | Offene kritische Entscheidungen als konkrete Fragen an den Menschen |
 | DECIDE | Entscheidungen festhalten, tragende als ADR — oder begründet festhalten, dass es keine gibt |
-| GENERATE | Foundation-Dateien schreiben |
-| VALIDATE | Command-Chain tatsächlich ausführen |
+| GENERATE | Foundation-Dateien schreiben, aus `templates/` — ein Template mit Platzhaltern ist keine Foundation |
+| VALIDATE | Command-Chain tatsächlich ausführen — dokumentiert, aber kaputt ist `BLOCKED`, nicht `WARNING`; danach `foundation-validate`, falls verfügbar |
 | AUDIT | Konsistenzprüfung + Report |
 
 Details zu jeder Phase: `reference/phases.md`.
-
-### Kurzfassung der Phasen
-
-**DISCOVER** — Repository lesen, nichts ändern. Bestehendes Wissen zuerst verstehen, bevor
-etwas ersetzt wird. Danach den `FOUNDATION DISCOVERY REPORT` vorlegen.
-
-**ASSESS** — Acht Domänen bewerten: Project Definition, Architecture, Development Setup,
-AI Foundation, Documentation, Testing & Quality, CI/CD & Infrastructure, Security.
-
-**ASK** — Alles, was `UNKNOWN` ist und die Foundation blockiert, wird gefragt, nicht
-geraten. Fragen bündeln statt einzeln nachhaken. Bei Wahlmöglichkeiten: Optionen mit
-Trade-offs vorlegen, eine Empfehlung nennen, den Menschen entscheiden lassen.
-
-**DECIDE** — Für jede tragende Entscheidung ein ADR. Kein ADR für Triviales. Am Ende steht
-`Architecture Decisions: REQUIRED` oder `NOT REQUIRED` in `docs/ARCHITECTURE.md` — die Frage
-bleibt nicht offen.
-
-**GENERATE** — Vorlagen aus `templates/` als Ausgangspunkt, dann projektspezifisch füllen.
-Keine Vorlage unausgefüllt liegen lassen: ein Template mit Platzhaltern ist keine Foundation.
-
-**VALIDATE** — Die dokumentierten Commands ausführen. Eine dokumentierte, aber kaputte
-Command-Chain ist `BLOCKED`, nicht `WARNING`. Danach `foundation-validate`, falls verfügbar
-(Ebene 1).
-
-**AUDIT** — Das inhaltliche Review (Ebene 2): Scope, Architektur, Overengineering,
-Konsistenz, Teststrategie, Security-Konzept, AI-Readiness, offene kritische Entscheidungen.
-Prüfliste und Report-Format: `reference/audit.md`.
 
 ## Fragen, nicht Dateilisten
 
@@ -139,35 +112,9 @@ Alles darunter ist begründungspflichtig — **in beide Richtungen**. Ein weggel
 Artefakt braucht denselben Satz Begründung wie ein zusätzliches.
 
 **Jede Information hat genau eine Heimat.** Widersprüche zwischen diesen Dateien sind ein
-Foundation-Fehler, kein Schönheitsfehler.
-
-### Wann `STATUS.md` sich lohnt
-
-`STATUS.md` beantwortet: *Was ist gerade wahr?* — offene Blocker, Zustand der
-Command-Chain, bewusst hingenommene Warnungen. Es lohnt sich, sobald mehr als eine Person
-oder mehr als eine Session am Projekt arbeitet.
-
-Es lohnt sich **nicht** als zweite Architektur- oder Projektbeschreibung. Nichts gehört
-hinein, was:
-
-- ein Werkzeug ohnehin ermitteln kann (Testanzahl, Coverage, letzter Commit),
-- in `docs/PROJECT.md`, `docs/ARCHITECTURE.md` oder einem ADR steht,
-- Historie ist (das ist `PROGRESS.md`).
-
-Ein `STATUS.md`, das niemand pflegt, ist schlechter als keins — es lügt irgendwann.
-
-## Source of Truth
-
-```
-README        → Wie starte/benutze ich es?
-PROJECT.md    → Was bauen wir?
-ARCHITECTURE  → Wie ist es strukturiert?
-ADR           → Warum wurde eine wichtige Entscheidung so getroffen?
-STATUS.md     → Was ist gerade wahr?  (optional, siehe oben)
-PROGRESS.md   → Was ist passiert?  (nie Wahrheit über Architektur oder Zustand)
-```
-
-Das Manifest `.project-foundation.yml` ist ein **Index**, niemals Source of Truth.
+Foundation-Fehler, kein Schönheitsfehler. Das Manifest `.project-foundation.yml` ist ein
+**Index**, niemals Source of Truth. Was in `STATUS.md` gehört und was nicht, steht im Kopf
+von `templates/STATUS.md`.
 
 ## Wann ein ADR nötig ist
 
