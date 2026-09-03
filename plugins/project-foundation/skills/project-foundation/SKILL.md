@@ -196,23 +196,9 @@ Bewertung ist Ebene 2 — deine Aufgabe.
 
 ## Abschluss
 
-Am Ende immer den Audit-Report im festgelegten Format ausgeben — Wortlaut und Aufbau stehen
-in `reference/audit.md`. Es gibt keine Prozentzahl. Nur:
-
-```
-FOUNDATION READY
-```
-
-oder
-
-```
-FOUNDATION NOT READY
-```
-
-`FOUNDATION READY` nur, wenn **alle** Pflichtdomänen `PASS` sind, **null** Blocking Issues
-offen sind, die Command-Chain tatsächlich gelaufen ist und keine kritische Entscheidung
-offensteht. Warnings blockieren nicht.
-
+Am Ende immer den Audit-Report im festgelegten Format ausgeben — Wortlaut, Aufbau und die
+Bedingungen für `FOUNDATION READY` stehen in `reference/audit.md`, §4 und §5. Es gibt keine
+Prozentzahl, nur `FOUNDATION READY` oder `FOUNDATION NOT READY`. Warnings blockieren nicht.
 Ein `FOUNDATION VALID` des Validators ist eine Voraussetzung davon, nie ein Ersatz dafür.
 
 ## Vertiefung
