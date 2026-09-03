@@ -165,9 +165,16 @@ def test_teststrategie_ohne_command_blockiert(project: Path) -> None:
     assert "CONS-004" in _ids(project)
 
 
-def test_committete_env_datei_blockiert(project: Path) -> None:
+def test_nicht_ignorierte_env_datei_blockiert(project: Path) -> None:
     (project / ".env").write_text("TOKEN=geheim\n", encoding="utf-8")
     assert "SEC-001" in _ids(project)
+
+
+def test_ignorierte_env_datei_ist_kein_befund(project: Path) -> None:
+    """Ein lokales .env, das .gitignore ausschliesst, ist der Normalfall jedes Checkouts."""
+    (project / ".env").write_text("TOKEN=geheim\n", encoding="utf-8")
+    (project / ".gitignore").write_text(".env*\n!.env.example\n", encoding="utf-8")
+    assert "SEC-001" not in _ids(project)
 
 
 def test_env_example_ohne_gitignore_eintrag_blockiert(project: Path) -> None:
