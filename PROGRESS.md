@@ -5,6 +5,45 @@
 >
 > Neueste Einträge oben.
 
+## 2026-09-03 — Dritter Fremdtest: Atemluft.Cloud, und drei Modelle auf Ebene 2
+
+**Anlass**
+
+Erster Lauf des Werkzeugs gegen ein großes, produktives Projekt (Monorepo, 45 ADRs, 18 Workflows,
+eigene Doku-Struktur) — und zugleich die erste Ausführung von Ebene 2 durch Agenten. Frage
+dahinter: reicht ein günstigeres Modell für das Review? Nur gelesen, im Zielprojekt nichts geändert.
+
+**Ebene 1**
+
+Fünf Blocker, davon einer falsch: `SEC-001` meldete ein lokales `.env`, das `.gitignore` per
+`.env*` ausschließt — der Normalfall jedes Checkouts. Behoben (#12). Die vier übrigen sind
+Pfad-Blocker aus der eigenen Doku-Struktur des Projekts; alle drei Reviewer hielten die Fragen
+dahinter für beantwortet. Das ist OD-2 in Reinform, unverändert offen.
+
+**Ebene 2, Aufbau**
+
+Eine Discovery (Sonnet, 33 Dateien, ~296k Tokens), dann drei Reviews mit wortgleichem Auftrag auf
+demselben Report, Budget 15 Dateien. Jeder Blocker wurde vom PA an der Fundstelle nachgelesen.
+
+| | Sonnet | Opus | Fable |
+| --- | --- | --- | --- |
+| Blocker, belegt | 2 | 6 | 7 |
+| Falsche Befunde | 1 | 0 | 0 |
+| Tokens | ~171k | ~190k | ~180k |
+
+**Befund**
+
+- Opus und Fable liegen nah beieinander, Sonnet weit dahinter. Erst die Vereinigung von Opus und
+  Fable ergibt das vollständige Bild (10 belegte Blocker, bester Einzelner 7). Zwei verschiedene
+  Reviewer schlagen ein besseres Modell.
+- Sonnets Fehler: „Rollback fehlt" nach Durchsuchen von zwei Dateien; er stand in einer dritten.
+  Daraus eine Regel in `reference/audit.md`: *Nicht gefunden ist nicht fehlt.*
+- Alle drei haben die Warnungsregel („benennbarer Nutzen") angewendet und die vier Pfad-Blocker
+  bewusst nicht wiederholt. Die Ebene-2-Logik aus ADR-0011 trägt.
+- Das Werkzeug hat in Atemluft neun belegte Widersprüche gefunden, fast alle vom Typ „richtig
+  entschieden, am zweiten Fundort nicht nachgezogen". Der Auftrag dorthin folgt, sobald das
+  Toolkit sauber ist.
+
 ## 2026-09-03 — Kleiner und stiller
 
 **Anlass**
