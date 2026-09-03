@@ -113,3 +113,19 @@ Behoben wurde der falsche Text: `ADR-010` nennt jetzt das gefundene Verzeichnis 
 und warnt vor dem Blocker, den `REQUIRED` auslösen würde. Die Schieflage selbst bleibt
 bestehen und ist als `OD-2` in `docs/PROJECT.md` festgehalten — die Strenge aus ADR-0008
 wird nicht auf Verdacht aufgeweicht.
+
+## Nachtrag — 2026-09-03
+
+Drei Regeln widersprachen dieser Entscheidung noch und sind zurückgezogen. Die IDs werden
+nicht neu vergeben.
+
+- **`STAT-003`.** Ein `STATUS.md` ohne Domänenzeilen bekam acht Warnungen auf einmal — „Domäne
+  X fehlt", für jede. Wenn die Datei optional ist, kann ein Projekt sie auch in eigenem
+  Format führen; das ist kein Mangel. Der Validator prüft jetzt nur, was behauptet, in
+  seinem Format zu sein: Domänenzeilen, die da sind (`STAT-001`, `STAT-002`). Keine
+  Domänenzeile, keine Meldung.
+- **`DEF-050` (`Core Value`) und `DEF-051` (`Functional Requirements`).** Beide Abschnitte
+  wiederholen, was `Purpose` und `Scope` schon beantworten. Eine Warnung, die zu einer
+  Überschrift ohne eigene Frage drängt, ist genau die Dateilisten-Logik, die diese
+  Entscheidung ablöst. `Constraints` (`DEF-052`) und `Open Decisions` (`DEF-053`) bleiben
+  Warnung: ohne sie weiß ein Agent nicht, was er nicht darf und was noch offen ist.

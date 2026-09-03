@@ -40,7 +40,7 @@ Keine.
 | format (`ruff format --check .`) | ok | 2026-09-02 |
 | lint (`ruff check .`) | ok | 2026-09-02 |
 | typecheck (`mypy`) | ok | 2026-09-02 |
-| test (`pytest`) | ok — 44 Tests | 2026-09-02 |
+| test (`pytest`) | ok — 45 Tests | 2026-09-03 |
 | build | n/a — kein Artefakt (ADR-0006) | — |
 
 ## Foundation-Validierung
@@ -54,7 +54,7 @@ Blocker durch. Das Toolkit prüft sich selbst.
 | --- | --- |
 | Skill `project-foundation` | vollständig |
 | Vorlagen (13 Stück) | vollständig |
-| Validator (`foundation_validate`) | vollständig, 48 mögliche Finding-IDs, Abdeckung erzwungen |
+| Validator (`foundation_validate`) | vollständig, 45 mögliche Finding-IDs, Abdeckung erzwungen |
 | Plugin- und Marketplace-Manifest | vollständig |
 | Beispielprojekt `examples/taskflow` | vollständig |
 | Foundation dieses Repos | vollständig |

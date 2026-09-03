@@ -126,14 +126,11 @@ FOUNDATION VALID
 
 ## Drei Ebenen
 
-| Ebene | Wer | Prüft | Ergebnis |
-| --- | --- | --- | --- |
-| 1 | `foundation-validate` | Existenz, Struktur, erlaubte Statuswerte, Widersprüche | `FOUNDATION VALID` / `INVALID` |
-| 2 | Skill (Agent) | Scope, Architektur, Overengineering, Konsistenz, Teststrategie, Security-Konzept, AI-Readiness | Domänenstatus, Blocker |
-| 3 | Mensch | kritische, schwer reversible, rechtliche Entscheidungen | Entscheidung |
-
-`FOUNDATION READY` ist das Ergebnis aller drei Ebenen — **nie die Ausgabe eines
-Programms** (ADR-0010). Ebene 1 ist Voraussetzung dafür, nicht Ersatz.
+Der Validator ist Ebene 1: Existenz, Struktur, erlaubte Statuswerte, Widersprüche. Ebene 2
+ist das inhaltliche Review durch den Skill, Ebene 3 der Mensch mit den Entscheidungen, die
+keine Maschine treffen darf. `FOUNDATION READY` ist das Ergebnis aller drei — **nie die
+Ausgabe eines Programms** (ADR-0010). Die Ebenen im Einzelnen definiert der Skill
+(`plugins/project-foundation/skills/project-foundation/SKILL.md`).
 
 Was der Validator ausdrücklich **nicht** kann:
 

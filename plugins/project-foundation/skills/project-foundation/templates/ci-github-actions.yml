@@ -13,6 +13,12 @@ on:
     branches: ["**"]
   pull_request:
 
+# Der Workflow liest nur. Ohne diesen Block bekäme GITHUB_TOKEN die Repo-Default-Rechte,
+# die Schreibzugriff einschließen können — in einem öffentlichen Repo mit Fork-PRs die
+# falsche Voreinstellung. Erst erweitern, wenn ein Schritt tatsächlich schreiben muss.
+permissions:
+  contents: read
+
 jobs:
   quality:
     runs-on: ubuntu-latest

@@ -5,6 +5,30 @@
 >
 > Neueste Einträge oben.
 
+## 2026-09-03 — Kleiner und stiller
+
+**Anlass**
+
+Nach dem Refinement war das Toolkit an drei Stellen weiter gewachsen als sein Zweck: `SKILL.md`
+um gut die Hälfte, die Drei-Ebenen-Tabelle stand dreimal (SKILL, README, ARCHITECTURE), und der
+Validator warnte bei einem optionalen `STATUS.md` in fremdem Format achtfach — im Fremdtest die
+einzige Warnung, die übrig blieb.
+
+**Geändert**
+
+- `STAT-003`, `DEF-050`, `DEF-051` zurückgezogen (Nachtrag in ADR-0011). Der Validator kennt
+  jetzt 45 Finding-IDs.
+- `SKILL.md` ohne die Kurzfassung der Phasen, den Source-of-Truth-Block und den
+  `STATUS.md`-Abschnitt — alles stand bereits in Phasentabelle, Fragentabelle bzw.
+  `templates/STATUS.md`. Drei Ebenen nur noch dort definiert; README und ARCHITECTURE verweisen.
+- Veraltete Behauptungen korrigiert: ARCHITECTURE nannte noch „Secret-Leaks", `CONS-004`
+  sprach von `quality_gates`, das `Domain`-Docstring von `STATUS.md` als Pflicht.
+- CI-Vorlage mit `permissions: contents: read`; Vorlagen `CLAUDE.md`/`README.md` markieren
+  `STATUS.md` als optional.
+
+**Nicht geändert:** die ADR-0008-Strenge (OD-2 bleibt offen), das Manifest-Schema, der
+Report-Wortlaut.
+
 ## 2026-09-02 — Zweiter Fremdtest: das Werkzeug gegen sich selbst
 
 **Anlass**

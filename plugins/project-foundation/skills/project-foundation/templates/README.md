@@ -42,4 +42,4 @@
 | Was bauen wir? | `docs/PROJECT.md` |
 | Wie ist es strukturiert? | `docs/ARCHITECTURE.md` |
 | Warum wurde so entschieden? | `docs/decisions/` |
-| Was gilt gerade? | `STATUS.md` |
+| Was gilt gerade? | `STATUS.md` (falls vorhanden, sonst Zeile streichen) |

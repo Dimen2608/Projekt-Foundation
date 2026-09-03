@@ -213,13 +213,11 @@ def test_beinahe_treffer_erfuellt_die_pflicht_nicht(project: Path) -> None:
     assert "STRUCT-005" in _ids(project)
 
 
-def test_status_ohne_erkennbares_format_gibt_eine_warnung(project: Path) -> None:
-    """Eine Ursache, eine Warnung - nicht acht gleichlautende Zeilen."""
+def test_status_in_eigenem_format_bleibt_still(project: Path) -> None:
+    """STATUS.md ist optional; ein fremdes Format ist kein Mangel und keine acht Warnungen."""
     (project / "STATUS.md").write_text("# Status\n\nAlles bestens.\n", encoding="utf-8")
     result = validate(project)
-    stat = [f for f in result.warnings if f.finding_id.startswith("STAT-")]
-    assert len(stat) == 1
-    assert stat[0].finding_id == "STAT-003"
+    assert not [f for f in result.findings if f.finding_id.startswith("STAT-")]
 
 
 def test_einzelne_fehlende_domaene_bleibt_eine_einzelmeldung(project: Path) -> None:

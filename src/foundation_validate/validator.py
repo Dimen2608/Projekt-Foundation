@@ -112,12 +112,16 @@ PROJECT_SECTIONS_REQUIRED = (
     "MVP",
     "Out of Scope",
 )
-#: Abschnitte, deren Fehlen nur eine Warnung ist.
-PROJECT_SECTIONS_OPTIONAL = (
-    "Core Value",
-    "Functional Requirements",
-    "Constraints",
-    "Open Decisions",
+#: Abschnitte, deren Fehlen nur eine Warnung ist - weil ihr Fehlen eine Risikofrage
+#: offenlaesst (gibt es Vorgaben von aussen? steht eine Entscheidung aus?).
+#:
+#: Die ID steht im Tupel, damit sie stabil bleibt. DEF-050 (Core Value) und DEF-051
+#: (Functional Requirements) sind entfallen: Ein Miniprojekt ohne diese Abschnitte ist
+#: korrekt, und vier Warnungen auf einem korrekten Projekt trainieren nur, Warnungen zu
+#: ueberlesen. Die IDs werden nicht neu vergeben.
+PROJECT_SECTIONS_OPTIONAL: tuple[tuple[str, str], ...] = (
+    ("DEF-052", "Constraints"),
+    ("DEF-053", "Open Decisions"),
 )
 
 #: Zeile in ARCHITECTURE.md, die erklaert, ob dieses Projekt ADRs braucht.
@@ -183,12 +187,12 @@ def _finding_id_register() -> tuple[str, ...]:
     ids: list[str] = [finding_id for finding_id, _, _, _ in REQUIRED_FILES]
     ids += ["STRUCT-010", "STRUCT-011"]
     ids += [f"DEF-{i:03d}" for i in range(1, len(PROJECT_SECTIONS_REQUIRED) + 1)]
-    ids += [f"DEF-{i:03d}" for i in range(50, 50 + len(PROJECT_SECTIONS_OPTIONAL))]
+    ids += [finding_id for finding_id, _ in PROJECT_SECTIONS_OPTIONAL]
     ids += [f"ARCH-{i:03d}" for i in range(1, len(CORE_AREAS) + 1)]
     ids += [f"MAN-{i:03d}" for i in range(1, 5)]
     ids += [f"ADR-{i:03d}" for i in range(1, 5)]
     ids += ["ADR-010"]
-    ids += [f"STAT-{i:03d}" for i in range(1, 4)]
+    ids += ["STAT-001", "STAT-002"]  # STAT-003 zurueckgezogen, siehe _check_status
     ids += [f"SEC-{i:03d}" for i in range(1, 3)]
     ids += [f"CONS-{i:03d}" for i in range(1, 5)]
     return tuple(ids)
@@ -535,11 +539,11 @@ def _check_project(root: Path, out: list[Finding]) -> None:
                     location="docs/PROJECT.md",
                 )
             )
-    for index, section in enumerate(PROJECT_SECTIONS_OPTIONAL, start=50):
+    for finding_id, section in PROJECT_SECTIONS_OPTIONAL:
         if not re.search(rf"^#{{1,6}}\s.*{re.escape(section)}", text, re.MULTILINE | re.IGNORECASE):
             out.append(
                 Finding(
-                    finding_id=f"DEF-{index:03d}",
+                    finding_id=finding_id,
                     severity=Severity.WARNING,
                     domain=Domain.PROJECT_DEFINITION,
                     reason=f"Abschnitt '{section}' fehlt in docs/PROJECT.md.",
@@ -677,36 +681,23 @@ def _check_status(root: Path, out: list[Finding]) -> dict[Domain, str]:
             )
 
     if len(fehlend) == len(Domain):
-        # Eine Ursache, eine Warnung: die Datei folgt dem Format gar nicht. Acht
-        # gleichlautende Zeilen wuerden nur den Report fluten.
+        # Keine einzige Domaenenzeile: Die Datei folgt nicht dieser Konvention, und sie
+        # muss es auch nicht - STATUS.md ist optional (ADR-0011). Der Validator prueft
+        # nur, was behauptet, in seinem Format zu sein. Frueher stand hier STAT-003; die
+        # Warnung hatte fuer ein Projekt mit eigenem Statusformat keinen benennbaren
+        # Nutzen und ist zurueckgezogen. Die ID wird nicht neu vergeben.
+        return declared
+    for domain in fehlend:
         out.append(
             Finding(
-                finding_id="STAT-003",
+                finding_id="STAT-001",
                 severity=Severity.WARNING,
                 domain=Domain.DOCUMENTATION,
-                reason=(
-                    "STATUS.md nennt fuer keine einzige Domaene einen Status - die Datei "
-                    "folgt dem erwarteten Format nicht."
-                ),
-                required_action=(
-                    "STATUS.md nach der Vorlage aufbauen: je Domaene eine Zeile mit "
-                    f"{'/'.join(DOMAIN_STATES)}."
-                ),
+                reason=f"STATUS.md nennt keinen Status fuer '{domain.value}'.",
+                required_action=f"'{domain.value}' mit {'/'.join(DOMAIN_STATES)} bewerten.",
                 location="STATUS.md",
             )
         )
-    else:
-        for domain in fehlend:
-            out.append(
-                Finding(
-                    finding_id="STAT-001",
-                    severity=Severity.WARNING,
-                    domain=Domain.DOCUMENTATION,
-                    reason=f"STATUS.md nennt keinen Status fuer '{domain.value}'.",
-                    required_action=f"'{domain.value}' mit {'/'.join(DOMAIN_STATES)} bewerten.",
-                    location="STATUS.md",
-                )
-            )
     return declared
 
 
@@ -810,7 +801,7 @@ def _check_consistency(
                 finding_id="CONS-004",
                 severity=Severity.BLOCKING,
                 domain=Domain.TESTING_QUALITY,
-                reason="Es sind Test-Level definiert, aber kein ausfuehrbares testing.command.",
+                reason="Es sind Test-Level definiert, aber kein testing.command.",
                 required_action=(
                     "Test-Command eintragen - eine nicht ausfuehrbare Teststrategie ist wertlos."
                 ),
