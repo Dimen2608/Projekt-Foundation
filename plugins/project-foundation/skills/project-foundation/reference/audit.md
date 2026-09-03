@@ -106,6 +106,10 @@ Eine Warnung braucht einen benennbaren Nutzen ihrer Auflösung. „Werkzeug X is
 konfiguriert" ist keine Warnung, solange niemand sagen kann, wovor X hier schützen würde
 — sonst erzeugt der Audit Aufgaben, deren einziger Zweck es ist, den Audit zu beruhigen.
 
+Nicht gefunden ist nicht fehlt. Eine Warnung „X fehlt" nennt, wo gesucht wurde; wer zwei
+Dateien durchsucht hat, darf nur über zwei Dateien sprechen. Im Zweifel ist es eine Frage an
+den Menschen, keine Warnung.
+
 ## 4 — Report-Format
 
 Am Ende **immer exakt** dieses Format ausgeben.
