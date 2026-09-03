@@ -53,7 +53,8 @@ Gesucht wird nach:
 | Manifest-Konflikt | Manifest meldet `READY`, `STATUS.md` meldet `BLOCKED` |
 
 Jeder gefundene Widerspruch ist ein Blocker, bis er aufgelöst ist. Bei Konflikten gewinnt
-die Source of Truth aus `SKILL.md`; das Manifest verliert immer.
+das Dokument, das die Frage beantwortet (Fragentabelle in `SKILL.md`); das Manifest
+verliert immer.
 
 ## 2 — AI Readiness Test
 
