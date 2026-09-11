@@ -44,6 +44,10 @@ belegen kann: **FOUNDATION VALID** (maschinell, durch das CLI) und **FOUNDATION 
 
 - Skill `project-foundation`, der den vollständigen Prozess
   DISCOVER → ASSESS → ASK → DECIDE → GENERATE → VALIDATE → AUDIT führt.
+- Skill `project-rethink` (seit 0.4.0, ADR-0013), der ein Projekt, dessen Dokumente und Code
+  auseinandergelaufen sind, durch MEASURE → MAP → GAPS → DECIDE → GUARD → HANDOFF in den
+  Zustand bringt, ab dem `project-foundation` ohne Raten übernehmen kann — mit eigenen
+  Vorlagen und drei Agents (Umsetzer, Gutachter als Tor, Zahlenprüfer).
 - Vorlagen für alle Foundation-Dateien (`PROJECT.md`, `ARCHITECTURE.md`, ADR, `STATUS.md`,
   `CLAUDE.md`, `AGENTS.md`, Cursor-Rule, `.env.example`, CI-Workflow, Manifest).
 - CLI `foundation-validate`, das die maschinell prüfbaren Regeln durchsetzt und den
@@ -54,7 +58,9 @@ belegen kann: **FOUNDATION VALID** (maschinell, durch das CLI) und **FOUNDATION 
 ### V1
 
 - Weitere Review-Skills (`architecture-review`, `security-review`), sobald sie sich in
-  der Anwendung als wiederkehrend erweisen — nicht vorab.
+  der Anwendung als wiederkehrend erweisen — nicht vorab. Der erste Zuwachs war kein
+  Review-Skill, sondern `project-rethink`: der Prozess **vor** DISCOVER, in einem
+  Fremdprojekt entstanden und dort bewährt, bevor er hier aufgenommen wurde (ADR-0013).
 - Manifest-Schemaversionierung mit Migrationspfad, sobald `schema_version` 2 nötig wird.
 
 **FUTURE IDEA** (nicht umgesetzt, nicht eingeplant): den Pflichtumfang aus `project.type`
@@ -90,6 +96,7 @@ Erfahrungswerte aus mehreren Fremdprojekten — vorher wäre die Zuordnung erfun
 | FR-11 | Pflicht ist ein Artefakt nur, wenn ohne es eine notwendige Frage unbeantwortet bliebe. ADRs und `STATUS.md` sind bedingt, nicht pauschal. |
 | FR-8 | Jeder Blocker nennt ID, Reason, Required Action und Affected Area. |
 | FR-9 | Das Toolkit ist per `/plugin marketplace add` in fremden Projekten installierbar. |
+| FR-12 | `project-rethink` endet, wo `project-foundation` beginnt: Sein Ausgang ist der Eingang von DISCOVER. Seine Artefakte sind keine Pflichtstellen des Validators. |
 
 ## Non-Functional Requirements
 

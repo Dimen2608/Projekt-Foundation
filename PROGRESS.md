@@ -5,6 +5,61 @@
 >
 > Neueste Einträge oben.
 
+## 2026-09-11 — Zweiter Skill `project-rethink`, das Plugin liefert Agents aus (0.4.0)
+
+**Anlass**
+
+Ein Prozess, der in einem Fremdprojekt entstanden ist und sich dort bewährt hat, lag
+entprojektiert als Entwurf vor: `MEASURE → MAP → GAPS → DECIDE → GUARD → HANDOFF` für Projekte,
+deren Dokumente und Code auseinandergelaufen sind. `project-foundation` setzt voraus, dass jemand
+sagen kann, was das System heute tut — Rethink ist der Weg davor und endet in `DISCOVER`. Der
+Einbau lief nach dem eigenen Prozess, nicht durch Kopieren.
+
+**Entschieden (ADR-0013)**
+
+Zweiter Skill im selben Plugin; Abgrenzung in beiden `description`-Feldern; keine
+Validator-Änderung, keine Finding-ID, `schema_version` bleibt 1; die drei Rollen (Umsetzer,
+Gutachter als Tor, Zahlenprüfer) als Agent-Definitionen unter `plugins/project-foundation/agents/`,
+weil nur Agents Isolation und eine erzwungene Werkzeugliste bekommen. Gegen die Stop Condition zu
+ADR-0001 geprüft: `agents/` ist Teil der vorgegebenen Plugin-Konvention, keine Änderung daran.
+
+**Geändert**
+
+- Neu: `skills/project-rethink/` mit `SKILL.md`, `reference/grundsaetze.md` (36 Grundsätze) und
+  sieben Vorlagen. Aus dem Entwurf nicht übernommen: `BOARD.md` (keine eigene Frage,
+  Projektmanagement ist `Out of Scope`) und `reference/herkunft.md` (nur für den Auftraggeber).
+  `TOR-PROMPT.md` um das gekürzt, was die Agent-Definition ohnehin trägt; Maintainer-Notizen zu
+  Modell und Effort aus den Agent-Prompts ins ADR verschoben.
+- Foundation-`description` um den Satz ergänzt, der Rethink-Fälle abgibt.
+- `plugin.json`, `marketplace.json`, `pyproject.toml`, `__init__.py`: 0.4.0. README, PROJECT
+  (Scope, V1, FR-12), ARCHITECTURE (Plugin-Schnitt, Agents, Prüfung von Prompt-Material),
+  STATUS, AGENTS, CLAUDE (Faktenstand, eine verschärfende Stop Condition) nachgezogen.
+
+**Geprüft**
+
+`claude plugin validate --strict` grün für Plugin und Marketplace; Format, Lint, Typecheck und
+54 Tests grün; `foundation-validate .` weiterhin `FOUNDATION VALID`. Plugin lokal aus dem
+eigenen Marketplace installiert (ADR-0002); `claude plugin details` zeigt zwei Skills und drei
+Agents. Gegenlesung durch einen Opus-Gutachter: drei blockierende Funde (zwei divergente
+Phasentore in `ABLAUF.md`, ein toter Verweis „Maskenverzeichnis" im Zahlenprüfer, `STATUS.md`
+ohne den offenen Auslöse-Test), alle behoben; dazu der Foundation-Abgrenzungssatz auf Rethinks
+Kriterium „Ist-Zustand nicht mehr beschreibbar" verschärft, damit er bei gewöhnlicher Drift nicht
+zu viel abgibt.
+
+**Auslöse-Test**, je ein Satz, der nicht wörtlich in den Beschreibungen steht, ausgeführt als
+Subagenten in einer Session mit geladenem Plugin (`claude -p` war an einer abgelaufenen
+CLI-Anmeldung gescheitert):
+
+- „Ich will hier mit der Implementierung anfangen. Ist das Repo dafür vorbereitet, und was fehlt
+  noch an Grundlagen?" → `project-foundation`. Befund: `FOUNDATION READY`, nichts nachzuziehen.
+- „Bei uns beschreiben die Dokumente ein System, das der Code längst nicht mehr ist, und jede
+  Prüfrunde macht aus denselben Themen neue Tickets. Niemand kann sagen, was das System heute
+  wirklich tut. …" → `project-rethink`. Befund auf diesem gesunden Repo: Drift nicht messbar,
+  Finding-ID-Zahl in `STATUS.md` gegen `FINDING_IDS` nachgezählt und stimmig; der Skill hat sich
+  mit seinem eigenen Abgrenzungssatz für unzuständig erklärt und **keine Arbeit erzeugt** — die
+  Probe aus dem Einbau-Auftrag („wenn er auf einem gesunden Projekt Arbeit erzeugt, ist er zu
+  groß") ist damit bestanden.
+
 ## 2026-09-03 — OD-2 entschieden: der Entscheidungsort ist deklarierbar (0.3.0)
 
 **Anlass**

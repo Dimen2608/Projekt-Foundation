@@ -37,8 +37,8 @@ grün sein.
 - **Das Toolkit gilt für sich selbst.** Änderungen an diesem Repo folgen demselben
   Prozess, den der Skill vorschreibt.
 - Genau eine Laufzeit-Abhängigkeit (`PyYAML`). Jede weitere braucht ein ADR (ADR-0003).
-- Der Skill existiert nur unter `plugins/project-foundation/` — keine zweite Kopie
-  unter `.claude/skills/` (ADR-0002).
+- Die Skills und Agents existieren nur unter `plugins/project-foundation/` — keine zweite
+  Kopie unter `.claude/skills/` oder `.claude/agents/` (ADR-0002, ADR-0013).
 - Der Validator **schreibt nie** in ein geprüftes Projekt. Reine Lesezugriffe.
 - Der Validator behauptet nur, was er geprüft hat: `FOUNDATION VALID`, nie
   `FOUNDATION READY`; `NOT CHECKED` statt `OK` für Domänen ohne Regel; Secret-*Hygiene*
@@ -70,3 +70,6 @@ Anhalten und fragen, wenn:
 - Eine weitere Laufzeit-Abhängigkeit nötig erscheint.
 - Die Plugin-Verzeichnisstruktur geändert werden müsste (ADR-0001).
 - Eine Änderung dazu führen würde, dass der Validator schreibt statt nur liest.
+- Eine Agent-Definition ein Frontmatter-Feld jenseits von `name`, `description`, `tools`,
+  `model`, `effort`, `isolation` bräuchte, oder eine Rethink-Vorlage zur Pflichtstelle des
+  Validators würde (ADR-0013).
