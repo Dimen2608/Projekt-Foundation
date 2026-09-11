@@ -3,7 +3,7 @@
 > Source of Truth für **den aktuellen Zustand**. Keine Historie (`PROGRESS.md`),
 > keine Pläne (`docs/PROJECT.md`), keine Architektur (`docs/ARCHITECTURE.md`).
 >
-> Stand: 2026-09-02
+> Stand: 2026-09-11
 
 ## Foundation
 
@@ -37,10 +37,10 @@ Keine.
 | Command | Zustand | Zuletzt geprüft |
 | --- | --- | --- |
 | install (`pip install -e ".[dev]"`) | ok | 2026-09-01 |
-| format (`ruff format --check .`) | ok | 2026-09-02 |
-| lint (`ruff check .`) | ok | 2026-09-02 |
-| typecheck (`mypy`) | ok | 2026-09-02 |
-| test (`pytest`) | ok — 54 Tests | 2026-09-03 |
+| format (`ruff format --check .`) | ok | 2026-09-11 |
+| lint (`ruff check .`) | ok | 2026-09-11 |
+| typecheck (`mypy`) | ok | 2026-09-11 |
+| test (`pytest`) | ok — 54 Tests | 2026-09-11 |
 | build | n/a — kein Artefakt (ADR-0006) | — |
 
 ## Foundation-Validierung
@@ -53,7 +53,9 @@ Blocker durch. Das Toolkit prüft sich selbst.
 | Bestandteil | Zustand |
 | --- | --- |
 | Skill `project-foundation` | vollständig |
-| Vorlagen (13 Stück) | vollständig |
+| Skill `project-rethink` | vollständig (0.4.0, ADR-0013); `claude plugin validate --strict` grün, Auslöse-Test beider Skills bestanden am 2026-09-11 |
+| Vorlagen (13 für Foundation, 7 für Rethink) | vollständig |
+| Agents (`rethink-umsetzer`, `rethink-gutachter`, `rethink-zahlenpruefer`) | vollständig; wirken nach `/reload-plugins` |
 | Validator (`foundation_validate`) | vollständig, 45 mögliche Finding-IDs, Abdeckung erzwungen |
 | Plugin- und Marketplace-Manifest | vollständig |
 | Beispielprojekt `examples/taskflow` | vollständig |

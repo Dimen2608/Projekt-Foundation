@@ -21,9 +21,15 @@ AI agents — using the smallest set of documents that makes guessing unnecessar
 AI-assisted development foundation, currently optimized for **Claude Code** and **Cursor**;
 `AGENTS.md` covers other tools as a shared context file. It ships as:
 
-- a **Claude Code skill** that walks an agent through
+- a **Claude Code skill** `project-foundation` that walks an agent through
   `DISCOVER → ASSESS → ASK → DECIDE → GENERATE → VALIDATE → AUDIT`, with templates for every
   foundation file;
+- a second skill **`project-rethink`** for projects whose documents and code have drifted
+  apart — nobody can say what the system does today. It measures the codebase, writes down its
+  current behaviour as a specification, registers every gap, turns recurring questions into
+  decisions with a filter sentence, and pins the behaviour with characterization tests
+  (`MEASURE → MAP → GAPS → DECIDE → GUARD → HANDOFF`). It ends where `project-foundation`
+  begins. Three agents (implementer, reviewer as gate, number checker) carry the role split;
 - a **CLI** (`foundation-validate <path>`) that checks a project for structure, missing
   answers and contradictions. Exit code `0` means `FOUNDATION VALID`, `1` means at least
   one structural blocker.
@@ -50,11 +56,17 @@ Everything is read-only: the validator never writes into a project it inspects.
 
 </details>
 
-Es besteht aus zwei Teilen:
+Es besteht aus drei Teilen:
 
 - **Skill `project-foundation`** — führt einen Agenten durch
   `DISCOVER → ASSESS → ASK → DECIDE → GENERATE → VALIDATE → AUDIT`, inklusive Vorlagen
   für alle Foundation-Dateien.
+- **Skill `project-rethink`** — der Weg davor, für ein Projekt, dessen Dokumente und Code
+  auseinandergelaufen sind: `MEASURE → MAP → GAPS → DECIDE → GUARD → HANDOFF`. Misst den
+  Bestand, schreibt fest, was das System heute tut, registriert Lücken, entscheidet
+  Grundsatzfragen als Filter und nagelt das Verhalten mit absichernden Tests fest. Endet dort,
+  wo `project-foundation` anfängt. Drei Agents (Umsetzer, Gutachter als Tor, Zahlenprüfer)
+  tragen die Rollentrennung.
 - **CLI `foundation-validate`** — prüft ein Projekt maschinell auf Struktur, fehlende
   Entscheidungen und Widersprüche und erzeugt den Audit-Report.
 
@@ -72,8 +84,10 @@ Es besteht aus zwei Teilen:
 /plugin install project-foundation@projekt-foundation
 ```
 
-Danach greift der Skill automatisch bei Anfragen wie „setz das Projekt auf",
-„bau die Foundation" oder „ist das Repo bereit für Implementierung".
+Danach greift `project-foundation` automatisch bei Anfragen wie „setz das Projekt auf",
+„bau die Foundation" oder „ist das Repo bereit für Implementierung" — und `project-rethink`
+bei „die Doku stimmt nicht mehr mit dem Code überein", „wo stehen wir wirklich" oder „Neubau
+oder Umbau". Die drei Rethink-Agents sind nach `/reload-plugins` oder einem Neustart verfügbar.
 
 ### CLI
 
@@ -168,6 +182,15 @@ Nicht pauschal. **Foundation Work** (Dokumente, ADRs, Aufräumen) ist immer erla
 wartet auf `FOUNDATION READY`. Die Regel richtet sich gegen Architekturentscheidungen,
 die stillschweigend durch Code getroffen werden, nicht gegen einen Einzeiler-Fix.
 
+## Wenn niemand mehr sagen kann, was das System tut
+
+`project-foundation` setzt voraus, dass sich der Ist-Zustand beschreiben lässt. Ist das nicht
+mehr der Fall — die Dokumente beschreiben ein System, das der Code nicht mehr ist; jede
+Prüfrunde findet dieselben Themen und macht daraus neue Aufgaben —, dann zuerst
+`project-rethink`. Er erzeugt genau das Wissen, das die Discovery sonst raten müsste, und
+übergibt an `DISCOVER`. Ein Projekt, das beschreiben kann, was es tut, braucht ihn nicht
+(ADR-0013).
+
 ## AI-Unterstützung
 
 Ausgelegt auf **Claude Code** (Skill, `CLAUDE.md`) und **Cursor** (`.cursor/rules/`),
@@ -189,7 +212,7 @@ Es gibt keinen Build-Schritt — das Projekt erzeugt kein Artefakt (siehe ADR-00
 ## Aufbau
 
 ```
-plugins/project-foundation/   Das Plugin: Skill, Reference, Vorlagen
+plugins/project-foundation/   Das Plugin: zwei Skills (Reference, Vorlagen), drei Agents
 src/foundation_validate/      Der Validator
 examples/taskflow/            Ein vollständig ausgefülltes Beispielprojekt
 docs/                         Foundation dieses Repos (Dogfooding)

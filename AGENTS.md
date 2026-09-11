@@ -5,14 +5,15 @@
 
 ## Projekt
 
-Ein Toolkit, das andere Projekte auf Implementierung vorbereitet — bestehend aus einem
-Claude-Code-Skill mit Vorlagen und einem Python-CLI, das die Foundation maschinell prüft.
+Ein Toolkit, das andere Projekte auf Implementierung vorbereitet — bestehend aus zwei
+Claude-Code-Skills mit Vorlagen (`project-foundation`, davor bei Bedarf `project-rethink`),
+drei Agents für die Rethink-Rollen und einem Python-CLI, das die Foundation maschinell prüft.
 Details: `docs/PROJECT.md`.
 
 ## Aufbau
 
 ```
-plugins/project-foundation/   Plugin: Skill (Prozesswissen), reference/, templates/
+plugins/project-foundation/   Plugin: skills/{project-foundation,project-rethink}, agents/
 src/foundation_validate/      CLI-Validator (cli, report, validator, model)
 tests/                        Ein Test je Blocking-Regel + CLI-Schnittstelle
 docs/                         Foundation dieses Repos

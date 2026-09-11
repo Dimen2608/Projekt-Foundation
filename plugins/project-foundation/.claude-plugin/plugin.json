@@ -1,9 +1,9 @@
 {
   "name": "project-foundation",
-  "description": "Bereitet neue oder bestehende Projekte so vor, dass Menschen und AI-Agents ohne Raten daran arbeiten können: Projektdefinition, Architektur, ADRs, Dev-Setup, AI-Instruktionen, Teststrategie, Quality Gates und ein prüfbarer Foundation-Audit.",
-  "version": "0.3.0",
+  "description": "Zwei Prozesse, ein Zweck: ein Projekt arbeitsfähig machen. project-foundation bereitet neue oder bestehende Projekte so vor, dass Menschen und AI-Agents ohne Raten daran arbeiten können — Projektdefinition, Architektur, ADRs, Dev-Setup, AI-Instruktionen, Teststrategie, Quality Gates und ein prüfbarer Foundation-Audit. project-rethink ist der Weg davor, für Projekte, deren Dokumente und Code auseinandergelaufen sind: Bestand messen, Ist-Verhalten als Spezifikation festschreiben, Lücken registrieren, Grundsatzfragen als Filter entscheiden und mit absichernden Tests festnageln — bis project-foundation ohne Raten übernehmen kann. Dazu drei Agents: Umsetzer, Gutachter (Tor), Zahlenprüfer.",
+  "version": "0.4.0",
   "author": {
     "name": "Dimen2608"
   },
-  "keywords": ["foundation", "architecture", "adr", "documentation", "audit", "quality-gates"]
+  "keywords": ["foundation", "architecture", "adr", "documentation", "audit", "quality-gates", "rethink", "specification", "characterization-tests"]
 }
