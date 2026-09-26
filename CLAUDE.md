@@ -6,7 +6,8 @@
 ## Was ist das
 
 Ein Toolkit (Claude-Code-Plugin + Python-CLI), das andere Projekte auf Implementierung
-vorbereitet. Details: `docs/PROJECT.md`.
+vorbereitet und die Ausführung danach in Blöcken über mehrere Sessions steuern kann. Details:
+`docs/PROJECT.md`.
 
 ## Project Knowledge
 

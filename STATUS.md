@@ -3,7 +3,7 @@
 > Source of Truth für **den aktuellen Zustand**. Keine Historie (`PROGRESS.md`),
 > keine Pläne (`docs/PROJECT.md`), keine Architektur (`docs/ARCHITECTURE.md`).
 >
-> Stand: 2026-09-11
+> Stand: 2026-09-26
 
 ## Foundation
 
@@ -37,10 +37,10 @@ Keine.
 | Command | Zustand | Zuletzt geprüft |
 | --- | --- | --- |
 | install (`pip install -e ".[dev]"`) | ok | 2026-09-01 |
-| format (`ruff format --check .`) | ok | 2026-09-11 |
-| lint (`ruff check .`) | ok | 2026-09-11 |
-| typecheck (`mypy`) | ok | 2026-09-11 |
-| test (`pytest`) | ok — 54 Tests | 2026-09-11 |
+| format (`ruff format --check .`) | ok | 2026-09-26 |
+| lint (`ruff check .`) | ok | 2026-09-26 |
+| typecheck (`mypy`) | ok | 2026-09-26 |
+| test (`pytest`) | ok — 54 Tests | 2026-09-26 |
 | build | n/a — kein Artefakt (ADR-0006) | — |
 
 ## Foundation-Validierung
@@ -54,8 +54,9 @@ Blocker durch. Das Toolkit prüft sich selbst.
 | --- | --- |
 | Skill `project-foundation` | vollständig |
 | Skill `project-rethink` | vollständig (0.4.0, ADR-0013); `claude plugin validate --strict` grün, Auslöse-Test beider Skills bestanden am 2026-09-11 |
-| Vorlagen (13 für Foundation, 7 für Rethink) | vollständig |
-| Agents (`rethink-umsetzer`, `rethink-gutachter`, `rethink-zahlenpruefer`) | vollständig; wirken nach `/reload-plugins` |
+| Skill `project-orchestrate` | vollständig (0.5.0, ADR-0014); `claude plugin validate --strict` grün, Auslöse-Test aller drei Skills bestanden am 2026-09-26. **Offen:** Prüfliste in `reference/mechanismen.md` (Rückkanal und Selbst-Leeren auf Claude Desktop, Hintergrundstart, Cloud-Spawn mit Probeblock) |
+| Vorlagen (13 für Foundation, 7 für Rethink, 4 für Orchestrate) | vollständig |
+| Agents (`rethink-umsetzer`, `rethink-gutachter`, `rethink-zahlenpruefer`, `orchestrate-blockarbeiter`, `orchestrate-tor`) | vollständig; wirken nach `/reload-plugins` |
 | Validator (`foundation_validate`) | vollständig, 45 mögliche Finding-IDs, Abdeckung erzwungen |
 | Plugin- und Marketplace-Manifest | vollständig |
 | Beispielprojekt `examples/taskflow` | vollständig |

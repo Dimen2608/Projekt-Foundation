@@ -5,6 +5,63 @@
 >
 > Neueste Einträge oben.
 
+## 2026-09-26 — Dritter Skill `project-orchestrate`: eine Hauptsession steuert Worker in Blöcken (0.5.0)
+
+**Anlass**
+
+Wunsch des Auftraggebers: ein Multi-Session-System — ein Orchestrator steuert andere Sessions
+und startet sie wenn möglich selbst; Aufgaben immer als Blöcke; am Ende jedes Blocks eine
+Übergabe an die Hauptsession, danach leert die Unter-Session ihren Kontext. Vorher prüfen, was
+Claude Code heute kann, und offene Fragen per Interview klären.
+
+**Geprüft, bevor entschieden wurde** (Cloud-Session, Claude Code 2.1.283, und code.claude.com/docs)
+
+- `claude -p --session-id` und `--resume`: ausgeführt, Start mit fester ID, JSON-Rückgabe,
+  Wiederaufnahme mit erhaltenem Kontext.
+- `claude --bg`: vorhanden; scheiterte außerhalb des Repos am Workspace-Vertrauen, mit
+  `bypassPermissions` vom Auto-Mode-Klassifikator abgelehnt — nicht umgangen.
+- Cloud-Session per Remote-API: gestartet, Status gelesen, archiviert. Die Antwort der
+  Kind-Session ist vom Starter aus nicht lesbar — daraus folgt die Übergabe über Datei statt Chat.
+- Subagent-Tiefe in der Cloud 1 (Doku: 3); Agent Teams experimentell; kein Werkzeug zum
+  Selbst-Leeren in der Cloud.
+
+**Entschieden (ADR-0014)**, in einem Interview mit 18 Fragen, je mit Empfehlung
+
+Worker sind eigenständige Sessions, Blockarbeit läuft in einem Subagent (dessen Ende ist das
+Leeren); Worker-Start in der Stufenfolge Cloud-Spawn → `claude --bg` → Handstart mit Startprompt;
+Heimat-Repo plus fremde Repos, alles unter `orchestrate/` committet; Übergabe per `SendMessage`,
+die Blockdatei ist die Wahrheit, ohne Rückkanal als Datei im Worker-Branch; der Orchestrator
+baut nicht; Tor je Block, höchstens fünf Runden, dann Vorlage mit Pro und Contra; parallel nur
+ohne offene Abhängigkeit und nie zwei Worker auf einem Branch; sechs Pflichtfelder je Block;
+Merge-Modus konfigurierbar (Standard: der Mensch mergt); `SETUP` als Installer-Interview, das
+Skills sucht und einzeln zur Installation vorschlägt; `FOUNDATION VALID` je Repo, sonst ist der
+erste Block die Foundation. Keine Validator-Änderung, keine Finding-ID, `schema_version` bleibt 1.
+
+**Geändert**
+
+- Neu: `skills/project-orchestrate/` mit `SKILL.md`, vier Vorlagen (`ORCHESTRATE.md`,
+  `BLOCKPLAN.md`, `BLOCK.md`, `WORKER-START.md`) und `reference/mechanismen.md` (Befunde mit
+  Datum und Version, Prüfliste für die ungeprüften Stellen).
+- Neu: Agents `orchestrate-blockarbeiter` (`sonnet`/`high`) und `orchestrate-tor`
+  (`opus`/`high`, lesend, `isolation: worktree`).
+- `plugin.json`, `marketplace.json`, `pyproject.toml`, `__init__.py`: 0.5.0. README, PROJECT
+  (Scope, V1, Out of Scope abgegrenzt, FR-13), ARCHITECTURE, STATUS, AGENTS, CLAUDE nachgezogen.
+
+**Geprüft**
+
+Format, Lint, Typecheck und 54 Tests grün; `foundation-validate .` und `examples/taskflow`
+weiterhin `FOUNDATION VALID`; `claude plugin validate --strict` grün für Plugin und
+Marketplace. Headless mit `--plugin-dir`: alle fünf Agents registriert. **Auslöse-Test**, je ein
+Satz, der nicht wörtlich in den Beschreibungen steht: Foundation-Satz → `project-foundation`,
+Rethink-Satz → `project-rethink`, „Hauptsitzung soll die Arbeit aufteilen, andere Sitzungen in
+Frontend- und Backend-Repo beauftragen und die Ergebnisse einsammeln" → `project-orchestrate`,
+„Tippfehler in der README" → keiner.
+
+**Offen**
+
+Die Prüfliste in `reference/mechanismen.md` — vor allem Rückkanal und Selbst-Leeren auf Claude
+Desktop, die hier nicht prüfbar waren.
+
 ## 2026-09-11 — Zweiter Skill `project-rethink`, das Plugin liefert Agents aus (0.4.0)
 
 **Anlass**

@@ -48,6 +48,10 @@ belegen kann: **FOUNDATION VALID** (maschinell, durch das CLI) und **FOUNDATION 
   auseinandergelaufen sind, durch MEASURE → MAP → GAPS → DECIDE → GUARD → HANDOFF in den
   Zustand bringt, ab dem `project-foundation` ohne Raten übernehmen kann — mit eigenen
   Vorlagen und drei Agents (Umsetzer, Gutachter als Tor, Zahlenprüfer).
+- Skill `project-orchestrate` (seit 0.5.0, ADR-0014), der nach `FOUNDATION READY` die
+  Ausführung über mehrere Sessions und Repos steuert: SETUP → PLAN → DISPATCH → GATE →
+  INTEGRATE, Aufgaben als Blöcke mit prüfbarem Abnahmekriterium, Tor je Block, Übergaben und
+  Stand im Heimat-Repo — mit eigenen Vorlagen und zwei Agents (Blockarbeiter, Tor).
 - Vorlagen für alle Foundation-Dateien (`PROJECT.md`, `ARCHITECTURE.md`, ADR, `STATUS.md`,
   `CLAUDE.md`, `AGENTS.md`, Cursor-Rule, `.env.example`, CI-Workflow, Manifest).
 - CLI `foundation-validate`, das die maschinell prüfbaren Regeln durchsetzt und den
@@ -60,7 +64,8 @@ belegen kann: **FOUNDATION VALID** (maschinell, durch das CLI) und **FOUNDATION 
 - Weitere Review-Skills (`architecture-review`, `security-review`), sobald sie sich in
   der Anwendung als wiederkehrend erweisen — nicht vorab. Der erste Zuwachs war kein
   Review-Skill, sondern `project-rethink`: der Prozess **vor** DISCOVER, in einem
-  Fremdprojekt entstanden und dort bewährt, bevor er hier aufgenommen wurde (ADR-0013).
+  Fremdprojekt entstanden und dort bewährt, bevor er hier aufgenommen wurde (ADR-0013). Der
+  zweite war `project-orchestrate`, der Prozess **nach** `FOUNDATION READY` (ADR-0014).
 - Manifest-Schemaversionierung mit Migrationspfad, sobald `schema_version` 2 nötig wird.
 
 **FUTURE IDEA** (nicht umgesetzt, nicht eingeplant): den Pflichtumfang aus `project.type`
@@ -71,8 +76,11 @@ Erfahrungswerte aus mehreren Fremdprojekten — vorher wäre die Zuordnung erfun
 ### Out of Scope
 
 - Code-Generierung für Zielprojekte. Die Foundation ermöglicht Implementierung, sie
-  ersetzt sie nicht.
-- Projektmanagement, Ticketing, Roadmaps, Zeitschätzung.
+  ersetzt sie nicht. `project-orchestrate` steuert Sessions, die mit den Skills des
+  Zielprojekts bauen; er selbst erzeugt keinen Code.
+- Projektmanagement, Ticketing, Roadmaps, Zeitschätzung. Auch `project-orchestrate` ist das
+  nicht: Sein Blockplan ist ein Ausführungsvertrag ohne Termine und Prioritäten auf Zeit
+  (ADR-0014).
 - Inhaltliche Bewertung von Architekturqualität durch den Validator. Er prüft Struktur
   und Widersprüche; die fachliche Bewertung bleibt beim Review.
 - Sprach- oder Framework-spezifische Scaffolds (kein `create-react-app`-Ersatz).
@@ -97,6 +105,7 @@ Erfahrungswerte aus mehreren Fremdprojekten — vorher wäre die Zuordnung erfun
 | FR-8 | Jeder Blocker nennt ID, Reason, Required Action und Affected Area. |
 | FR-9 | Das Toolkit ist per `/plugin marketplace add` in fremden Projekten installierbar. |
 | FR-12 | `project-rethink` endet, wo `project-foundation` beginnt: Sein Ausgang ist der Eingang von DISCOVER. Seine Artefakte sind keine Pflichtstellen des Validators. |
+| FR-13 | `project-orchestrate` vergibt keinen Block ohne prüfbares Abnahmekriterium, keinen Bau-Block in ein Repo ohne `FOUNDATION VALID` und nimmt keinen Block ohne Tor-Freigabe ab. Der Orchestrator baut nicht; seine Artefakte sind keine Pflichtstellen des Validators. |
 
 ## Non-Functional Requirements
 
