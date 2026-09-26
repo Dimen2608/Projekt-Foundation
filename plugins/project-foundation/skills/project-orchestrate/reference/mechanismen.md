@@ -56,7 +56,8 @@ auf einem Rechner ist es der tragende Weg:
 
 | Aufgabe | Werkzeug | Befund |
 | --- | --- | --- |
-| Session-ID eines Workers finden | `list_sessions`, am **Arbeitsverzeichnis** auflösen | *Betrieb.* Nie aus dem Gedächtnis — sie ist die Adresse zum Wecken. |
+| Session-ID eines Workers finden | `list_sessions`, am **Arbeitsverzeichnis** auflösen | *Betrieb.* Nie aus dem Gedächtnis — sie ist die Adresse zum Wecken. Arbeitet der Worker in einem Worktree, ist sein `cwd` der Worktree-Pfad unter dem Repo, nicht der Repo-Ordner: am Präfix auflösen. |
+| Worker benennen | `set_session_title` | *Geprüft 2026-09-26:* Der Titel ist die Adresse für `SendMessage`; ein vom App vergebener Titel wird ohne Rückfrage ersetzt. |
 | Ruhenden oder geleerten Worker wecken | `send_message` an die Session-ID | *Betrieb.* Weckt zuverlässig. `SendMessage` an den Namen ist nach dem Leeren **nicht sicher** zustellbar. |
 | Wartenden Worker erreichen (`ANTWORT`, `NACHARBEIT`), wenn er sich geleert haben kann | `send_message` an die Session-ID | *Betrieb.* Ein wartender Worker ruht; der Weg ist derselbe wie beim Wecken. |
 | Laufenden Worker mitten im Turn erreichen | `SendMessage` an den Namen | *Betrieb.* Namen fest vergeben (`claude --name`, `/rename`); ohne das leitet sich der Name aus dem Ordner ab und wechselt bei jedem Neustart. Sitzungstitel taugen nicht als Adresse. |
@@ -67,6 +68,11 @@ auf einem Rechner ist es der tragende Weg:
 **Warum leeren:** Eine Session liest bei jeder Anfrage ihren ganzen Verlauf mit — gemessen
 250–290k Token gegen 60–70k bei einer frischen. Leeren kostet nichts, `/compact` ist selbst eine
 teure Anfrage. *(Betrieb)*
+
+**Was ein Worktree nicht mitbringt:** Dateien, die das Repo ignoriert — installierte Addons,
+Import-Caches, lokale Konfiguration. Im Test fehlte einem Worker im Worktree ein ignoriertes
+Test-Addon, die Tests liefen dort nicht; im Haupt-Checkout lag es. *(Geprüft 2026-09-26)*
+Deshalb prüft der Worker beim Start, ob die Befehle des Repos in seinem Checkout laufen.
 
 **Was nach dem Leeren fehlt:** alles, was nur im Chat stand — auch der Startprompt. Was auf der
 Platte steht, bleibt: `CLAUDE.md` oberhalb des Arbeitsverzeichnisses wird bei jedem Start
@@ -91,7 +97,7 @@ geladen, und `.claude/worker.md` trägt das Gedächtnis des Workers. *(Betrieb)*
 | Verfahren | Wann | Befund |
 | --- | --- | --- |
 | **`attach`** (Standard) | Immer. Der Mensch öffnet im Ziel-Repo eine Session mit Remote Control und fügt den Startprompt ein; der Worker meldet sich mit `WORKER BEREIT`. | Grundform oben. |
-| **`chip`** (Claude Desktop) | Der Orchestrator ruft `spawn_task` mit `cwd` = Ordner des Ziel-Repos und dem Startprompt als `prompt` auf. Der Mensch sieht einen Chip und startet die Session mit einem Klick, in einem neuen Worktree. | *Geprüft 2026-09-26:* Chip wird angezeigt. Start per Klick und Meldung `WORKER BEREIT` noch ungeprüft (Prüfliste 7). Der Klick bleibt Handarbeit — siehe `start_session` unten. |
+| **`chip`** (Claude Desktop) | Der Orchestrator ruft `spawn_task` mit `cwd` = Ordner des Ziel-Repos und dem Startprompt als `prompt` auf. Der Mensch sieht einen Chip und startet die Session mit einem Klick, in einem neuen Worktree. | *Geprüft 2026-09-26 (Prüfliste 7):* Ein Klick startet die Session in einem neuen Worktree des Ziel-Repos (`<repo>/.claude/worktrees/<name>`, Branch `<präfix>/<name>`, Ort und Präfix aus den Desktop-Einstellungen), mit Remote Control. Der Prompt läuft als erster Turn, die Meldung per `SendMessage` kommt an. Ihr Name ist zunächst der Chip-Titel; der Orchestrator benennt sie mit `set_session_title` in den Worker-Namen um, `ListAgents` zeigt den neuen Namen sofort. Der Klick bleibt Handarbeit — siehe `start_session` unten. |
 | **`local_bg`** (nur auf ausdrücklichen Wunsch) | Worker auf dem Rechner des Orchestrators: `claude --bg "<Startprompt>"`, Übersicht mit `claude agents --json`. | *Geprüft:* `--bg` und `--print` schließen sich aus; außerhalb eines vertrauten Workspace verweigert; mit `bypassPermissions` vom Auto-Mode-Klassifikator abgelehnt — richtig so, nie umgehen. In einem vertrauten Repo mit geerbten Rechten ungeprüft. |
 
 **Nicht vorgesehen:**
@@ -158,9 +164,9 @@ Auf dem Rechner des Menschen abarbeiten, Ergebnis mit Datum und Version oben ein
    `project-foundation:orchestrate-tor` aus dem Worker aufrufbar?
 6. **Annahme ohne Rückfrage:** Laufen Orchestrator und Worker im selben Rechtemodus, kommt ein
    Auftrag ohne Freigabedialog an?
-7. **`chip`** (Claude Desktop): Chip mit einem kurzen Startprompt vorlegen, anklicken lassen.
-   Startet die Session im richtigen Repo, meldet sie sich mit `WORKER BEREIT`, findet der
-   Orchestrator sie per `list_sessions` am Arbeitsverzeichnis?
+7. **`chip`** (Claude Desktop) *(geprüft 2026-09-26, siehe Worker-Verfahren)*: Chip mit einem
+   kurzen Startprompt vorlegen, anklicken lassen. Startet die Session im richtigen Repo, meldet
+   sie sich, findet der Orchestrator sie per `list_sessions`?
 8. **`local_bg`** (nur falls gewünscht): In einem vertrauten Repo `claude --bg "<kurzer
    Auftrag>"` ohne Rechte-Erweiterung. Startet er, erscheint er in `claude agents --json`, ist er
    per `SendMessage` erreichbar?

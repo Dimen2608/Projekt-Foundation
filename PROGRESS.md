@@ -5,6 +5,16 @@
 >
 > Neueste Einträge oben.
 
+## 2026-09-26 — Start per Chip geprüft (0.5.3)
+
+Prüfliste 7 ausgeführt: Chip mit `cwd` eines fremden Repos angeklickt. Die Session startete in
+einem neuen Worktree dieses Repos mit Remote Control, führte den Startprompt als ersten Turn aus
+und meldete sich per `SendMessage`; `list_sessions` fand sie unter dem Worktree-Pfad,
+`set_session_title` machte den Worker-Namen sofort zur Adresse. Nebenbefund: Im Worktree fehlte
+ein ignoriertes Test-Addon, die Tests liefen dort nicht. Daraus: `WORKER BEREIT` meldet
+`befehle`, fehlendes Einrichten ist ein eigener Block; Auflösen der Session-ID am Präfix des
+Worktree-Pfads.
+
 ## 2026-09-26 — Worker-Verfahren `chip`, Befund zu `start_session` (0.5.2)
 
 **Anlass**
