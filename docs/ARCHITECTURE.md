@@ -10,7 +10,7 @@ Jeder Bereich ist bewertet mit `RELEVANT`, `NOT REQUIRED`, `FUTURE` oder `UNKNOW
 
 | Bereich | Bewertung | Begründung |
 | --- | --- | --- |
-| Application Architecture | RELEVANT | Zwei Skills + Vorlagen + drei Agents + CLI-Validator, siehe unten. |
+| Application Architecture | RELEVANT | Drei Skills + Vorlagen + fünf Agents + CLI-Validator, siehe unten. |
 | Frontend | NOT REQUIRED | Kein UI. Bedienung über Agent und Terminal. |
 | Backend | NOT REQUIRED | Kein Server, kein Dienst. |
 | Database | NOT REQUIRED | Kein persistenter Zustand über den Lauf hinaus. |
@@ -23,7 +23,7 @@ Jeder Bereich ist bewertet mit `RELEVANT`, `NOT REQUIRED`, `FUTURE` oder `UNKNOW
 | Security | RELEVANT | Secret-Hygiene in fremden Projekten (`.env`), kein Secret Scanning — und der Validator schreibt dort nie. |
 | Configuration | RELEVANT | `.project-foundation.yml` im Zielprojekt. |
 | Secrets | NOT REQUIRED | Das Toolkit selbst braucht keine Secrets. |
-| Architecture Decisions | REQUIRED | Verteilung, Sprache, Manifest-Rolle und Report-Wortlaut sind tragende Entscheidungen — ADR-0001 bis ADR-0013. |
+| Architecture Decisions | REQUIRED | Verteilung, Sprache, Manifest-Rolle und Report-Wortlaut sind tragende Entscheidungen — ADR-0001 bis ADR-0014. |
 | Storage | NOT REQUIRED | Nur Dateisystem-Lesezugriffe im Zielprojekt. |
 | Background Jobs | NOT REQUIRED | Ein Lauf ist synchron und in Millisekunden fertig. |
 | Messaging / Events | NOT REQUIRED | Kein verteiltes System. |
@@ -39,7 +39,7 @@ Das Repository enthält drei Artefakte mit klar getrennten Aufgaben:
 
 ```
 Projekt-Foundation
-├── plugins/project-foundation/     Prozesswissen (2 Skills, Vorlagen, 3 Agents) → Agent liest
+├── plugins/project-foundation/     Prozesswissen (3 Skills, Vorlagen, 5 Agents) → Agent liest
 ├── src/foundation_validate/        Maschinelle Prüfung               → CI/Mensch führt aus
 └── docs/, examples/                Anwendung des Prozesses auf sich selbst
 ```
@@ -54,7 +54,9 @@ zusammen in eine Datei zu legen würde bedeuten, Prosa und Logik gemeinsam zu ve
 plugins/project-foundation/
 ├── skills/project-foundation/   DISCOVER → ASSESS → ASK → DECIDE → GENERATE → VALIDATE → AUDIT
 ├── skills/project-rethink/      MEASURE → MAP → GAPS → DECIDE → GUARD → HANDOFF
-└── agents/                      rethink-umsetzer, rethink-gutachter, rethink-zahlenpruefer
+├── skills/project-orchestrate/  SETUP → PLAN → DISPATCH → GATE → INTEGRATE
+└── agents/                      rethink-umsetzer, rethink-gutachter, rethink-zahlenpruefer,
+                                 orchestrate-blockarbeiter, orchestrate-tor
 ```
 
 Jeder Skill hat denselben Schnitt:
@@ -66,10 +68,13 @@ Jeder Skill hat denselben Schnitt:
 Ein Skill lädt bewusst nur `SKILL.md` vorab; `reference/` und `templates/` werden gezielt
 nachgeladen. Das hält den Kontextverbrauch klein.
 
-**Zwei Skills, eine Reihenfolge.** `project-rethink` endet dort, wo `project-foundation`
+**Drei Skills, eine Reihenfolge.** `project-rethink` endet dort, wo `project-foundation`
 anfängt: Sein `HANDOFF` ist der Eingang von `DISCOVER`. Weil beide auf derselben Ebene liegen,
 gibt es keine Vorrangregel — die Abgrenzung lebt in den beiden `description`-Feldern, die
-aufeinander zeigen (ADR-0013).
+aufeinander zeigen (ADR-0013). `project-orchestrate` beginnt nach `FOUNDATION READY` und setzt
+in jedem Repo, in dem gebaut wird, `FOUNDATION VALID` voraus. Seine Trigger („mehrere Sessions
+steuern") überschneiden sich nicht mit denen der Vorbereitung; die Abgrenzung steht deshalb nur
+in seiner eigenen `description` (ADR-0014).
 
 **Agents.** Die drei Rollen des Rethink-Prozesses sind Agent-Definitionen, keine Textbausteine:
 Nur so bekommen sie eigenen Kontext, eine erzwungene Werkzeugliste und Isolation. Sie
@@ -77,6 +82,16 @@ registrieren sich als `project-foundation:rethink-<rolle>`. Die lesenden Rollen 
 Zahlenprüfer) haben kein `Write`/`Edit`, `isolation: worktree` und die Prompt-Regel „Shell nur
 lesend" — die Sperre ist damit begrenzt, nicht erzwungen, weil `Bash` bleibt.
 Änderungen an einer Agent-Definition wirken erst nach `/reload-plugins` oder Neustart.
+
+**Orchestrate.** Der Orchestrator ist eine Session im Heimat-Repo, die Worker sind
+eigenständige Sessions — keine Agents dieses Plugins —, auch in anderen Repos und auf anderen
+Rechnern; alle mit Remote Control verbunden und per `SendMessage` im Gespräch. Die Agents `orchestrate-blockarbeiter`
+(schreibt) und `orchestrate-tor` (lesend, `isolation: worktree`) laufen als Subagents **im
+Worker**: Der Blockarbeiter führt einen Block in frischem Kontext aus, der mit seinem Ende
+verfällt; das Tor prüft danach in einem neuen Aufruf. Ein Vorbereitungsblock (`project-foundation`
+oder `project-rethink`) läuft als einzige Ausnahme im Worker selbst. Übergaben kommen per
+`SendMessage`; die Wahrheit ist die Blockdatei unter `orchestrate/` im Heimat-Repo. Welche Start- und Rückkanäle in welcher Umgebung funktionieren,
+steht mit Quelle, Datum und Version in `skills/project-orchestrate/reference/mechanismen.md` (ADR-0014).
 
 ### Validator (`src/foundation_validate/`)
 
@@ -170,4 +185,5 @@ Nicht getestet werden bewusst: Getter, Dataclass-Konstruktion, YAML-Parsing von 
 Skills und Agents sind Prompt-Material und haben keine Tests (ADR-0009). Geprüft werden sie mit
 `claude plugin validate --strict plugins/project-foundation` (Manifest, Frontmatter) und durch
 den Auslöse-Test nach jeder Änderung an einer `description`: ein Satz, der `project-foundation`
-ziehen muss, einer, der `project-rethink` ziehen muss (ADR-0013).
+ziehen muss, einer, der `project-rethink` ziehen muss (ADR-0013), einer, der
+`project-orchestrate` ziehen muss (ADR-0014).

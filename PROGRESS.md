@@ -5,6 +5,74 @@
 >
 > Neueste Einträge oben.
 
+## 2026-09-26 — Dritter Skill `project-orchestrate`: eine Hauptsession steuert Worker in Blöcken (0.5.0)
+
+**Anlass**
+
+Wunsch des Auftraggebers: ein Multi-Session-System — ein Orchestrator steuert andere Sessions,
+echte Sessions auch in anderen Repos, per Remote Control erreichbar und per `SendMessage`
+ansprechbar; Aufgaben immer als Blöcke; am Ende jedes Blocks eine
+Übergabe an die Hauptsession, danach leert die Unter-Session ihren Kontext. Vorher prüfen, was
+Claude Code heute kann, und offene Fragen per Interview klären.
+
+**Geprüft, bevor entschieden wurde** (Cloud-Session, Claude Code 2.1.283, und code.claude.com/docs)
+
+- `claude -p --session-id` und `--resume`: ausgeführt, Start mit fester ID, JSON-Rückgabe,
+  Wiederaufnahme mit erhaltenem Kontext.
+- `claude --bg`: vorhanden; scheiterte außerhalb des Repos am Workspace-Vertrauen, mit
+  `bypassPermissions` vom Auto-Mode-Klassifikator abgelehnt — nicht umgangen.
+- Cloud-Session per Remote-API: gestartet, Status gelesen, archiviert. Die Antwort der
+  Kind-Session ist vom Starter aus nicht lesbar — daraus folgt die Übergabe über Datei statt Chat.
+- Subagent-Tiefe in der Cloud 1 (Doku: 3); Agent Teams experimentell; kein Werkzeug zum
+  Selbst-Leeren in der Cloud.
+
+**Entschieden (ADR-0014)**, in einem Interview mit 20 Fragen, je mit Empfehlung
+
+Worker sind eigenständige Sessions, Blockarbeit läuft in einem Subagent (dessen Ende ist das
+Leeren); Worker werden angebunden, nicht gespawnt — der Mensch öffnet sie mit Remote Control,
+`claude --bg` nur auf Wunsch, Cloud-Sessions sind als Worker nicht vorgesehen; der Orchestrator
+läuft mit Remote Control; Heimat-Repo plus fremde Repos, alles unter `orchestrate/` auf einem
+`state_branch` committet; Übergabe per `SendMessage`, die Blockdatei ist die Wahrheit; der
+Orchestrator baut nicht; Tor je Block, Runden zählt nur der Worker, höchstens fünf, dann
+`exhausted` und Vorlage mit Pro und Contra; Vorbereitungsblöcke laufen im Worker selbst; parallel nur
+ohne offene Abhängigkeit und nie zwei Worker auf einem Branch; sechs Pflichtfelder je Block;
+Merge-Modus konfigurierbar (Standard: der Mensch mergt); `SETUP` als Installer-Interview, das
+Skills sucht und einzeln zur Installation vorschlägt; `FOUNDATION VALID` je Repo, sonst ist der
+erste Block die Foundation. Keine Validator-Änderung, keine Finding-ID, `schema_version` bleibt 1.
+
+**Geändert**
+
+- Neu: `skills/project-orchestrate/` mit `SKILL.md`, vier Vorlagen (`ORCHESTRATE.md`,
+  `BLOCKPLAN.md`, `BLOCK.md`, `WORKER-START.md`) und `reference/mechanismen.md` (Befunde mit
+  Datum und Version, Prüfliste für die ungeprüften Stellen).
+- Neu: Agents `orchestrate-blockarbeiter` (`sonnet`/`high`) und `orchestrate-tor`
+  (`opus`/`high`, lesend, `isolation: worktree`).
+- `plugin.json`, `marketplace.json`, `pyproject.toml`, `__init__.py`: 0.5.0. README, PROJECT
+  (Scope, V1, Out of Scope abgegrenzt, FR-13), ARCHITECTURE, STATUS, AGENTS, CLAUDE nachgezogen.
+
+**Geprüft**
+
+Format, Lint, Typecheck und 54 Tests grün; `foundation-validate .` und `examples/taskflow`
+weiterhin `FOUNDATION VALID`; `claude plugin validate --strict` grün für Plugin und
+Marketplace. Headless mit `--plugin-dir`: alle fünf Agents registriert. Gegenlesung durch einen
+Opus-Gutachter: vier blockierende Funde — Runden doppelt gezählt und Statuswerte uneindeutig,
+Cloud-Worker ohne durchgehenden Kanal, Übergabe-Datei im Worker-Branch außerhalb der
+Umfangsgrenze, Foundation-Block im Subagent nicht ausführbar —, alle behoben (die letzten drei
+durch die Entscheidungen „keine Cloud-Worker" und „Vorbereitungsblock im Worker"); dazu
+Push vor dem Tor, Basis-Commit im Eingang, FR-1-Zitat, `Purpose` und ADR-Zählung. **Auslöse-Test**, je ein
+Satz, der nicht wörtlich in den Beschreibungen steht: Foundation-Satz → `project-foundation`,
+Rethink-Satz → `project-rethink`, „Hauptsitzung soll die Arbeit aufteilen, andere Sitzungen in
+Frontend- und Backend-Repo beauftragen und die Ergebnisse einsammeln" → `project-orchestrate`,
+„Tippfehler in der README" → keiner. Nach der Änderung der `description` (Remote Control)
+wiederholt, mit „auf Notebook und Desktop je eine Sitzung in unterschiedlichen Repos, diese soll
+sie steuern, Arbeitspakete schicken, Ergebnisse einsammeln" → `project-orchestrate`; die übrigen
+unverändert.
+
+**Offen**
+
+Die Prüfliste in `reference/mechanismen.md` — vor allem Rückkanal über Rechnergrenzen und
+Selbst-Leeren auf Claude Desktop, die aus der Cloud-Session nicht prüfbar waren.
+
 ## 2026-09-11 — Zweiter Skill `project-rethink`, das Plugin liefert Agents aus (0.4.0)
 
 **Anlass**

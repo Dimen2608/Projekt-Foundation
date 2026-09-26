@@ -30,6 +30,12 @@ AI-assisted development foundation, currently optimized for **Claude Code** and 
   decisions with a filter sentence, and pins the behaviour with characterization tests
   (`MEASURE → MAP → GAPS → DECIDE → GUARD → HANDOFF`). It ends where `project-foundation`
   begins. Three agents (implementer, reviewer as gate, number checker) carry the role split;
+- a third skill **`project-orchestrate`** for the work after `FOUNDATION READY`: one main
+  session steers worker sessions across one or more repos, hands out work as blocks with a
+  testable acceptance criterion, has every block checked by a gate, and keeps handoffs and state
+  in its home repo (`SETUP → PLAN → DISPATCH → GATE → INTEGRATE`). Workers are real sessions —
+  in other repos, on other machines — that you open with Remote Control; orchestrator and
+  workers talk via `SendMessage`. Two agents (block worker, gate) carry the split;
 - a **CLI** (`foundation-validate <path>`) that checks a project for structure, missing
   answers and contradictions. Exit code `0` means `FOUNDATION VALID`, `1` means at least
   one structural blocker.
@@ -56,7 +62,7 @@ Everything is read-only: the validator never writes into a project it inspects.
 
 </details>
 
-Es besteht aus drei Teilen:
+Es besteht aus vier Teilen:
 
 - **Skill `project-foundation`** — führt einen Agenten durch
   `DISCOVER → ASSESS → ASK → DECIDE → GENERATE → VALIDATE → AUDIT`, inklusive Vorlagen
@@ -67,6 +73,13 @@ Es besteht aus drei Teilen:
   Grundsatzfragen als Filter und nagelt das Verhalten mit absichernden Tests fest. Endet dort,
   wo `project-foundation` anfängt. Drei Agents (Umsetzer, Gutachter als Tor, Zahlenprüfer)
   tragen die Rollentrennung.
+- **Skill `project-orchestrate`** — der Weg danach, für Vorhaben, die größer sind als eine
+  Session: `SETUP → PLAN → DISPATCH → GATE → INTEGRATE`. Eine Hauptsession (Orchestrator)
+  steuert Worker-Sessions über ein oder mehrere Repos, vergibt Aufgaben als Blöcke mit
+  prüfbarem Abnahmekriterium, lässt jeden Block durch ein Tor prüfen und führt Übergaben und
+  Stand im Heimat-Repo. Worker sind echte Sessions, auch in anderen Repos und auf anderen
+  Rechnern, per Remote Control erreichbar; gesprochen wird per `SendMessage`. Zwei Agents
+  (Blockarbeiter, Tor) tragen die Trennung (ADR-0014).
 - **CLI `foundation-validate`** — prüft ein Projekt maschinell auf Struktur, fehlende
   Entscheidungen und Widersprüche und erzeugt den Audit-Report.
 
@@ -87,7 +100,9 @@ Es besteht aus drei Teilen:
 Danach greift `project-foundation` automatisch bei Anfragen wie „setz das Projekt auf",
 „bau die Foundation" oder „ist das Repo bereit für Implementierung" — und `project-rethink`
 bei „die Doku stimmt nicht mehr mit dem Code überein", „wo stehen wir wirklich" oder „Neubau
-oder Umbau". Die drei Rethink-Agents sind nach `/reload-plugins` oder einem Neustart verfügbar.
+oder Umbau" — und `project-orchestrate` bei „Hauptsession soll andere Sessions steuern" oder
+„Arbeit in Blöcke aufteilen und verteilen". Die Agents sind nach `/reload-plugins` oder einem
+Neustart verfügbar.
 
 ### CLI
 
@@ -191,6 +206,17 @@ Prüfrunde findet dieselben Themen und macht daraus neue Aufgaben —, dann zuer
 übergibt an `DISCOVER`. Ein Projekt, das beschreiben kann, was es tut, braucht ihn nicht
 (ADR-0013).
 
+## Wenn ein Vorhaben größer ist als eine Session
+
+Nach `FOUNDATION READY` kann `project-orchestrate` die Ausführung übernehmen. `SETUP` ist ein
+geführtes Interview: Heimat-Repo, weitere Repos, Merge-Modus (Standard: du mergst), ob der
+Orchestrator per Remote Control erreichbar ist, und welcher Skill oder Agent für welche Aufgabenart zuständig ist — fehlende werden
+gesucht und einzeln zur Installation vorgeschlagen. Danach schneidet der Orchestrator Blöcke,
+vergibt sie an Worker-Sessions, die du mit Remote Control in den Ziel-Repos öffnest und die sich
+per `SendMessage` melden, nimmt Übergaben erst nach dem Tor ab und führt alles unter `orchestrate/` im
+Heimat-Repo. Er baut selbst nicht, und er ist kein Projektmanagement: keine Termine, keine
+Roadmap (ADR-0014).
+
 ## AI-Unterstützung
 
 Ausgelegt auf **Claude Code** (Skill, `CLAUDE.md`) und **Cursor** (`.cursor/rules/`),
@@ -212,7 +238,7 @@ Es gibt keinen Build-Schritt — das Projekt erzeugt kein Artefakt (siehe ADR-00
 ## Aufbau
 
 ```
-plugins/project-foundation/   Das Plugin: zwei Skills (Reference, Vorlagen), drei Agents
+plugins/project-foundation/   Das Plugin: drei Skills (Reference, Vorlagen), fünf Agents
 src/foundation_validate/      Der Validator
 examples/taskflow/            Ein vollständig ausgefülltes Beispielprojekt
 docs/                         Foundation dieses Repos (Dogfooding)
