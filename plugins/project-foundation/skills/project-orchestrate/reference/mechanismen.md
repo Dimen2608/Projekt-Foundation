@@ -91,6 +91,7 @@ geladen, und `.claude/worker.md` trägt das Gedächtnis des Workers. *(Betrieb)*
 | Verfahren | Wann | Befund |
 | --- | --- | --- |
 | **`attach`** (Standard) | Immer. Der Mensch öffnet im Ziel-Repo eine Session mit Remote Control und fügt den Startprompt ein; der Worker meldet sich mit `WORKER BEREIT`. | Grundform oben. |
+| **`chip`** (Claude Desktop) | Der Orchestrator ruft `spawn_task` mit `cwd` = Ordner des Ziel-Repos und dem Startprompt als `prompt` auf. Der Mensch sieht einen Chip und startet die Session mit einem Klick, in einem neuen Worktree. | *Geprüft 2026-09-26:* Chip wird angezeigt. Start per Klick und Meldung `WORKER BEREIT` noch ungeprüft (Prüfliste 7). Der Klick bleibt Handarbeit — siehe `start_session` unten. |
 | **`local_bg`** (nur auf ausdrücklichen Wunsch) | Worker auf dem Rechner des Orchestrators: `claude --bg "<Startprompt>"`, Übersicht mit `claude agents --json`. | *Geprüft:* `--bg` und `--print` schließen sich aus; außerhalb eines vertrauten Workspace verweigert; mit `bypassPermissions` vom Auto-Mode-Klassifikator abgelehnt — richtig so, nie umgehen. In einem vertrauten Repo mit geerbten Rechten ungeprüft. |
 
 **Nicht vorgesehen:**
@@ -104,6 +105,16 @@ geladen, und `.claude/worker.md` trägt das Gedächtnis des Workers. *(Betrieb)*
   Kontext. Aber ein blockierender Aufruf, keine eigenständige Session, die man per `SendMessage`
   erreicht.
 - **Agent Teams** (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`): experimentell. *(Doku)*
+- **`start_session` / `hand_off_to_session`** — eine Session startet eine andere ohne Klick,
+  sichtbar in der Seitenleiste. *Geprüft 2026-09-26 an Claude Desktop 2.9939.2 (Windows):* Die
+  Werkzeuge gibt es im Code der App, im Server `ccd_session` neben `spawn_task`. Sie hängen an
+  einem **serverseitigen Feature-Flag** (`2371478310`): Ist es an, fällt `spawn_task` weg und
+  `start_session`, `hand_off_to_session` und `list_start_targets` erscheinen. Ist es aus, gibt es
+  nur den Chip. Keine Einstellung, kein Rechtemodus und keine Umgebungsvariable schaltet es. Der
+  Wunsch, es freizugeben, steht als Issue anthropics/claude-code#94697, geschlossen als
+  „not planned". Die Doku (code.claude.com/docs) nennt die Werkzeuge nicht. Das Flag lokal zu
+  überschreiben hieße, die signierte App zu verändern — nicht Teil des Verfahrens.
+  **Neu bewerten**, sobald `start_session` in einer Session erscheint oder dokumentiert wird.
 
 ## Subagents im Worker
 
@@ -147,6 +158,9 @@ Auf dem Rechner des Menschen abarbeiten, Ergebnis mit Datum und Version oben ein
    `project-foundation:orchestrate-tor` aus dem Worker aufrufbar?
 6. **Annahme ohne Rückfrage:** Laufen Orchestrator und Worker im selben Rechtemodus, kommt ein
    Auftrag ohne Freigabedialog an?
-7. **`local_bg`** (nur falls gewünscht): In einem vertrauten Repo `claude --bg "<kurzer
+7. **`chip`** (Claude Desktop): Chip mit einem kurzen Startprompt vorlegen, anklicken lassen.
+   Startet die Session im richtigen Repo, meldet sie sich mit `WORKER BEREIT`, findet der
+   Orchestrator sie per `list_sessions` am Arbeitsverzeichnis?
+8. **`local_bg`** (nur falls gewünscht): In einem vertrauten Repo `claude --bg "<kurzer
    Auftrag>"` ohne Rechte-Erweiterung. Startet er, erscheint er in `claude agents --json`, ist er
    per `SendMessage` erreichbar?

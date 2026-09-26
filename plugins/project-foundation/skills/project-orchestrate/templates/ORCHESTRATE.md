@@ -18,7 +18,7 @@ orchestrate:
       foundation: <VALID | NOT VALID — erster Block ist ein Vorbereitungsblock | nicht prüfbar>
       self_clear: <ja | nein>    # ja nur, wenn der Worker auf dem Rechner des Orchestrators läuft und dieser ihn per Session-ID wecken kann
   merge_mode: human              # human | orchestrator
-  worker_start: attach           # attach | attach+local_bg
+  worker_start: attach           # attach | attach+local_bg | attach+chip
   max_parallel_blocks: <n>       # Deckel über alle Worker; 1, wenn das Kontingent knapp ist
   gate_max_rounds: 5
   responsibilities:
@@ -36,7 +36,7 @@ orchestrate:
 - **Festgestellt am:** `<Datum>` · **Orchestrator läuft in:** `<Claude Desktop | CLI>` ·
   **Claude Code:** `<Version>`
 - **Remote Control am Orchestrator:** `<verbunden — wie eingeschaltet>`
-- **Worker-Verfahren:** `<attach | attach+local_bg — warum>`
+- **Worker-Verfahren:** `<attach | attach+local_bg | attach+chip — warum>`
 - **Selbst leeren im Worker:** `<möglich und geprüft | nicht verfügbar>` · je Repo in `self_clear`
 - **Sessions auf diesem Rechner auflisten, wecken, Transkript lesen:** `<ja — womit | nein>`
   · Rückweg vor jedem Auftrag und jeder Abnahme: `<Transkript | nur Nachricht>`

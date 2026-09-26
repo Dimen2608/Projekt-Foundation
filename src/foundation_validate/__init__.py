@@ -9,4 +9,4 @@ from foundation_validate.model import Domain, Finding, Severity
 from foundation_validate.validator import validate
 
 __all__ = ["Domain", "Finding", "Severity", "validate"]
-__version__ = "0.5.1"
+__version__ = "0.5.2"

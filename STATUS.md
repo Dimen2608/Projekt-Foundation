@@ -54,7 +54,7 @@ Blocker durch. Das Toolkit prüft sich selbst.
 | --- | --- |
 | Skill `project-foundation` | vollständig |
 | Skill `project-rethink` | vollständig (0.4.0, ADR-0013); `claude plugin validate --strict` grün, Auslöse-Test beider Skills bestanden am 2026-09-11 |
-| Skill `project-orchestrate` | vollständig (0.5.1, ADR-0014, ADR-0015); `claude plugin validate --strict` grün, Auslöse-Test aller drei Skills bestanden am 2026-09-26. Selbst-Leeren auf Claude Desktop geprüft (ADR-0015). **Offen:** Prüfliste in `reference/mechanismen.md` (Rückkanal Worker → Orchestrator über Rechnergrenzen, `/clear` als Nachrichtentext, Plugin-Agents im Worker, optional `claude --bg`) |
+| Skill `project-orchestrate` | vollständig (0.5.2, ADR-0014, ADR-0015); `claude plugin validate --strict` grün, Auslöse-Test aller drei Skills bestanden am 2026-09-26. Selbst-Leeren auf Claude Desktop geprüft (ADR-0015). **Offen:** Prüfliste in `reference/mechanismen.md` (Rückkanal Worker → Orchestrator über Rechnergrenzen, `/clear` als Nachrichtentext, Plugin-Agents im Worker, Start per Chip, optional `claude --bg`). `start_session` hängt an einem serverseitigen Feature-Flag (mechanismen.md) |
 | Vorlagen (13 für Foundation, 7 für Rethink, 4 für Orchestrate) | vollständig |
 | Agents (`rethink-umsetzer`, `rethink-gutachter`, `rethink-zahlenpruefer`, `orchestrate-blockarbeiter`, `orchestrate-tor`) | vollständig; wirken nach `/reload-plugins` |
 | Validator (`foundation_validate`) | vollständig, 45 mögliche Finding-IDs, Abdeckung erzwungen |

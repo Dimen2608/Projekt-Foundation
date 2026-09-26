@@ -109,3 +109,13 @@ Verworfene Alternativen:
 
 Neu zu bewerten, wenn Transkripte auch über Rechnergrenzen lesbar werden oder `SendMessage` eine
 geleerte Session zuverlässig weckt — dann entfällt die Sonderbehandlung für Claude Desktop.
+
+## Nachtrag — 2026-09-26
+
+Worker-Verfahren `chip` ergänzt. Auf Claude Desktop legt der Orchestrator den Startprompt als
+Aufgaben-Chip (`spawn_task` mit `cwd` des Ziel-Repos) vor, der Mensch startet die Session mit
+einem Klick. Der Klick bleibt, weil das Starten ohne Klick (`start_session`,
+`hand_off_to_session`) im Code der App an einem serverseitigen Feature-Flag hängt, das der
+Nutzer nicht schalten kann; die Freigabe ist als anthropics/claude-code#94697 „not planned"
+geschlossen. Befund mit Quelle in `reference/mechanismen.md`. Neu zu bewerten, sobald
+`start_session` in einer Session erscheint.
