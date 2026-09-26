@@ -15,14 +15,14 @@
 | Project Definition | PASS |
 | Architecture | PASS |
 | Development Setup | PASS |
-| AI Foundation | PASS |
+| AI Foundation | WARNING |
 | Documentation | PASS |
 | Testing & Quality | PASS |
 | CI/CD & Infrastructure | PASS |
 | Security | PASS |
 
 Blockers: 0
-Warnings: 0
+Warnings: 1
 
 ## Blocker
 
@@ -30,7 +30,9 @@ Keine.
 
 ## Warnungen
 
-Keine.
+- **Werkzeug-Abdeckung (ADR-0016):** Für „Skill, Agent oder Vorlage schreiben oder ändern" ist
+  kein Werkzeug zuständig; gefunden wurde `plugin-dev` (Anthropic Directory). Installation
+  wartet auf die Entscheidung des Auftraggebers (`CLAUDE.md`, Abschnitt Werkzeuge).
 
 ## Command-Chain
 
@@ -52,9 +54,9 @@ Blocker durch. Das Toolkit prüft sich selbst.
 
 | Bestandteil | Zustand |
 | --- | --- |
-| Skill `project-foundation` | vollständig |
+| Skill `project-foundation` | vollständig; seit 0.6.0 mit Werkzeug-Abdeckung im Review (ADR-0016) |
 | Skill `project-rethink` | vollständig (0.4.0, ADR-0013); `claude plugin validate --strict` grün, Auslöse-Test beider Skills bestanden am 2026-09-11 |
-| Skill `project-orchestrate` | vollständig (0.5.3, ADR-0014, ADR-0015); `claude plugin validate --strict` grün, Auslöse-Test aller drei Skills bestanden am 2026-09-26. Selbst-Leeren und Start per Chip auf Claude Desktop geprüft (ADR-0015). **Offen:** Prüfliste in `reference/mechanismen.md` (Rückkanal Worker → Orchestrator über Rechnergrenzen, `/clear` als Nachrichtentext, Plugin-Agents im Worker, optional `claude --bg`). `start_session` hängt an einem serverseitigen Feature-Flag (mechanismen.md) |
+| Skill `project-orchestrate` | vollständig (0.5.3, ADR-0014, ADR-0015; SETUP Schritt 6 nutzt seit 0.6.0 die Werkzeug-Abdeckung); `claude plugin validate --strict` grün, Auslöse-Test aller drei Skills bestanden am 2026-09-26. Selbst-Leeren und Start per Chip auf Claude Desktop geprüft (ADR-0015). **Offen:** Prüfliste in `reference/mechanismen.md` (Rückkanal Worker → Orchestrator über Rechnergrenzen, `/clear` als Nachrichtentext, Plugin-Agents im Worker, optional `claude --bg`). `start_session` hängt an einem serverseitigen Feature-Flag (mechanismen.md) |
 | Vorlagen (13 für Foundation, 7 für Rethink, 4 für Orchestrate) | vollständig |
 | Agents (`rethink-umsetzer`, `rethink-gutachter`, `rethink-zahlenpruefer`, `orchestrate-blockarbeiter`, `orchestrate-tor`) | vollständig; wirken nach `/reload-plugins` |
 | Validator (`foundation_validate`) | vollständig, 45 mögliche Finding-IDs, Abdeckung erzwungen |

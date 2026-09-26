@@ -123,7 +123,9 @@ SETUP → PLAN → DISPATCH ⇄ GATE → INTEGRATE
      meldet es der Worker in `WORKER BEREIT` (Feld `foundation`). Ohne `FOUNDATION VALID` wird
      der erste Block dieses Repos ein Vorbereitungsblock.
   6. Aufgabenarten des Vorhabens erfragen und je Art den zuständigen Skill oder Agent
-     zuordnen. Zuerst vorhandene prüfen, dann fehlende im Marketplace suchen, jeden Fund
+     zuordnen — nach dem Verfahren „Werkzeug-Abdeckung" aus `project-foundation`
+     (`reference/audit.md`); steht im Zielprojekt schon ein Abschnitt `Werkzeuge`, von dort
+     ausgehen. Zuerst vorhandene prüfen, dann fehlende im Marketplace suchen, jeden Fund
      **einzeln zur Installation vorschlagen**. Nie ohne Bestätigung installieren. Bleibt eine
      Art ohne Zuständigen, steht sie als `general-purpose` mit Begründung in der Tabelle.
 - **Ausgang:** `ORCHESTRATE.md` nach [ORCHESTRATE.md](templates/ORCHESTRATE.md), committet.

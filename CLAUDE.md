@@ -61,6 +61,26 @@ grün sein.
   (Ebene 1, `report.py`) sind festgelegt und werden nicht umformuliert. Sie werden auch
   nicht gegeneinander ausgetauscht: kein Programm gibt `FOUNDATION READY` aus.
 
+## Werkzeuge
+
+Ergebnis der Werkzeug-Abdeckung (ADR-0016), Stand 2026-09-26. Das Repo verlässt sich für
+seinen eigenen Prozess auf das Plugin, das es selbst ausliefert.
+
+| Aufgabenart | Zuständig (Skill/Agent/Werkzeug) | Herkunft |
+| --- | --- | --- |
+| Foundation dieses Repos prüfen und nachziehen | Skill `project-foundation` + `foundation-validate` | Plugin aus diesem Repo (`plugins/`), CLI aus `src/` |
+| Skill, Agent oder Vorlage schreiben oder ändern | keiner | — |
+| Änderung an Skill, Agent oder Vorlage gegenlesen | Subagent als Tor (Opus, frischer Kontext, nur lesend) | eingebauter Agent der Session, kommt nicht mit dem Repo — die eigenen Tor-Agents (`orchestrate-tor`, `rethink-gutachter`) prüfen Bau-Blöcke bzw. Spezifikationen, nicht Skill-Text |
+| Plugin- und Marketplace-Manifest prüfen | `claude plugin validate --strict` | Claude Code CLI |
+
+**Vorgeschlagen:** `plugin-dev` (Anthropic Directory, Herausgeber Anthropic) für „Skill, Agent
+oder Vorlage schreiben oder ändern" — seine Skills `skill-development` und `agent-development`
+und der Agent `skill-reviewer` prüfen Frontmatter, Auslöse-Beschreibung und Aufbau gegen die
+Plugin-Konventionen, die hier bisher nur `claude plugin validate` formal abdeckt. Entscheidung
+offen, siehe `STATUS.md`.
+
+**Abgelehnt:** keine.
+
 ## Stop Conditions
 
 Anhalten und fragen, wenn:

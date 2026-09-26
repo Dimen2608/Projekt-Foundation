@@ -43,6 +43,22 @@
 
 - <Technische oder organisatorische Vorgaben, die nicht verhandelbar sind>
 
+## Werkzeuge
+
+> Nur, wenn das Projekt eigene Skills oder Agents hat (`.claude/skills/`,
+> `.claude/agents/`), sich auf Plugins verlässt oder das Review eine Lücke mit Fund findet
+> (Werkzeug-Abdeckung). Sonst diesen Abschnitt weglassen. Herkunft „Plugin" oder „Benutzer"
+> heißt: kommt nicht mit dem Repo.
+
+| Aufgabenart | Zuständig (Skill/Agent/Werkzeug) | Herkunft |
+| --- | --- | --- |
+| <wiederkehrende Aufgabe> | <Name oder „keiner"> | <Projekt / Plugin … / installiert am JJJJ-MM-TT> |
+
+**Vorgeschlagen:** <Name — für welche Aufgabenart — Nutzen in einem Satz; die offene
+Entscheidung steht in `STATUS.md`>
+
+**Abgelehnt:** <Name — Grund, damit das nächste Review ihn nicht wieder vorschlägt>
+
 ## Stop Conditions
 
 Anhalten und fragen, wenn:

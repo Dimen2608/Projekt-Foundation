@@ -23,6 +23,7 @@ existiert.
 | Security-Konzept | Sind Auth, Datengrenzen und Secret-Handhabung entschieden und dokumentiert? |
 | Deployment | Ist der Weg in Betrieb beschrieben, inklusive Fehlschlag? |
 | AI-Readiness | Siehe Abschnitt 2. |
+| Werkzeug-Abdeckung | Siehe Abschnitt „Werkzeug-Abdeckung" (nach Abschnitt 2). Nur `PASS` oder `WARNING`. |
 | Offene kritische Entscheidungen | Steht etwas offen, das die Implementierung faktisch vorwegnehmen müsste? |
 
 Zwei Regeln für dieses Review:
@@ -77,6 +78,42 @@ Kann eine kritische Frage nicht beantwortet werden: **NOT READY**.
 Der Test wird ehrlich geführt: „steht sinngemäß irgendwo" zählt nicht. Es muss eine
 benennbare Datei geben, die die Frage beantwortet.
 
+## Werkzeug-Abdeckung
+
+Beantwortet: **Welcher Skill oder Agent übernimmt welche wiederkehrende Aufgabenart — und
+fehlt einer, der hier einen benennbaren Nutzen hätte?** Teil der Domäne AI Foundation; kein
+Programm prüft das, weil es Werkzeuge der Session braucht (Marketplace-Suche).
+
+1. **Aufgabenarten bestimmen** — nur wiederkehrende, abgeleitet aus `docs/PROJECT.md`,
+   `docs/ARCHITECTURE.md`, `STATUS.md` und dem Stack (z. B. „Tests für die Spiellogik
+   schreiben", „Android-Export bauen", „Migration anlegen"). Eine einmalige Aufgabe ist
+   keine Art.
+2. **Vorhandenes erfassen** — Skills und Agents des Projekts (`.claude/skills/`,
+   `.claude/agents/`), installierte Plugins und die der Session. Quelle je Eintrag nennen;
+   was nicht mit dem Repo kommt (Plugin, Benutzer- oder Session-Werkzeug), ist in der Spalte
+   Herkunft als solches gekennzeichnet — ein anderer Rechner hat es nicht automatisch.
+3. **Zuordnen** — je Aufgabenart der zuständige Skill oder Agent, oder „keiner". (In
+   `project-orchestrate` wird aus „keiner" ein `general-purpose` mit Begründung, weil dort
+   jeder Block einen Zuständigen braucht.)
+4. **Lücken suchen** — für jede Art ohne Zuständigen im Marketplace suchen (in Claude Code
+   über `/plugin` bzw. die Such-Werkzeuge der Session). Gesucht wird nur, wofür eine Art
+   besteht, nicht ins Blaue.
+5. **Einzeln vorschlagen** — jeden Fund mit Aufgabenart, Nutzen in einem Satz und Quelle.
+   **Nie ohne Bestätigung installieren.** Abgelehnte Funde mit Grund notieren, damit das
+   nächste Review sie nicht wieder vorschlägt.
+6. **Festhalten** — Ergebnis als Abschnitt `Werkzeuge` in `CLAUDE.md` (Skills und Agents
+   sind Claude-spezifisch, deshalb nicht in `AGENTS.md`): Tabelle Aufgabenart · zuständig ·
+   Herkunft, darunter „Vorgeschlagen" und „Abgelehnt"; die offene Entscheidung über einen
+   Vorschlag steht in `STATUS.md`. Nötig nur, wenn das Projekt eigene
+   Skills oder Agents hat (`.claude/skills/`, `.claude/agents/`), sich auf Plugins verlässt
+   oder das Review eine Lücke mit Fund findet.
+   Sonst genügt `PASS` mit einem Satz im Review.
+
+Eine Lücke ist nur dann eine **WARNING**, wenn für eine benannte Aufgabenart ein konkreter
+Skill oder Agent gefunden wurde und sein Nutzen benennbar ist. „Kein Skill für X" ohne Fund ist
+keine Warnung. Ein Skill für eine einzelne Regel ist Overengineering
+(`reference/anti-overengineering.md`), keine Lücke.
+
 ## 3 — Blocker und Warnings
 
 **BLOCKING** — unter anderem:
@@ -99,6 +136,8 @@ benennbare Datei geben, die die Frage beantwortet.
 - Ein bewusst hingenommener Zustand ist nirgends als solcher festgehalten
 - Staging fehlt, ist aber nicht erforderlich
 - Optionale Automatisierung fehlt
+- Eine wiederkehrende Aufgabenart hat keinen zuständigen Skill oder Agent, obwohl ein
+  passender gefunden wurde (Werkzeug-Abdeckung)
 
 Warnings blockieren nicht. Sie werden trotzdem genannt.
 
