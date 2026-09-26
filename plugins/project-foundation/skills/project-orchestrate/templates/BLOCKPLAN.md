@@ -27,7 +27,7 @@
 | `B01` | `<…>` | `<…>` | `—` | `<Skill/Agent>` | `<w1>` | `open` | `0` | `—` |
 
 **Status:** `open` (vergebbar, wenn Abhängigkeiten `done`) · `assigned` (beim Worker, auch nach
-`NACHARBEIT`) · `gate` (Übergabe liegt vor, wird abgenommen) · `done` · `blocked` (`FRAGE` offen, Block bleibt beim Worker)
+`NACHARBEIT`) · `gate` (Übergabe liegt vor, wird abgenommen) · `done` · `blocked` (`FRAGE` offen oder `WARTET` auf Freigabe/Befehl beim Menschen bis `WEITER`, Block bleibt beim Worker)
 · `escalated` (Übergabe `exhausted`: fünf Runden ohne Freigabe oder `NACHARBEIT` nach der
 fünften, liegt beim Menschen).
 **Tor-Runden** trägt der Orchestrator aus der Übergabe ein; gezählt werden sie nur vom Worker.

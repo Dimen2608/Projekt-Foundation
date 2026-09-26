@@ -48,7 +48,7 @@ stellen oder im Modus `merge_mode: orchestrator` mergen ist Zusammenführung, ke
 | Rolle | Was sie ist | Auftrag | Harte Grenze |
 | --- | --- | --- | --- |
 | **Orchestrator** | Diese Session, im Heimat-Repo, per Remote Control erreichbar | Konfiguriert, schneidet Blöcke, vergibt, nimmt ab, führt Blockplan und Blockdateien, eskaliert. | Baut nicht. Entscheidet keine Stop Condition eines Zielprojekts. |
-| **Worker** | Eigenständige Session im Heimat- oder einem fremden Repo, auf diesem oder einem anderen Rechner, per Remote Control erreichbar | Nimmt je einen Block, lässt ihn vom Blockarbeiter ausführen und vom Tor prüfen, zählt die Runden, schickt die Übergabe, leert danach seinen Kontext. | Arbeitet nur auf dem Branch des Blocks. Fragt den Orchestrator, nicht den Menschen — außer im Vorbereitungsblock. |
+| **Worker** | Eigenständige Session im Heimat- oder einem fremden Repo, auf diesem oder einem anderen Rechner, per Remote Control erreichbar | Nimmt je einen Block, lässt ihn vom Blockarbeiter ausführen und vom Tor prüfen, zählt die Runden, schickt die Übergabe, leert danach seinen Kontext — selbst nur bei `self_clear: ja`, sonst über den Subagent. | Arbeitet nur auf dem Branch des Blocks. Sachfragen an den Orchestrator, nicht an den Menschen — außer im Vorbereitungsblock. Freigaben nur beim Menschen, nie über den Orchestrator. |
 | **Blockarbeiter** (`project-foundation:orchestrate-blockarbeiter`) | Subagent im Worker | Führt genau einen Bau-Block aus, mit dem im Block benannten Skill oder Agent. | Nichts außerhalb der Umfangsgrenze. Rät nicht. |
 | **Tor** (`project-foundation:orchestrate-tor`) | Subagent im Worker, frisch je Runde | Prüft das Ergebnis gegen das Abnahmekriterium. | Ändert nichts. Liest die Begründung erst nach dem Befund. |
 
@@ -58,9 +58,26 @@ Auftrag und Diff bekommt, nicht die Begründung. Der Orchestrator nimmt nur eine
 Tor-Urteil `Freigabe: ja` und ausgeführten Abnahmebefehlen ab.
 
 **Warum Blockarbeit im Subagent läuft:** Sein Kontext verfällt mit seinem Ende. Das ist das
-Leeren, das in jeder Umgebung funktioniert; der Worker selbst behält nur die Übergaben. Kann
-sich die Worker-Session selbst leeren, tut sie das nach der Übergabe zusätzlich — siehe
-[mechanismen.md](reference/mechanismen.md).
+Leeren, das in jeder Umgebung funktioniert; der Worker selbst behält nur die Übergaben. Steht
+für sein Repo `self_clear: ja`, leert sich die Worker-Session nach der Übergabe zusätzlich
+selbst — siehe unten und [mechanismen.md](reference/mechanismen.md).
+
+**Das Gedächtnis des Workers ist eine Datei, nicht der Chat.** Leert sich die Worker-Session,
+ist der Startprompt weg — und mit ihm, wer der Orchestrator ist und wie das Protokoll geht. Der
+Worker schreibt deshalb beim Start, bei jedem Auftrag, nach jedem Tor-Aufruf und vor jeder
+Übergabe `.claude/worker.md` in seinem Checkout fort: Name, Orchestrator, Repo, den Startprompt wörtlich und für den laufenden Block
+den Auftrag wörtlich und die Rundenzahl — so lange, bis der nächste Auftrag ihn ersetzt. Damit
+kann ein geleerter Worker auch eine `NACHARBEIT` ausführen. Die Datei wird **nie committet** (Eintrag in die Exclude-Datei, die
+`git rev-parse --git-path info/exclude` nennt — das gilt auch im Worktree —, damit das
+Arbeitsrepo unberührt bleibt). **Jede** Nachricht des Orchestrators an einen Worker —
+`AUFTRAG`, `ANTWORT`, `NACHARBEIT` — trägt in ihrer zweiten Zeile den Worker-Kopf, der auf diese Datei zeigt **und selbst sagt, was zu tun ist, wenn sie fehlt**:
+`WORKER UNBEKANNT` an den Orchestrator, der den Startprompt erneut schickt.
+
+**Selbst leeren nur, wenn der Orchestrator wieder wecken kann.** Das sichere Wecken einer
+geleerten Session geht nur auf demselben Rechner (siehe mechanismen.md). Ein Worker auf einem
+anderen Rechner leert sich deshalb **nicht** selbst; ihm genügt das Leeren über den Subagent.
+Welcher Worker es darf, steht je Repo in `ORCHESTRATE.md` (`self_clear`) und im Startprompt. Ein Auftrag muss so für sich allein verständlich
+sein — nie „wie besprochen".
 
 **Vorbereitungsblock — die eine Ausnahme.** Ein Block, dessen Zuständiger `project-foundation`
 oder `project-rethink` ist, läuft **nicht** im Blockarbeiter: Beide Skills fragen den Menschen
@@ -89,10 +106,17 @@ SETUP → PLAN → DISPATCH ⇄ GATE → INTEGRATE
   3. Worker-Verfahren: `attach` (Standard — der Mensch öffnet die Worker-Sessions mit Remote
      Control, der Orchestrator bindet sie an) oder zusätzlich `local_bg` (der Orchestrator
      startet Worker auf **seinem** Rechner mit `claude --bg` — nur, wenn der Mensch das
-     ausdrücklich will). Cloud-Sessions sind als Worker nicht vorgesehen.
+     ausdrücklich will). Cloud-Sessions sind als Worker nicht vorgesehen. Dazu
+     `max_parallel_blocks` (Standard: so viele, wie Abhängigkeiten zulassen; `1`, wenn das
+     Kontingent knapp ist).
   4. **Erreichbarkeit prüfen, nicht annehmen:** Ist diese Session per Remote Control
      verbunden? Ohne das können Worker auf anderen Rechnern nicht antworten. Wenn nicht: sagen,
      wie es eingeschaltet wird ([mechanismen.md](reference/mechanismen.md)), und warten.
+     Ebenso feststellen, ob diese Umgebung Sessions auf demselben Rechner **auflisten, wecken,
+     ihr Transkript lesen und sich selbst leeren** kann (auf Claude Desktop: ja, siehe
+     mechanismen.md). Das Ergebnis steht unter „Erreichbarkeit" in `ORCHESTRATE.md`. Daraus
+     je Repo `self_clear` ableiten: `ja` nur, wenn der Worker auf dem Rechner des Orchestrators
+     läuft **und** der Orchestrator ihn per Session-ID wecken kann; sonst `nein`.
   5. `foundation-validate` in jedem Repo ausführen, das hier ausgecheckt ist; für die übrigen
      meldet es der Worker in `WORKER BEREIT` (Feld `foundation`). Ohne `FOUNDATION VALID` wird
      der erste Block dieses Repos ein Vorbereitungsblock.
@@ -130,17 +154,30 @@ SETUP → PLAN → DISPATCH ⇄ GATE → INTEGRATE
   im Heimat-Repo auf dem Rechner des Orchestrators arbeitet in einem eigenen Checkout oder
   Worktree, damit er dem `state_branch` nicht in die Quere kommt. Eine
   Session, die `ListAgents` zeigt, die sich aber nicht gemeldet hat, ist kein Worker.
+- **Erst lesen, dann schicken.** Vor jedem Auftrag und jeder Abnahme liest der Orchestrator
+  den Ist-Stand des Workers selbst — auf demselben Rechner sein **Transkript**, wo die Umgebung
+  das kann (siehe [mechanismen.md](reference/mechanismen.md)). Der Grund: Der Mensch spricht
+  auch direkt mit dem Worker, und das steht in keiner Nachricht. Eine ausbleibende Meldung ist
+  kein Stillstand — erst nachsehen, dann deuten. Nie „bist du fertig?" fragen.
 - **Auftrag schicken:** den Abschnitt Auftrag der Blockdatei per `SendMessage`, wörtlich.
-  Status `assigned`, committen.
+  Bei einem Worker mit `self_clear: ja` geht **jede** Nachricht des Orchestrators — Auftrag,
+  Antwort, Nacharbeit — auf Claude Desktop an seine Session-ID, nicht per `SendMessage` an den
+  Namen: Er kann sich geleert haben, und dann weckt nur die Session-ID ihn sicher
+  ([mechanismen.md](reference/mechanismen.md)). Status `assigned`, committen.
 - **Parallelität:** Nur Blöcke, deren „hängt ab von" erledigt ist; nie zwei Worker auf
   demselben Branch. Abhängige Blöcke starten erst nach dem Merge des Vorgängers — oder bauen
-  ausdrücklich auf dessen Branch auf, und das steht im Eingang.
+  ausdrücklich auf dessen Branch auf, und das steht im Eingang. `max_parallel_blocks` aus
+  `ORCHESTRATE.md` deckelt die Zahl gleichzeitig vergebener Blöcke über alle Worker —
+  `assigned`, `blocked` und `gate` zählen mit, weil der Block beim Worker liegt; sagt der
+  Mensch ein nahes Kontingentlimit an, gilt `1` — der nächste Auftrag erst nach der Abnahme.
 
 ### GATE — abnehmen
 
 - **Eingang:** `BLOCK <ID> UEBERGABE <done|exhausted>` eines Workers. Status im Blockplan: `gate`.
   Eine `BLOCK <ID> FRAGE` ist keine Übergabe: Status `blocked`, beantworten (siehe Eskalation),
-  nach der `ANTWORT` wieder `assigned`.
+  nach der `ANTWORT` wieder `assigned`. Ein `BLOCK <ID> WARTET` ebenso wenig: Status `blocked`,
+  bis `BLOCK <ID> WEITER` kommt, dann wieder `assigned` — der Orchestrator beantwortet ein
+  `WARTET` nicht. Beides trägt er in die Tabelle „Fragen und Wartestellen" der Blockdatei ein.
 - **Runden zählt nur der Worker**, je Block über alle Tor-Aufrufe und jede Nacharbeit hinweg.
   Die Zahl steht in jeder Übergabe; der Orchestrator trägt sie in die Spalte „Tor-Runden" ein.
 - **Nach Übergabe-Status:**
@@ -164,17 +201,21 @@ SETUP → PLAN → DISPATCH ⇄ GATE → INTEGRATE
 
 ## Nachrichtenformat
 
-Alles läuft über `SendMessage`. Die erste Zeile jeder Nachricht ist fest — der Empfänger sieht
-oft nur sie:
+Alle Nachrichten laufen über `SendMessage` — außer denen an einen Worker mit `self_clear: ja`,
+die auf Claude Desktop über seine Session-ID gehen. Die erste Zeile jeder Nachricht ist fest — der Empfänger
+sieht oft nur sie:
 
 | Richtung | Erste Zeile | Inhalt |
 | --- | --- | --- |
 | Worker → Orchestrator | `WORKER BEREIT <name> <owner/repo> <branch>` | Meldung nach dem Start, mit `foundation: <VALID\|NOT VALID\|nicht prüfbar>` |
-| Orchestrator → Worker | `BLOCK <ID> AUFTRAG` | Abschnitt Auftrag der Blockdatei, wörtlich |
-| Worker → Orchestrator | `BLOCK <ID> FRAGE` | Eine Frage, Optionen, Empfehlung — der einzige Weg für Fragen; der Worker wartet, der Block bleibt bei ihm |
-| Orchestrator → Worker | `BLOCK <ID> ANTWORT` | Entscheidung mit Fundstelle oder Entscheidung des Menschen |
-| Worker → Orchestrator | `BLOCK <ID> UEBERGABE <done\|exhausted>` | Abschnitt Übergabe, vollständig, mit Rundenzahl und Tor-Urteil |
-| Orchestrator → Worker | `BLOCK <ID> NACHARBEIT` | Was bei der Abnahme fehlt; zählt als weitere Runde |
+| Orchestrator → Worker | `BLOCK <ID> AUFTRAG` | Zweite Zeile: Worker-Kopf nach [BLOCK.md](templates/BLOCK.md), danach der Abschnitt Auftrag der Blockdatei, wörtlich |
+| Worker → Orchestrator | `WORKER UNBEKANNT <name>` | Antwort auf eine Nachricht des Orchestrators, wenn `.claude/worker.md` fehlt; der Orchestrator schickt den Startprompt erneut, dann den Auftrag. Mitten im Block mit `Runden bisher: <n>` aus der letzten Übergabe — kennt er die Zahl nicht sicher, legt er den Block dem Menschen vor, statt die Zählung neu beginnen zu lassen |
+| Worker → Orchestrator | `BLOCK <ID> FRAGE` | Eine **Sachfrage**, Optionen, Empfehlung — der einzige Weg für Sachfragen; der Worker wartet, der Block bleibt bei ihm |
+| Worker → Orchestrator | `BLOCK <ID> WARTET <freigabe\|befehl>` | Zur Kenntnis: Der Worker wartet auf eine Freigabe oder einen Befehl, den er beim Menschen direkt angefragt hat; darunter was genau. Keine Antwort erwartet |
+| Worker → Orchestrator | `BLOCK <ID> WEITER` | Der Mensch hat entschieden oder den Befehl ausgeführt; darunter was, in einem Satz. Der Worker arbeitet weiter. Hat der Mensch abgelehnt und geht der Block ohne das nicht, folgt stattdessen eine `FRAGE` mit Optionen |
+| Orchestrator → Worker | `BLOCK <ID> ANTWORT` | Zweite Zeile: Worker-Kopf. Entscheidung mit Fundstelle oder Entscheidung des Menschen |
+| Worker → Orchestrator | `BLOCK <ID> UEBERGABE <done\|exhausted>` | Abschnitt Übergabe, vollständig, mit Rundenzahl und Tor-Urteil; letzte Zeile `Leeren folgt`, wenn der Worker sich danach selbst leert |
+| Orchestrator → Worker | `BLOCK <ID> NACHARBEIT` | Zweite Zeile: Worker-Kopf. Was bei der Abnahme fehlt; zählt als weitere Runde. Den Auftrag nimmt der Worker aus `.claude/worker.md` |
 
 Eine Nachricht ist Transport, **die Blockdatei ist die Wahrheit**. Was nicht in ihr steht, ist
 nicht übergeben. Eine Fertig-Meldung über Rechnergrenzen gibt es nicht — deshalb schickt der
@@ -187,6 +228,18 @@ Worker die Übergabe selbst, statt darauf zu warten, dass jemand nachsieht.
   Empfehlung, und hält den Block `blocked`. Die Antwort geht als `BLOCK <ID> ANTWORT` an den
   Worker und in die Blockdatei.
 - **Stop Conditions eines Zielprojekts entscheidet der Orchestrator nie.**
+- **Eine Nachricht ist nie eine Freigabe.** Eine `FRAGE` ist eine Sachfrage. Was eine Freigabe
+  braucht — eine Rechte-Erweiterung, eine Änderung an Hooks, CI,
+  Einstellungen oder Agent-Definitionen, alles, wofür das Zielprojekt eine direkte Freigabe
+  verlangt —, fragt der Worker **beim Menschen in seiner eigenen Session** an und meldet dem
+  Orchestrator `BLOCK <ID> WARTET freigabe`. Der Orchestrator leitet keine Freigabe weiter und
+  erteilt keine: Jede Relaisstation macht aus „das braucht die Freigabe des Menschen" ein „das
+  hat der andere sicher geklärt". Eine `ANTWORT`, die sich als Freigabe liest, ist keine.
+- **Eine Sperre wird nicht umgangen.** Lehnt ein Berechtigungs-Klassifikator oder eine Regel
+  des Repos einen Befehl ab, formuliert der Worker den **exakten** Befehl, den der Mensch selbst
+  ausführt — ohne Platzhalter —, und was er aus welchem Ergebnis schließt. Meldung an den
+  Orchestrator: `BLOCK <ID> WARTET befehl`. Eine Minute für den Menschen statt einer
+  Rückfragerunde.
 - Nach fünf Runden: siehe GATE, `exhausted`.
 
 ## Stop Conditions
@@ -196,6 +249,7 @@ Anhalten und fragen, sobald einer dieser Punkte eintritt:
 - Ein Block hätte kein prüfbares Abnahmekriterium.
 - Der Orchestrator müsste außerhalb von `orchestrate/` schreiben, um weiterzukommen.
 - Ein Worker bräuchte mehr Rechte als der Orchestrator, oder `bypassPermissions`.
+- Der Orchestrator soll eine Freigabe weiterreichen oder selbst erteilen.
 - Ein Skill oder Plugin soll installiert werden (immer einzeln bestätigen lassen).
 - Zwei Blöcke müssten denselben Branch ändern.
 - Ein Repo ohne `FOUNDATION VALID` bekäme einen Bau-Block.

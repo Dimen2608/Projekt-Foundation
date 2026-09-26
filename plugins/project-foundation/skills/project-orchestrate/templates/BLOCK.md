@@ -6,7 +6,12 @@
 
 ## Auftrag
 
-Wird wörtlich als `BLOCK <ID> AUFTRAG` an den Worker geschickt. Alle sechs Felder sind Pflicht.
+Wird wörtlich als `BLOCK <ID> AUFTRAG` an den Worker geschickt, mit dem Worker-Kopf als zweiter
+Zeile — der Auftrag muss auch für einen Worker verständlich sein, der gerade geleert wurde.
+Denselben Worker-Kopf tragen `ANTWORT` und `NACHARBEIT`. Alle
+sechs Felder sind Pflicht.
+
+`Worker <name> · Orchestrator <orchestrator-name> · zuerst .claude/worker.md lesen; fehlt sie, nichts tun, an <orchestrator-name> per SendMessage „WORKER UNBEKANNT <name>" melden und auf den Startprompt warten`
 
 - **Ziel:** `<ein Satz>`
 - **Repo/Branch:** `<owner/repo>` · `<branch>`
@@ -16,7 +21,8 @@ Wird wörtlich als `BLOCK <ID> AUFTRAG` an den Worker geschickt. Alle sechs Feld
 - **Abnahmekriterium:** `<prüfbar — z. B. die Befehle, die grün sein müssen, und was sie zeigen>`
 - **Zuständig:** `<Skill oder Agent aus ORCHESTRATE.md>`
 
-**Für den Worker:** Ablauf, Rundenzählung und Übergabe wie im Startprompt (`WORKER-START.md`).
+**Für den Worker:** Ablauf, Rundenzählung und Übergabe wie in deinem Startprompt, den
+`.claude/worker.md` wörtlich enthält.
 Ist `project-foundation` oder `project-rethink` zuständig, ist das ein **Vorbereitungsblock**: Du
 führst ihn selbst aus, nicht im Blockarbeiter, und seine Fragen gehen an den Menschen.
 
@@ -39,10 +45,10 @@ Vom Worker, als `BLOCK <ID> UEBERGABE <done|exhausted>`.
 - **Entscheidungen im Block:** `<was entschieden wurde und auf welcher Grundlage — oder „keine">`
 - **Offen / für Folgeblöcke:** `<höchstens fünf Zeilen, die ein Nachfolger wissen muss>`
 
-## Fragen
+## Fragen und Wartestellen
 
-| Datum | Frage (`BLOCK <ID> FRAGE`) | Antwort (`BLOCK <ID> ANTWORT`) | Grundlage |
-| --- | --- | --- | --- |
+| Datum | Art | Frage (`FRAGE`) oder Wartestelle (`WARTET freigabe\|befehl`) | Antwort (`ANTWORT`) oder Ausgang (`WEITER`) | Grundlage |
+| --- | --- | --- | --- | --- |
 
 ## Tor
 

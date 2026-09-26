@@ -23,7 +23,7 @@ Jeder Bereich ist bewertet mit `RELEVANT`, `NOT REQUIRED`, `FUTURE` oder `UNKNOW
 | Security | RELEVANT | Secret-Hygiene in fremden Projekten (`.env`), kein Secret Scanning — und der Validator schreibt dort nie. |
 | Configuration | RELEVANT | `.project-foundation.yml` im Zielprojekt. |
 | Secrets | NOT REQUIRED | Das Toolkit selbst braucht keine Secrets. |
-| Architecture Decisions | REQUIRED | Verteilung, Sprache, Manifest-Rolle und Report-Wortlaut sind tragende Entscheidungen — ADR-0001 bis ADR-0014. |
+| Architecture Decisions | REQUIRED | Verteilung, Sprache, Manifest-Rolle und Report-Wortlaut sind tragende Entscheidungen — ADR-0001 bis ADR-0015. |
 | Storage | NOT REQUIRED | Nur Dateisystem-Lesezugriffe im Zielprojekt. |
 | Background Jobs | NOT REQUIRED | Ein Lauf ist synchron und in Millisekunden fertig. |
 | Messaging / Events | NOT REQUIRED | Kein verteiltes System. |
@@ -91,7 +91,7 @@ Worker**: Der Blockarbeiter führt einen Block in frischem Kontext aus, der mit 
 verfällt; das Tor prüft danach in einem neuen Aufruf. Ein Vorbereitungsblock (`project-foundation`
 oder `project-rethink`) läuft als einzige Ausnahme im Worker selbst. Übergaben kommen per
 `SendMessage`; die Wahrheit ist die Blockdatei unter `orchestrate/` im Heimat-Repo. Welche Start- und Rückkanäle in welcher Umgebung funktionieren,
-steht mit Quelle, Datum und Version in `skills/project-orchestrate/reference/mechanismen.md` (ADR-0014).
+steht mit Quelle, Datum und Version in `skills/project-orchestrate/reference/mechanismen.md` (ADR-0014); die Befunde aus dem Betrieb auf Claude Desktop — Wecken per Session-ID, Transkript als Rückweg, Selbst-Leeren, Worker-Gedächtnis in `.claude/worker.md` — kamen mit ADR-0015 dazu.
 
 ### Validator (`src/foundation_validate/`)
 

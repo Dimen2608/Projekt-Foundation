@@ -35,8 +35,14 @@ arbeitest du nicht, sondern übergibst sofort mit Status `blocked` und nennst da
   nicht in den Diff.
 - **Keine Entscheidung, die das Repo nicht getroffen hat.** Müsstest du etwas festlegen, das in
   keinem Dokument oder ADR steht, oder berührst du eine Stop Condition des Repos: anhalten,
-  Status `blocked`, die Frage mit Optionen und Empfehlung formulieren.
-- **Kein Merge, kein Force-Push, keine Rechte-Erweiterung.**
+  Status `blocked`, Art `frage`, die Frage mit Optionen und Empfehlung formulieren.
+- **Kein Merge, kein Force-Push, keine Rechte-Erweiterung.** Bräuchtest du eine Freigabe — mehr
+  Rechte, eine Änderung an Hooks, CI, Einstellungen oder Agent-Definitionen, oder etwas, wofür
+  das Repo eine direkte Freigabe verlangt: anhalten, Status `blocked`, Art `freigabe`, genau
+  benennen, was freizugeben ist.
+- **Keine Sperre umgehen.** Lehnt ein Berechtigungs-Klassifikator oder eine Regel des Repos
+  einen Befehl ab: anhalten, Status `blocked`, Art `befehl`, den **exakten** Befehl ohne
+  Platzhalter nennen, den der Mensch selbst ausführt, und was aus welchem Ergebnis folgt.
 - **Tests nicht abschwächen**, um grün zu werden. Ein Test, den du ändern müsstest, ist eine
   Frage, keine Aufgabe.
 - **Deine Schlussantwort ist dein einziger Kanal.**
@@ -50,5 +56,6 @@ in einem Satz ablehnen. Danach die Abnahmebefehle erneut ausführen.
 
 **Status** (`done` / `blocked`) · **Ergebnis** (drei Sätze) · **Commits** ·
 **Geänderte Dateien** · **Abnahmebefehle mit Ausgabe** · **Entscheidungen im Block** (mit
-Grundlage) · **Offen / für Folgeblöcke** (höchstens fünf Zeilen) · bei `blocked`: **Frage,
-Optionen, Empfehlung**
+Grundlage) · **Offen / für Folgeblöcke** (höchstens fünf Zeilen) · bei `blocked`: **Art**
+(`frage` / `freigabe` / `befehl`) und je nach Art **Frage, Optionen, Empfehlung** · **was
+freizugeben ist** · **exakter Befehl und was aus welchem Ergebnis folgt**

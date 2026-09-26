@@ -5,8 +5,10 @@
 > in `SETUP` wird er **erneut festgestellt, nicht übernommen**.
 >
 > Stand: 2026-09-26, Claude Code 2.1.283. Quellen: code.claude.com/docs (`remote-control`,
-> `cross-session-messaging`, `sub-agents`, `headless`, `agent-teams`) und Ausführung in einer
-> Cloud-Session (ADR-0014). **Geprüft** heißt ausgeführt; **Doku** heißt nur gelesen.
+> `cross-session-messaging`, `sub-agents`, `headless`, `agent-teams`), Ausführung in einer
+> Cloud-Session (ADR-0014) und Betrieb auf Claude Desktop (Code-Tab, Windows) in einem Lauf mit
+> einer Kopf- und zwei Arbeits-Sessions vom 2026-08-28 bis 2026-09-26 (ADR-0015). **Geprüft**
+> heißt ausgeführt; **Betrieb** heißt über Wochen im Einsatz; **Doku** heißt nur gelesen.
 
 ## Grundform: Remote Control + `SendMessage`
 
@@ -23,7 +25,7 @@ von Anthropic. *(Doku)*
 | Als Server, wartet auf Verbindungen | `claude remote-control` im Repo-Ordner |
 | Laufende Session | `/remote-control` (bzw. `/rc`) |
 | Dauerhaft für alle Sessions | `/config` → Remote Control für alle Sessions, oder `remoteControlAtStartup: true` in den Einstellungen |
-| Claude Desktop | laut Auftraggeber per `SendMessage` erreichbar — **ungeprüft**, siehe Prüfliste |
+| Claude Desktop | Remote Control je Session einschaltbar; nach dem Wecken einer geleerten Session wieder verbunden *(Betrieb)* |
 
 **Der Orchestrator muss selbst verbunden sein.** Schreibt eine Session ohne Remote Control an
 eine Session auf einem anderen Rechner, hat der Empfänger keine Antwortadresse. *(Doku)*
@@ -44,6 +46,45 @@ eine Session auf einem anderen Rechner, hat der Empfänger keine Antwortadresse.
   zurück, außer der Absender auch. `accept` / `hold` / `refuse` lassen sich fest einstellen —
   **das entscheidet der Mensch je Worker, nicht der Skill.** Stille ist kein Einverständnis:
   Eine zurückgehaltene Nachricht meldet sich beim Absender nicht. *(Doku)*
+
+## Claude Desktop: Sessions auf demselben Rechner
+
+Der Code-Tab von Claude Desktop bringt ein Werkzeug zur Session-Verwaltung mit
+(`mcp__ccd_session_mgmt__*`, per `ToolSearch` zu laden). Es reicht nur auf Sessions **dieses**
+Rechners — Remote-Control-Sessions anderer Rechner kennt es nicht. Für Orchestrator und Worker
+auf einem Rechner ist es der tragende Weg:
+
+| Aufgabe | Werkzeug | Befund |
+| --- | --- | --- |
+| Session-ID eines Workers finden | `list_sessions`, am **Arbeitsverzeichnis** auflösen | *Betrieb.* Nie aus dem Gedächtnis — sie ist die Adresse zum Wecken. |
+| Ruhenden oder geleerten Worker wecken | `send_message` an die Session-ID | *Betrieb.* Weckt zuverlässig. `SendMessage` an den Namen ist nach dem Leeren **nicht sicher** zustellbar. |
+| Wartenden Worker erreichen (`ANTWORT`, `NACHARBEIT`), wenn er sich geleert haben kann | `send_message` an die Session-ID | *Betrieb.* Ein wartender Worker ruht; der Weg ist derselbe wie beim Wecken. |
+| Laufenden Worker mitten im Turn erreichen | `SendMessage` an den Namen | *Betrieb.* Namen fest vergeben (`claude --name`, `/rename`); ohne das leitet sich der Name aus dem Ordner ab und wechselt bei jedem Neustart. Sitzungstitel taugen nicht als Adresse. |
+| Ist-Stand des Workers lesen | `list_events`, bei Suche `search_session_transcripts` | *Betrieb.* Das Transkript enthält **beide** Kanäle — die Nachrichten und das, was der Mensch direkt mit dem Worker bespricht. Die Nachricht allein ist blind für den zweiten: In einer Woche mit anwesendem Menschen standen 154 direkte Rückfragen im Worker gegen 6 Nachrichten an den Kopf. |
+| Selbst leeren | `clear_session` mit `session_id: "self"` | *Geprüft 2026-09-23:* läuft ohne Klick des Menschen; Session-ID, Titel, Modell und Effort bleiben; `list_events` liest weiter; Remote Control ist nach dem Wecken wieder da. |
+| Fremde Session leeren | `clear_session` mit fremder ID | *Geprüft:* verweigert. |
+
+**Warum leeren:** Eine Session liest bei jeder Anfrage ihren ganzen Verlauf mit — gemessen
+250–290k Token gegen 60–70k bei einer frischen. Leeren kostet nichts, `/compact` ist selbst eine
+teure Anfrage. *(Betrieb)*
+
+**Was nach dem Leeren fehlt:** alles, was nur im Chat stand — auch der Startprompt. Was auf der
+Platte steht, bleibt: `CLAUDE.md` oberhalb des Arbeitsverzeichnisses wird bei jedem Start
+geladen, und `.claude/worker.md` trägt das Gedächtnis des Workers. *(Betrieb)*
+
+## Kosten und Grenzen einer Nachricht
+
+- **Jede zugestellte Nachricht kostet Kontingent wie ein getippter Prompt.** Deshalb liest der
+  Orchestrator den Rückweg, statt sich berichten zu lassen. *(Betrieb)*
+- **`notify_when_idle` ist ein einmaliges Abo**, und ein neueres verdrängt ein älteres —
+  höchstens eines gleichzeitig, an den letzten Auftrag einer Runde. Ohne `message` kostet es den
+  Empfänger nichts. Bleibt die Meldung aus, zuerst das eigene Vorgehen verdächtigen. *(Geprüft
+  2026-08-30)*
+- **Eine Nachricht aus einer anderen Session kann keine Zustimmung sein** — das erzwingt das
+  Werkzeug, nicht nur die Hausregel. Sie kann auch keine Konfiguration ändern. *(Betrieb)*
+- **Berechtigungs-Klassifikator:** Er hält Befehle an, die Produktion oder Rechte berühren —
+  im Betrieb dreimal an einem Vormittag. Das ist die Schutzlinie, keine Panne; sie wird nicht
+  umgangen, sondern der Mensch bekommt den exakten Befehl. *(Betrieb)*
 
 ## Worker-Verfahren
 
@@ -80,7 +121,7 @@ eine Session auf einem anderen Rechner, hat der Empfänger keine Antwortadresse.
 | --- | --- | --- |
 | Subagent | immer — sein Kontext verfällt mit dem Ende | Grundlage des Verfahrens |
 | Session, Mensch tippt `/clear` | ja; mit Remote Control sehen alle verbundenen Geräte das | Doku |
-| Session leert sich auf eigene Veranlassung (Claude Desktop) | laut Auftraggeber ja | **ungeprüft**, siehe Prüfliste |
+| Session leert sich auf eigene Veranlassung (Claude Desktop) | ja, `clear_session` mit `"self"` | geprüft 2026-09-23, siehe oben |
 | Cloud-Session | kein Werkzeug dafür; `/compact` verfügbar | geprüft |
 | Fremde Session per Nachricht | nein — Befehle in Nachrichten laufen nicht | Doku |
 
@@ -88,15 +129,19 @@ eine Session auf einem anderen Rechner, hat der Empfänger keine Antwortadresse.
 
 Auf dem Rechner des Menschen abarbeiten, Ergebnis mit Datum und Version oben eintragen:
 
-1. **Orchestrator erreichbar:** Orchestrator auf Claude Desktop oder mit `claude --rc` öffnen.
+1. **Orchestrator erreichbar** *(halb geprüft 2026-09-16: Remote-Control-Sessions eines zweiten
+   Rechners stehen in `ListAgents` und sind per `SendMessage` erreichbar; ihr Transkript ist vom
+   ersten Rechner aus **nicht** lesbar. Die Gegenrichtung ist offen)*: Orchestrator auf Claude Desktop oder mit `claude --rc` öffnen.
    Auf einem **zweiten Rechner** oder in einem anderen Repo einen Worker mit `claude --rc`. Zeigt
    `ListAgents` im Worker den Orchestrator, und umgekehrt?
 2. **Rückkanal:** Worker schickt `WORKER BEREIT test <repo> <branch>`. Kommt sie an, kann der
    Orchestrator mit `BLOCK T1 AUFTRAG` antworten, kommt die Antwort an?
-3. **Selbst leeren auf Desktop:** Im Worker nach einem kleinen Block die Übergabe schicken und
+3. **Selbst leeren auf Desktop** *(geprüft 2026-09-23, siehe „Claude Desktop" oben; nach dem
+   Leeren per Session-ID wecken, nicht per Name)*: Im Worker nach einem kleinen Block die Übergabe schicken und
    sich selbst leeren lassen. Ist der Kontext danach leer (Frage nach einem Detail)? Ist die
    Session unter demselben Namen weiter erreichbar?
-4. **Fremder Befehl:** Vom Orchestrator `/clear` als Nachricht schicken. Erwartet: wird **nicht**
+4. **Fremder Befehl** *(Teilbefund: Leeren einer fremden Session per Werkzeug wird verweigert;
+   `/clear` als Nachrichtentext noch nicht ausdrücklich geprüft)*: Vom Orchestrator `/clear` als Nachricht schicken. Erwartet: wird **nicht**
    ausgeführt.
 5. **Plugin-Agents im Worker:** `project-foundation:orchestrate-blockarbeiter` und danach
    `project-foundation:orchestrate-tor` aus dem Worker aufrufbar?
