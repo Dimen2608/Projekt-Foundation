@@ -99,3 +99,9 @@ Neu zu bewerten, wenn Projekte anfangen, den Ort auf Dateien zu setzen, die kein
 Entscheidungen enthalten, um `REQUIRED` billig zu erfüllen. Dann nicht durch ein zweites
 Format im Validator, sondern durch die Prüfung im Review (Ebene 2), das jeden erklärten Ort
 öffnet.
+
+## Nachtrag — 2026-09-26
+
+Dieselbe Begründung trägt ADR-0017: Ein Bestandsprojekt kann ADRs nicht einfach umbenennen oder
+umgliedern. Deshalb sind dort `NNNN-titel.md` und die deutsche Gliederung gleichwertig. Dieses
+ADR bleibt unverändert.

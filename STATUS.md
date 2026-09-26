@@ -40,7 +40,7 @@ Keine.
 | format (`ruff format --check .`) | ok | 2026-09-26 |
 | lint (`ruff check .`) | ok | 2026-09-26 |
 | typecheck (`mypy`) | ok | 2026-09-26 |
-| test (`pytest`) | ok — 54 Tests | 2026-09-26 |
+| test (`pytest`) | ok — 58 Tests | 2026-09-26 |
 | build | n/a — kein Artefakt (ADR-0006) | — |
 
 ## Foundation-Validierung
@@ -57,7 +57,7 @@ Blocker durch. Das Toolkit prüft sich selbst.
 | Skill `project-orchestrate` | vollständig (0.5.3, ADR-0014, ADR-0015; SETUP Schritt 6 nutzt seit 0.6.0 die Werkzeug-Abdeckung); `claude plugin validate --strict` grün, Auslöse-Test aller drei Skills bestanden am 2026-09-26. Selbst-Leeren und Start per Chip auf Claude Desktop geprüft (ADR-0015). **Offen:** Prüfliste in `reference/mechanismen.md` (Rückkanal Worker → Orchestrator über Rechnergrenzen, `/clear` als Nachrichtentext, Plugin-Agents im Worker, optional `claude --bg`). `start_session` hängt an einem serverseitigen Feature-Flag (mechanismen.md) |
 | Vorlagen (13 für Foundation, 7 für Rethink, 4 für Orchestrate) | vollständig |
 | Agents (`rethink-umsetzer`, `rethink-gutachter`, `rethink-zahlenpruefer`, `orchestrate-blockarbeiter`, `orchestrate-tor`) | vollständig; wirken nach `/reload-plugins` |
-| Validator (`foundation_validate`) | vollständig, 45 mögliche Finding-IDs, Abdeckung erzwungen |
+| Validator (`foundation_validate`) | vollständig, 45 mögliche Finding-IDs, Abdeckung erzwungen; seit 0.7.0 fremde ADR-Nummerierung und deutsche Gliederung gleichwertig (ADR-0017) |
 | Plugin- und Marketplace-Manifest | vollständig |
 | Beispielprojekt `examples/taskflow` | vollständig |
 | Foundation dieses Repos | vollständig |

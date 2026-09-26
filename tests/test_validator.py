@@ -325,6 +325,55 @@ def test_adr_mit_falschem_dateinamen_ist_warnung(project: Path) -> None:
     assert result.valid
 
 
+def test_adr_ohne_praefix_ist_gueltiger_dateiname(project: Path) -> None:
+    """`0002-titel.md` ist gleichwertig zu `ADR-0002-titel.md` (ADR-0017)."""
+    quelle = project / "docs" / "decisions" / "ADR-0001-beispiel.md"
+    (project / "docs" / "decisions" / "0002-beispiel.md").write_text(
+        quelle.read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    result = validate(project)
+    assert "ADR-001" not in {f.finding_id for f in result.warnings}
+    assert result.valid, [str(f) for f in result.blocking]
+
+
+def test_adr_mit_deutscher_gliederung_ist_gueltig(project: Path) -> None:
+    """Kontext, Entscheidung, Folgen und ein deutscher Status genuegen (ADR-0017)."""
+    (project / "docs" / "decisions" / "0002-deutsch.md").write_text(
+        "# 0002 · Deutsch gegliedert\n\n**Status:** **angenommen** — vom User freigegeben\n\n"
+        "## Kontext\nK.\n\n## 2 · Entscheidung\nE.\n\n## Folgen\nF.\n",
+        encoding="utf-8",
+    )
+    (project / "docs" / "decisions" / "ADR-0003-konsequenzen.md").write_text(
+        "# ADR-0003\n\n**Status:** Accepted\n\n## Kontext\nK.\n\n## Entscheidung\nE.\n\n"
+        "## Konsequenzen\nF.\n",
+        encoding="utf-8",
+    )
+    result = validate(project)
+    ids = {f.finding_id for f in result.blocking}
+    assert "ADR-001" not in {f.finding_id for f in result.warnings}
+    assert "ADR-003" not in ids
+    assert "ADR-004" not in ids
+
+
+def test_adr_deutsch_ohne_entscheidung_blockiert(project: Path) -> None:
+    """Die deutsche Gliederung ist gleichwertig, nicht optional."""
+    (project / "docs" / "decisions" / "ADR-0002-ohne-entscheidung.md").write_text(
+        "# 0002\n\n**Status:** angenommen\n\n## Kontext\nK.\n\n## Folgen\nF.\n",
+        encoding="utf-8",
+    )
+    assert "ADR-003" in _ids(project)
+
+
+def test_adr_mit_unbekanntem_deutschen_status_blockiert(project: Path) -> None:
+    """Nur die festgelegten Statuswoerter zaehlen, auch auf Deutsch."""
+    (project / "docs" / "decisions" / "ADR-0002-status.md").write_text(
+        "# 0002\n\n**Status:** vielleicht\n\n## Kontext\nK.\n\n## Entscheidung\nE.\n\n"
+        "## Folgen\nF.\n",
+        encoding="utf-8",
+    )
+    assert "ADR-004" in _ids(project)
+
+
 def test_adr_ohne_status_blockiert(project: Path) -> None:
     (project / "docs" / "decisions" / "ADR-0002-ohne-status.md").write_text(
         "# ADR-0002\n\n## Context\nK.\n\n## Decision\nE.\n\n## Consequences\nF.\n",

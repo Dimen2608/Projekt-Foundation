@@ -87,3 +87,9 @@ Zeile `Architecture Decisions` genannt werden, weil ein Bestandsprojekt mit eine
 ADR-Sammeldatei nicht „umbenennen" kann — die Annahme oben, der Preis sei eine Umbenennung,
 hielt dem dritten Fremdtest nicht stand. Für `README.md`, `docs/PROJECT.md`,
 `docs/ARCHITECTURE.md` und das Manifest gilt dieses ADR unverändert.
+
+## Nachtrag — 2026-09-26
+
+In einem Punkt ergänzt durch ADR-0017: Der Dateiname `NNNN-titel.md` ohne Präfix `ADR-` ist
+kein Beinahe-Treffer mehr, sondern gleichwertig; die Formatprüfung erkennt außerdem deutsche
+Gliederung und deutsche Statuswörter. Für die übrigen Pfade gilt dieses ADR unverändert.

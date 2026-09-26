@@ -5,6 +5,30 @@
 >
 > Neueste Einträge oben.
 
+## 2026-09-26 — ADR-Format: fremde Nummerierung und deutsche Gliederung (0.7.0)
+
+**Anlass**
+
+Im Aufräum-Block eines Bestandsprojekts (21 deutsche ADRs als `0001-titel.md` unter
+`docs/adr/`) war „0 Warnungen" nicht erreichbar: 21 × ADR-001, nach einem Umbenennen bis zu 42
+Blocker. Entscheidung des Auftraggebers: beides zulassen.
+
+**Entschieden (ADR-0017)**
+
+`NNNN-titel.md` gleichwertig zu `ADR-NNNN-titel.md`; Kontext/Entscheidung/Folgen bzw.
+Konsequenzen gleichwertig zu Context/Decision/Consequences; deutsche Statuswörter; Markdown um
+den Status stört nicht mehr. Keine neue Finding-ID, keine Verschiebung von BLOCKING/WARNING.
+
+**Geprüft**
+
+Vier neue Tests. Gegenprobe gegen den alten Code: Dateiname, deutsche Gliederung
+(einschließlich `Konsequenzen` und `**Status:** Accepted` in Fettschrift) und deutsche
+Statuswörter scheitern ohne die Änderung; die beiden Negativtests tragen `ADR-`-Namen, damit sie
+die Abschnitts- und die Statusregel unabhängig vom Dateinamen treffen. Mutationsprobe durch das
+Tor: jeder Alias wird von einem Test geschützt. Die Status-Erkennung überspringt nach Doppelpunkt
+oder Tabellenstrich keine Zeilenumbrüche. Am Bestandsprojekt: 21 Warnungen → 0, dafür ein
+echter Fund (ein ADR ohne Abschnitt „Entscheidung").
+
 ## 2026-09-26 — `plugin-dev` installiert
 
 Vorschlag aus der Werkzeug-Abdeckung angenommen: Der Auftraggeber hat `plugin-dev` (Anthropic

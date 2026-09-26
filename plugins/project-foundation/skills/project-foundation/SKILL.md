@@ -164,7 +164,9 @@ ein Blocker — genau der Fall „fehlendes ADR" aus dem Consistency Audit.
 
 Format: `docs/decisions/ADR-NNNN-kurzer-titel.md`, Abschnitte `Status`, `Context`,
 `Decision`, `Consequences`. Status: `Proposed` / `Accepted` / `Rejected` / `Superseded` /
-`Deprecated`. Vorlage: `templates/ADR.md`.
+`Deprecated`. Vorlage: `templates/ADR.md`. Ein Bestand mit `NNNN-titel.md` und deutscher
+Gliederung (`Kontext`, `Entscheidung`, `Folgen`; Status `angenommen` usw.) ist gleichwertig
+und wird nicht umgebaut (ADR-0017).
 
 ## Stop Conditions
 
