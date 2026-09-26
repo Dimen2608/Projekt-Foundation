@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "Toolkit, das Projekte auf Implementierung durch Menschen und AI-Agents vorbereitet.",
-    "version": "0.6.0"
+    "version": "0.7.0"
   },
   "plugins": [
     {
       "name": "project-foundation",
       "source": "./plugins/project-foundation",
       "description": "Drei Skills, fünf Agents. project-foundation führt ein Projekt durch DISCOVER → ASSESS → ASK → DECIDE → GENERATE → VALIDATE → AUDIT und liefert eine prüfbare Foundation-Ready-Entscheidung. project-rethink führt ein Projekt, dessen Dokumente und Code auseinandergelaufen sind, durch MEASURE → MAP → GAPS → DECIDE → GUARD → HANDOFF zurück in einen entscheidbaren Zustand — sein Ausgang ist der Eingang von DISCOVER. project-orchestrate führt nach FOUNDATION READY aus: SETUP → PLAN → DISPATCH → GATE → INTEGRATE, eine Hauptsession steuert Worker-Sessions in Blöcken mit Tor und Übergabe.",
-      "version": "0.6.0",
+      "version": "0.7.0",
       "category": "workflow",
       "keywords": ["foundation", "architecture", "adr", "documentation", "audit", "rethink", "specification", "orchestration"]
     }

@@ -38,6 +38,18 @@ AREA_STATES = ("RELEVANT", "NOT REQUIRED", "FUTURE", "UNKNOWN")
 #: Status-Werte, die ein ADR annehmen darf.
 ADR_STATES = ("Proposed", "Accepted", "Rejected", "Superseded", "Deprecated")
 
+#: Deutsche Statuswoerter, gleichwertig zu ADR_STATES (ADR-0017). Bestandsprojekte fuehren
+#: ihre ADRs oft deutsch; umbenennen hiesse, jede Entscheidung anzufassen.
+ADR_STATES_DE = (
+    "Vorgeschlagen",
+    "Angenommen",
+    "Abgelehnt",
+    "Abgelöst",
+    "Ersetzt",
+    "Veraltet",
+    "Überholt",
+)
+
 
 @dataclass(frozen=True)
 class Finding:

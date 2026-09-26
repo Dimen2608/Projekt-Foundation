@@ -18,6 +18,7 @@ import yaml
 
 from foundation_validate.model import (
     ADR_STATES,
+    ADR_STATES_DE,
     AREA_STATES,
     DOMAIN_STATES,
     Domain,
@@ -174,8 +175,17 @@ MANIFEST_REQUIRED_KEYS = (
     "foundation.status",
 )
 
-ADR_FILENAME_RE = re.compile(r"^ADR-(\d{4})-[a-z0-9]+(?:-[a-z0-9]+)*\.md$")
+#: `ADR-0001-titel.md` ist die Konvention; `0001-titel.md` ohne Praefix ist gleichwertig
+#: (ADR-0017) - Bestandsprojekte nummerieren oft so und koennen nicht einfach umbenennen.
+ADR_FILENAME_RE = re.compile(r"^(?:ADR-)?(\d{4})-[a-z0-9]+(?:-[a-z0-9]+)*\.md$")
 ADR_SECTIONS = ("Context", "Decision", "Consequences")
+
+#: Je Pflichtabschnitt die gleichwertigen Ueberschriften, englisch zuerst (ADR-0017).
+ADR_SECTION_ALIASES: dict[str, tuple[str, ...]] = {
+    "Context": ("Context", "Kontext"),
+    "Decision": ("Decision", "Entscheidung"),
+    "Consequences": ("Consequences", "Folgen", "Konsequenzen"),
+}
 
 #: Grosszuegiger als ADR_FILENAME_RE: erkennt auch fremde Nummerierungen wie
 #: "0001-titel.md". Nur fuer die Beinahe-Treffer-Meldung, nicht fuer die Pruefung.
@@ -258,8 +268,12 @@ def _dig(data: Any, dotted: str) -> Any:
 def _find_state(text: str, label: str, states: tuple[str, ...]) -> str | None:
     """Sucht `label ... STATE` auf einer Zeile und liefert den ersten Treffer."""
     alternatives = "|".join(re.escape(s) for s in states)
+    # Zwischen Label und Status duerfen Doppelpunkt, Tabellenstrich, Leerraum und
+    # Markdown-Hervorhebung stehen - auch `**Status:** **angenommen**` (ADR-0017). Nach dem
+    # Doppelpunkt oder Tabellenstrich nur auf derselben Zeile; ein Zeilenumbruch direkt nach
+    # dem Label (`## Status` / `Accepted`) bleibt wie bisher erlaubt.
     pattern = re.compile(
-        rf"{re.escape(label)}\s*[:|]?[^\S\n]*\|?[^\S\n]*[*_`]*({alternatives})\b",
+        rf"{re.escape(label)}[*_`]*\s*[:|]?[*_`|\t ]*({alternatives})\b",
         re.IGNORECASE,
     )
     match = pattern.search(text)
@@ -688,7 +702,10 @@ def _check_adrs(root: Path, out: list[Finding]) -> None:
                     finding_id="ADR-001",
                     severity=Severity.WARNING,
                     domain=Domain.ARCHITECTURE,
-                    reason=f"Dateiname {path.name} folgt nicht dem Muster ADR-NNNN-title.md.",
+                    reason=(
+                        f"Dateiname {path.name} folgt nicht dem Muster ADR-NNNN-title.md "
+                        "oder NNNN-title.md."
+                    ),
                     required_action="Datei umbenennen.",
                     location=str(path.relative_to(root)),
                 )
@@ -714,7 +731,10 @@ def _check_adrs(root: Path, out: list[Finding]) -> None:
         missing = [
             section
             for section in ADR_SECTIONS
-            if not re.search(rf"^#{{1,6}}\s.*{section}", text, re.MULTILINE | re.IGNORECASE)
+            if not any(
+                re.search(rf"^#{{1,6}}\s.*{alias}", text, re.MULTILINE | re.IGNORECASE)
+                for alias in ADR_SECTION_ALIASES[section]
+            )
         ]
         if missing:
             out.append(
@@ -723,11 +743,14 @@ def _check_adrs(root: Path, out: list[Finding]) -> None:
                     severity=Severity.BLOCKING,
                     domain=Domain.ARCHITECTURE,
                     reason=f"{path.name} fehlen die Abschnitte: {', '.join(missing)}.",
-                    required_action="Context, Decision und Consequences ergaenzen.",
+                    required_action=(
+                        "Context, Decision und Consequences ergaenzen "
+                        "(gleichwertig: Kontext, Entscheidung, Folgen)."
+                    ),
                     location=str(path.relative_to(root)),
                 )
             )
-        if _find_state(text, "Status", ADR_STATES) is None:
+        if _find_state(text, "Status", ADR_STATES + ADR_STATES_DE) is None:
             out.append(
                 Finding(
                     finding_id="ADR-004",
