@@ -23,10 +23,13 @@ committet im Haupt-Checkout auf seinem `state_branch`.
 1. Prüfe mit `ListAgents`, ob `<orchestrator-name>` gelistet ist. Wenn nicht: sag dem Menschen
    in dieser Session, dass der Orchestrator nicht erreichbar ist (Remote Control an beiden
    Enden?), und warte.
-2. Führe `foundation-validate .` aus (falls installiert) und merke dir das Ergebnis.
+2. Führe `foundation-validate .` aus (falls installiert) und merke dir das Ergebnis. Prüfe,
+   ob die Build- und Test-Befehle des Repos in **deinem** Checkout laufen — ein Worktree
+   bringt ignorierte Dateien (Addons, Caches, lokale Konfiguration) nicht mit. Richte nichts
+   ein, sondern melde, was fehlt.
 3. Melde dich mit einer Nachricht, deren erste Zeile lautet:
    `WORKER BEREIT <name> <owner/repo> <aktueller Branch>`, darunter
-   `foundation: <VALID | NOT VALID | nicht prüfbar>`.
+   `foundation: <VALID | NOT VALID | nicht prüfbar>` und `befehle: <laufen | fehlt: …>`.
 4. Lege dein **Gedächtnis** an: `.claude/worker.md` in deinem Checkout, mit deinem Namen, dem
    Orchestrator, dem Repo und diesem Startprompt wörtlich. Trag `.claude/worker.md` in die
    Exclude-Datei ein, deren Pfad `git rev-parse --git-path info/exclude` nennt (im Worktree ist

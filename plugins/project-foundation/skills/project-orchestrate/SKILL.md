@@ -152,7 +152,9 @@ SETUP → PLAN → DISPATCH ⇄ GATE → INTEGRATE
 - **Worker anbinden:** Je Repo einen Startprompt nach
   [WORKER-START.md](templates/WORKER-START.md) ausgeben. Der Mensch öffnet dort eine Session mit
   Remote Control und fügt ihn ein — oder der Orchestrator startet sie bei `local_bg` selbst,
-  oder er legt sie bei `chip` als Aufgaben-Chip vor, den der Mensch anklickt.
+  oder er legt sie bei `chip` als Aufgaben-Chip vor, den der Mensch anklickt; danach benennt
+  er sie mit `set_session_title` in den Worker-Namen um. Meldet ein Worker `befehle: fehlt`,
+  ist das Einrichten ein eigener Block, bevor er einen Bau-Block bekommt.
   Der Worker meldet sich mit `WORKER BEREIT`; erst dann steht er in `BLOCKPLAN.md`. Ein Worker
   im Heimat-Repo auf dem Rechner des Orchestrators arbeitet in einem eigenen Checkout oder
   Worktree, damit er dem `state_branch` nicht in die Quere kommt. Eine
@@ -210,7 +212,7 @@ sieht oft nur sie:
 
 | Richtung | Erste Zeile | Inhalt |
 | --- | --- | --- |
-| Worker → Orchestrator | `WORKER BEREIT <name> <owner/repo> <branch>` | Meldung nach dem Start, mit `foundation: <VALID\|NOT VALID\|nicht prüfbar>` |
+| Worker → Orchestrator | `WORKER BEREIT <name> <owner/repo> <branch>` | Meldung nach dem Start, mit `foundation: <VALID\|NOT VALID\|nicht prüfbar>` und `befehle: <laufen\|fehlt: …>` |
 | Orchestrator → Worker | `BLOCK <ID> AUFTRAG` | Zweite Zeile: Worker-Kopf nach [BLOCK.md](templates/BLOCK.md), danach der Abschnitt Auftrag der Blockdatei, wörtlich |
 | Worker → Orchestrator | `WORKER UNBEKANNT <name>` | Antwort auf eine Nachricht des Orchestrators, wenn `.claude/worker.md` fehlt; der Orchestrator schickt den Startprompt erneut, dann den Auftrag. Mitten im Block mit `Runden bisher: <n>` aus der letzten Übergabe — kennt er die Zahl nicht sicher, legt er den Block dem Menschen vor, statt die Zählung neu beginnen zu lassen |
 | Worker → Orchestrator | `BLOCK <ID> FRAGE` | Eine **Sachfrage**, Optionen, Empfehlung — der einzige Weg für Sachfragen; der Worker wartet, der Block bleibt bei ihm |
