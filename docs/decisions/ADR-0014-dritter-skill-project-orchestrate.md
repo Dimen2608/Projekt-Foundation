@@ -55,7 +55,8 @@ selten genutzt, ihre Antwort war nicht lesbar, und sie kosten einen Container je
 `bypassPermissions`; ein Worker hat höchstens die Rechte des Orchestrators.
 
 **4. Der Orchestrator läuft auf dem Rechner des Menschen, mit Remote Control.** Ohne das können
-Worker auf anderen Rechnern nicht antworten. `SETUP` prüft das und bricht sonst ab.
+Worker auf anderen Rechnern nicht antworten. `SETUP` prüft das und bricht sonst ab. Ein Worker im
+Heimat-Repo auf demselben Rechner arbeitet in einem eigenen Checkout oder Worktree.
 
 **5. Heimat-Repo plus fremde Repos.** Konfiguration, Blockplan und Blockdateien liegen unter
 `orchestrate/` im Heimat-Repo und werden **committet**, auf einem eigenen `state_branch`, nie auf
@@ -96,10 +97,12 @@ Foundation-Lauf passt nicht in einen Subagent-Kontext; Rethink startet eigene Ag
 Verschachtelungstiefe 1 nicht ginge. Abnahme: `FOUNDATION VALID`, danach das Tor.
 
 **10. Eskalation und Runden.** Fragen eines Workers im Bau-Block gehen an den Orchestrator,
-nicht an den Menschen. Der Orchestrator beantwortet sie, wenn Dokumentation oder ADR des
+nicht an den Menschen — auf genau einem Weg, `BLOCK <ID> FRAGE`; der Block bleibt beim Worker,
+eine Frage ist weder Übergabe noch Runde. Der Orchestrator beantwortet sie, wenn Dokumentation oder ADR des
 Zielprojekts es entscheiden, sonst fragt er den Menschen. Stop Conditions eines Zielprojekts
 entscheidet er nie. **Die Runden zählt nur der Worker**, je Block über jeden Tor-Aufruf und jede
-`NACHARBEIT` des Orchestrators hinweg; höchstens fünf. Danach übergibt er mit `exhausted`, der
+`NACHARBEIT` des Orchestrators hinweg; höchstens fünf, auch eine `NACHARBEIT` nach der fünften
+Runde eröffnet keine sechste. Danach übergibt er mit `exhausted`, der
 Block wird `escalated`, und der Orchestrator legt dem Menschen „weiter oder nicht" mit Pro und
 Contra vor — oder der Mensch entscheidet anders. (Der Rethink-Gutachter bleibt bei zwei Runden:
 Spezifikationsdateien und Bau-Blöcke sind verschiedene Gegenstände.)

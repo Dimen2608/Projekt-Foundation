@@ -22,9 +22,9 @@ führst ihn selbst aus, nicht im Blockarbeiter, und seine Fragen gehen an den Me
 
 ## Übergabe
 
-Vom Worker, als `BLOCK <ID> UEBERGABE <done|blocked|exhausted>`.
+Vom Worker, als `BLOCK <ID> UEBERGABE <done|exhausted>`.
 
-- **Status:** `<done | blocked (Frage offen) | exhausted (fünf Runden ohne Freigabe)>`
+- **Status:** `<done | exhausted (fünf Runden ohne Freigabe)>`
 - **Runden:** `<Anzahl Tor-Aufrufe in diesem Block>`
 - **Ergebnis:** `<drei Sätze, was jetzt anders ist>`
 - **Commits / PR:** `<SHA … · PR-Link>`
@@ -38,7 +38,11 @@ Vom Worker, als `BLOCK <ID> UEBERGABE <done|blocked|exhausted>`.
 
 - **Entscheidungen im Block:** `<was entschieden wurde und auf welcher Grundlage — oder „keine">`
 - **Offen / für Folgeblöcke:** `<höchstens fünf Zeilen, die ein Nachfolger wissen muss>`
-- **Bei `blocked`:** `<Frage, Optionen, Empfehlung>`
+
+## Fragen
+
+| Datum | Frage (`BLOCK <ID> FRAGE`) | Antwort (`BLOCK <ID> ANTWORT`) | Grundlage |
+| --- | --- | --- | --- |
 
 ## Tor
 

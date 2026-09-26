@@ -94,15 +94,15 @@ SETUP → PLAN → DISPATCH ⇄ GATE → INTEGRATE
      verbunden? Ohne das können Worker auf anderen Rechnern nicht antworten. Wenn nicht: sagen,
      wie es eingeschaltet wird ([mechanismen.md](reference/mechanismen.md)), und warten.
   5. `foundation-validate` in jedem Repo ausführen, das hier ausgecheckt ist; für die übrigen
-     fragt es der erste Worker dort. Ohne `FOUNDATION VALID` wird der erste Block dieses Repos
-     ein Vorbereitungsblock.
+     meldet es der Worker in `WORKER BEREIT` (Feld `foundation`). Ohne `FOUNDATION VALID` wird
+     der erste Block dieses Repos ein Vorbereitungsblock.
   6. Aufgabenarten des Vorhabens erfragen und je Art den zuständigen Skill oder Agent
      zuordnen. Zuerst vorhandene prüfen, dann fehlende im Marketplace suchen, jeden Fund
      **einzeln zur Installation vorschlagen**. Nie ohne Bestätigung installieren. Bleibt eine
      Art ohne Zuständigen, steht sie als `general-purpose` mit Begründung in der Tabelle.
 - **Ausgang:** `ORCHESTRATE.md` nach [ORCHESTRATE.md](templates/ORCHESTRATE.md), committet.
-- **Abbruchkriterium:** Diese Session ist nicht per Remote Control erreichbar und kein Worker
-  läuft auf demselben Rechner — dann kann keine Übergabe zurückkommen.
+- **Abbruchkriterium:** Diese Session ist nicht per Remote Control erreichbar — dann kann ein
+  Worker auf einem anderen Rechner nicht antworten.
 - **Wiederholen**, sobald ein Repo, ein Skill oder die Umgebung wechselt.
 
 ### PLAN — Blöcke schneiden
@@ -126,7 +126,9 @@ SETUP → PLAN → DISPATCH ⇄ GATE → INTEGRATE
 - **Worker anbinden:** Je Repo einen Startprompt nach
   [WORKER-START.md](templates/WORKER-START.md) ausgeben. Der Mensch öffnet dort eine Session mit
   Remote Control und fügt ihn ein — oder der Orchestrator startet sie bei `local_bg` selbst.
-  Der Worker meldet sich mit `WORKER BEREIT`; erst dann steht er in `BLOCKPLAN.md`. Eine
+  Der Worker meldet sich mit `WORKER BEREIT`; erst dann steht er in `BLOCKPLAN.md`. Ein Worker
+  im Heimat-Repo auf dem Rechner des Orchestrators arbeitet in einem eigenen Checkout oder
+  Worktree, damit er dem `state_branch` nicht in die Quere kommt. Eine
   Session, die `ListAgents` zeigt, die sich aber nicht gemeldet hat, ist kein Worker.
 - **Auftrag schicken:** den Abschnitt Auftrag der Blockdatei per `SendMessage`, wörtlich.
   Status `assigned`, committen.
@@ -136,7 +138,9 @@ SETUP → PLAN → DISPATCH ⇄ GATE → INTEGRATE
 
 ### GATE — abnehmen
 
-- **Eingang:** `BLOCK <ID> UEBERGABE <status>` eines Workers. Status im Blockplan: `gate`.
+- **Eingang:** `BLOCK <ID> UEBERGABE <done|exhausted>` eines Workers. Status im Blockplan: `gate`.
+  Eine `BLOCK <ID> FRAGE` ist keine Übergabe: Status `blocked`, beantworten (siehe Eskalation),
+  nach der `ANTWORT` wieder `assigned`.
 - **Runden zählt nur der Worker**, je Block über alle Tor-Aufrufe und jede Nacharbeit hinweg.
   Die Zahl steht in jeder Übergabe; der Orchestrator trägt sie in die Spalte „Tor-Runden" ein.
 - **Nach Übergabe-Status:**
@@ -144,9 +148,10 @@ SETUP → PLAN → DISPATCH ⇄ GATE → INTEGRATE
   | Übergabe | Prüfung des Orchestrators | Blockplan |
   | --- | --- | --- |
   | `done` | Tor-Urteil `Freigabe: ja` · jeder Abnahmebefehl mit Ausgabe · keine Datei außerhalb der Umfangsgrenze | erfüllt: `done` · sonst `BLOCK <ID> NACHARBEIT` mit dem fehlenden Punkt, `assigned` |
-  | `blocked` | Frage aus der Übergabe beantworten (siehe Eskalation) | `blocked`, nach der Antwort `assigned` |
   | `exhausted` | Fünf Runden ohne Freigabe erreicht | `escalated`: dem Menschen „weiter oder nicht" mit **Pro und Contra** und Empfehlung vorlegen — oder er entscheidet anders |
 
+- Eine `NACHARBEIT` nach der fünften Runde führt nicht zu einer sechsten: Der Worker übergibt
+  mit `exhausted`.
 - **Ausgang:** Blockdatei mit Übergabe, Tor und Abnahme, Blockplan, committet.
 
 ### INTEGRATE — zusammenführen
@@ -164,11 +169,11 @@ oft nur sie:
 
 | Richtung | Erste Zeile | Inhalt |
 | --- | --- | --- |
-| Worker → Orchestrator | `WORKER BEREIT <name> <owner/repo> <branch>` | Meldung nach dem Start |
+| Worker → Orchestrator | `WORKER BEREIT <name> <owner/repo> <branch>` | Meldung nach dem Start, mit `foundation: <VALID\|NOT VALID\|nicht prüfbar>` |
 | Orchestrator → Worker | `BLOCK <ID> AUFTRAG` | Abschnitt Auftrag der Blockdatei, wörtlich |
-| Worker → Orchestrator | `BLOCK <ID> FRAGE` | Eine Frage, Optionen, Empfehlung — der Worker wartet |
+| Worker → Orchestrator | `BLOCK <ID> FRAGE` | Eine Frage, Optionen, Empfehlung — der einzige Weg für Fragen; der Worker wartet, der Block bleibt bei ihm |
 | Orchestrator → Worker | `BLOCK <ID> ANTWORT` | Entscheidung mit Fundstelle oder Entscheidung des Menschen |
-| Worker → Orchestrator | `BLOCK <ID> UEBERGABE <done\|blocked\|exhausted>` | Abschnitt Übergabe, vollständig, mit Rundenzahl und Tor-Urteil |
+| Worker → Orchestrator | `BLOCK <ID> UEBERGABE <done\|exhausted>` | Abschnitt Übergabe, vollständig, mit Rundenzahl und Tor-Urteil |
 | Orchestrator → Worker | `BLOCK <ID> NACHARBEIT` | Was bei der Abnahme fehlt; zählt als weitere Runde |
 
 Eine Nachricht ist Transport, **die Blockdatei ist die Wahrheit**. Was nicht in ihr steht, ist
@@ -179,7 +184,8 @@ Worker die Übergabe selbst, statt darauf zu warten, dass jemand nachsieht.
 
 - Eine Frage des Workers beantwortet der Orchestrator, wenn Dokumentation oder ADR des
   Zielprojekts sie entscheiden — mit Fundstelle. Sonst fragt er den Menschen, mit Optionen und
-  Empfehlung, und hält den Block `blocked`.
+  Empfehlung, und hält den Block `blocked`. Die Antwort geht als `BLOCK <ID> ANTWORT` an den
+  Worker und in die Blockdatei.
 - **Stop Conditions eines Zielprojekts entscheidet der Orchestrator nie.**
 - Nach fünf Runden: siehe GATE, `exhausted`.
 
