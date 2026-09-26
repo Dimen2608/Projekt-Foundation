@@ -33,9 +33,9 @@ AI-assisted development foundation, currently optimized for **Claude Code** and 
 - a third skill **`project-orchestrate`** for the work after `FOUNDATION READY`: one main
   session steers worker sessions across one or more repos, hands out work as blocks with a
   testable acceptance criterion, has every block checked by a gate, and keeps handoffs and state
-  in its home repo (`SETUP → PLAN → DISPATCH → GATE → INTEGRATE`). Workers are spawned where the
-  environment allows it, otherwise started by hand from a generated prompt. Two agents (block
-  worker, gate) carry the split;
+  in its home repo (`SETUP → PLAN → DISPATCH → GATE → INTEGRATE`). Workers are real sessions —
+  in other repos, on other machines — that you open with Remote Control; orchestrator and
+  workers talk via `SendMessage`. Two agents (block worker, gate) carry the split;
 - a **CLI** (`foundation-validate <path>`) that checks a project for structure, missing
   answers and contradictions. Exit code `0` means `FOUNDATION VALID`, `1` means at least
   one structural blocker.
@@ -77,7 +77,9 @@ Es besteht aus vier Teilen:
   Session: `SETUP → PLAN → DISPATCH → GATE → INTEGRATE`. Eine Hauptsession (Orchestrator)
   steuert Worker-Sessions über ein oder mehrere Repos, vergibt Aufgaben als Blöcke mit
   prüfbarem Abnahmekriterium, lässt jeden Block durch ein Tor prüfen und führt Übergaben und
-  Stand im Heimat-Repo. Zwei Agents (Blockarbeiter, Tor) tragen die Trennung (ADR-0014).
+  Stand im Heimat-Repo. Worker sind echte Sessions, auch in anderen Repos und auf anderen
+  Rechnern, per Remote Control erreichbar; gesprochen wird per `SendMessage`. Zwei Agents
+  (Blockarbeiter, Tor) tragen die Trennung (ADR-0014).
 - **CLI `foundation-validate`** — prüft ein Projekt maschinell auf Struktur, fehlende
   Entscheidungen und Widersprüche und erzeugt den Audit-Report.
 
@@ -207,10 +209,11 @@ Prüfrunde findet dieselben Themen und macht daraus neue Aufgaben —, dann zuer
 ## Wenn ein Vorhaben größer ist als eine Session
 
 Nach `FOUNDATION READY` kann `project-orchestrate` die Ausführung übernehmen. `SETUP` ist ein
-geführtes Interview: Heimat-Repo, weitere Repos, Merge-Modus (Standard: du mergst), wie Worker
-starten, und welcher Skill oder Agent für welche Aufgabenart zuständig ist — fehlende werden
+geführtes Interview: Heimat-Repo, weitere Repos, Merge-Modus (Standard: du mergst), ob der
+Orchestrator per Remote Control erreichbar ist, und welcher Skill oder Agent für welche Aufgabenart zuständig ist — fehlende werden
 gesucht und einzeln zur Installation vorgeschlagen. Danach schneidet der Orchestrator Blöcke,
-vergibt sie, nimmt Übergaben erst nach dem Tor ab und führt alles unter `orchestrate/` im
+vergibt sie an Worker-Sessions, die du mit Remote Control in den Ziel-Repos öffnest und die sich
+per `SendMessage` melden, nimmt Übergaben erst nach dem Tor ab und führt alles unter `orchestrate/` im
 Heimat-Repo. Er baut selbst nicht, und er ist kein Projektmanagement: keine Termine, keine
 Roadmap (ADR-0014).
 

@@ -16,9 +16,9 @@
 
 ## Worker
 
-| Name | Repo | Branch | Gestartet über | Seit | Aktueller Block |
+| Name (wie `ListAgents` ihn zeigt) | Repo | Rechner | Angebunden über | Seit | Aktueller Block |
 | --- | --- | --- | --- | --- | --- |
-| `<w1>` | `<owner/repo>` | `<branch>` | `<cloud_spawn / local_bg / manual>` | `<Datum>` | `<ID oder —>` |
+| `<w1>` | `<owner/repo>` | `<Rechner>` | `<attach / local_bg>` | `<Datum>` | `<ID oder —>` |
 
 ## Blöcke
 
@@ -26,9 +26,10 @@
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `B01` | `<…>` | `<…>` | `—` | `<Skill/Agent>` | `<w1>` | `open` | `0` | `—` |
 
-**Status:** `open` (vergebbar, wenn Abhängigkeiten `done`) · `assigned` · `gate` (Übergabe
-liegt vor, wird abgenommen) · `done` · `blocked` (wartet auf Antwort) · `escalated` (nach fünf
-Tor-Runden beim Menschen).
+**Status:** `open` (vergebbar, wenn Abhängigkeiten `done`) · `assigned` (beim Worker, auch nach
+`NACHARBEIT`) · `gate` (Übergabe liegt vor, wird abgenommen) · `done` · `blocked` (Frage offen)
+· `escalated` (Übergabe `exhausted`: fünf Runden ohne Freigabe, liegt beim Menschen).
+**Tor-Runden** trägt der Orchestrator aus der Übergabe ein; gezählt werden sie nur vom Worker.
 
 ## Regeln
 

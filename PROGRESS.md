@@ -9,8 +9,9 @@
 
 **Anlass**
 
-Wunsch des Auftraggebers: ein Multi-Session-System — ein Orchestrator steuert andere Sessions
-und startet sie wenn möglich selbst; Aufgaben immer als Blöcke; am Ende jedes Blocks eine
+Wunsch des Auftraggebers: ein Multi-Session-System — ein Orchestrator steuert andere Sessions,
+echte Sessions auch in anderen Repos, per Remote Control erreichbar und per `SendMessage`
+ansprechbar; Aufgaben immer als Blöcke; am Ende jedes Blocks eine
 Übergabe an die Hauptsession, danach leert die Unter-Session ihren Kontext. Vorher prüfen, was
 Claude Code heute kann, und offene Fragen per Interview klären.
 
@@ -25,13 +26,15 @@ Claude Code heute kann, und offene Fragen per Interview klären.
 - Subagent-Tiefe in der Cloud 1 (Doku: 3); Agent Teams experimentell; kein Werkzeug zum
   Selbst-Leeren in der Cloud.
 
-**Entschieden (ADR-0014)**, in einem Interview mit 18 Fragen, je mit Empfehlung
+**Entschieden (ADR-0014)**, in einem Interview mit 20 Fragen, je mit Empfehlung
 
 Worker sind eigenständige Sessions, Blockarbeit läuft in einem Subagent (dessen Ende ist das
-Leeren); Worker-Start in der Stufenfolge Cloud-Spawn → `claude --bg` → Handstart mit Startprompt;
-Heimat-Repo plus fremde Repos, alles unter `orchestrate/` committet; Übergabe per `SendMessage`,
-die Blockdatei ist die Wahrheit, ohne Rückkanal als Datei im Worker-Branch; der Orchestrator
-baut nicht; Tor je Block, höchstens fünf Runden, dann Vorlage mit Pro und Contra; parallel nur
+Leeren); Worker werden angebunden, nicht gespawnt — der Mensch öffnet sie mit Remote Control,
+`claude --bg` nur auf Wunsch, Cloud-Sessions sind als Worker nicht vorgesehen; der Orchestrator
+läuft mit Remote Control; Heimat-Repo plus fremde Repos, alles unter `orchestrate/` auf einem
+`state_branch` committet; Übergabe per `SendMessage`, die Blockdatei ist die Wahrheit; der
+Orchestrator baut nicht; Tor je Block, Runden zählt nur der Worker, höchstens fünf, dann
+`exhausted` und Vorlage mit Pro und Contra; Vorbereitungsblöcke laufen im Worker selbst; parallel nur
 ohne offene Abhängigkeit und nie zwei Worker auf einem Branch; sechs Pflichtfelder je Block;
 Merge-Modus konfigurierbar (Standard: der Mensch mergt); `SETUP` als Installer-Interview, das
 Skills sucht und einzeln zur Installation vorschlägt; `FOUNDATION VALID` je Repo, sonst ist der
@@ -51,16 +54,24 @@ erste Block die Foundation. Keine Validator-Änderung, keine Finding-ID, `schema
 
 Format, Lint, Typecheck und 54 Tests grün; `foundation-validate .` und `examples/taskflow`
 weiterhin `FOUNDATION VALID`; `claude plugin validate --strict` grün für Plugin und
-Marketplace. Headless mit `--plugin-dir`: alle fünf Agents registriert. **Auslöse-Test**, je ein
+Marketplace. Headless mit `--plugin-dir`: alle fünf Agents registriert. Gegenlesung durch einen
+Opus-Gutachter: vier blockierende Funde — Runden doppelt gezählt und Statuswerte uneindeutig,
+Cloud-Worker ohne durchgehenden Kanal, Übergabe-Datei im Worker-Branch außerhalb der
+Umfangsgrenze, Foundation-Block im Subagent nicht ausführbar —, alle behoben (die letzten drei
+durch die Entscheidungen „keine Cloud-Worker" und „Vorbereitungsblock im Worker"); dazu
+Push vor dem Tor, Basis-Commit im Eingang, FR-1-Zitat, `Purpose` und ADR-Zählung. **Auslöse-Test**, je ein
 Satz, der nicht wörtlich in den Beschreibungen steht: Foundation-Satz → `project-foundation`,
 Rethink-Satz → `project-rethink`, „Hauptsitzung soll die Arbeit aufteilen, andere Sitzungen in
 Frontend- und Backend-Repo beauftragen und die Ergebnisse einsammeln" → `project-orchestrate`,
-„Tippfehler in der README" → keiner.
+„Tippfehler in der README" → keiner. Nach der Änderung der `description` (Remote Control)
+wiederholt, mit „auf Notebook und Desktop je eine Sitzung in unterschiedlichen Repos, diese soll
+sie steuern, Arbeitspakete schicken, Ergebnisse einsammeln" → `project-orchestrate`; die übrigen
+unverändert.
 
 **Offen**
 
-Die Prüfliste in `reference/mechanismen.md` — vor allem Rückkanal und Selbst-Leeren auf Claude
-Desktop, die hier nicht prüfbar waren.
+Die Prüfliste in `reference/mechanismen.md` — vor allem Rückkanal über Rechnergrenzen und
+Selbst-Leeren auf Claude Desktop, die aus der Cloud-Session nicht prüfbar waren.
 
 ## 2026-09-11 — Zweiter Skill `project-rethink`, das Plugin liefert Agents aus (0.4.0)
 

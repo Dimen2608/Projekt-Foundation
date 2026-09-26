@@ -1,21 +1,23 @@
 # Orchestrierung — Konfiguration
 
-> Ergebnis von `SETUP`. Beantwortet: **Welche Repos, wer mergt, wie starten Worker, wer ist für
-> welche Aufgabenart zuständig?** Der YAML-Block ist für den Orchestrator, der Text darunter für
-> Menschen. Bei jeder Änderung an Repos, Skills oder Umgebung `SETUP` wiederholen.
+> Ergebnis von `SETUP`. Beantwortet: **Welche Repos, wer mergt, wie kommen Worker dazu, wer ist
+> für welche Aufgabenart zuständig?** Der YAML-Block ist für den Orchestrator, der Text darunter
+> für Menschen. Bei jeder Änderung an Repos, Skills oder Umgebung `SETUP` wiederholen.
 
 ```yaml
 orchestrate:
   folder: orchestrate            # Ort von BLOCKPLAN.md und bloecke/
   home_repo: <owner/repo>
+  state_branch: <orchestrate>    # hier committet der Orchestrator, nie auf einem Worker-Branch
+  orchestrator_session: <Name, wie ListAgents ihn zeigt>
   repos:
     - name: <owner/repo>
       purpose: <ein Satz>
       default_branch: <main>
-      foundation: <VALID | NOT VALID — erster Block ist project-foundation/-rethink>
+      machine: <auf welchem Rechner der Worker läuft>
+      foundation: <VALID | NOT VALID — erster Block ist ein Vorbereitungsblock | unbekannt>
   merge_mode: human              # human | orchestrator
-  worker_start: <cloud_spawn | local_bg | manual>
-  back_channel: <send_message | branch_file>
+  worker_start: attach           # attach | attach+local_bg
   gate_max_rounds: 5
   responsibilities:
     - task_type: <z. B. Backend-Endpunkt>
@@ -25,20 +27,20 @@ orchestrate:
 
 ## Repos
 
-`<Je Repo ein Satz: wofür es da ist und warum es eingebunden ist.>`
+`<Je Repo ein Satz: wofür es da ist, warum es eingebunden ist, auf welchem Rechner.>`
 
-## Worker-Verfahren
+## Erreichbarkeit
 
-- **Festgestellt am:** `<Datum>` · **Umgebung:** `<Cloud | Desktop | CLI lokal>` ·
+- **Festgestellt am:** `<Datum>` · **Orchestrator läuft in:** `<Claude Desktop | CLI>` ·
   **Claude Code:** `<Version>`
-- **Stufe:** `<welche Stufe aus mechanismen.md, und warum die höheren nicht verfügbar sind>`
-- **Rückkanal:** `<SendMessage | Übergabe-Datei im Worker-Branch>`
-- **Selbst leeren:** `<möglich und geprüft | nicht verfügbar>`
+- **Remote Control am Orchestrator:** `<verbunden — wie eingeschaltet>`
+- **Worker-Verfahren:** `<attach | attach+local_bg — warum>`
+- **Selbst leeren im Worker:** `<möglich und geprüft | nicht verfügbar>`
 
 ## Zusammenführung
 
-`<human: Du mergst jeden PR. | orchestrator: Der Orchestrator mergt nach Tor-Ja und grüner CI —
-warum hier vertretbar.>`
+`<human: Der Mensch mergt jeden PR. | orchestrator: Der Orchestrator mergt nach Tor-Ja und
+grüner CI — warum hier vertretbar.>`
 
 ## Zuständigkeiten
 

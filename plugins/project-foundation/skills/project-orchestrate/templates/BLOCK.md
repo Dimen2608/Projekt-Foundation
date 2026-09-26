@@ -10,21 +10,22 @@ Wird wörtlich als `BLOCK <ID> AUFTRAG` an den Worker geschickt. Alle sechs Feld
 
 - **Ziel:** `<ein Satz>`
 - **Repo/Branch:** `<owner/repo>` · `<branch>`
-- **Eingang:** `<worauf der Block aufbaut: Commit, Vorgängerblock, Dateien, die zu lesen sind>`
+- **Eingang:** Basis-Commit `<SHA>` · `<worauf der Block aufbaut: Vorgängerblock, Dateien, die zu
+  lesen sind>`
 - **Umfangsgrenze:** `<was ausdrücklich nicht dazugehört>`
 - **Abnahmekriterium:** `<prüfbar — z. B. die Befehle, die grün sein müssen, und was sie zeigen>`
 - **Zuständig:** `<Skill oder Agent aus ORCHESTRATE.md>`
 
-**Für den Worker:** Führe den Block mit `project-foundation:orchestrate-blockarbeiter` aus,
-danach das Tor mit `project-foundation:orchestrate-tor` in einem frischen Aufruf, dem du
-Auftrag und Diff gibst, nicht die Begründung. Fragen gehen als `BLOCK <ID> FRAGE` an den
-Orchestrator, nie an den Menschen.
+**Für den Worker:** Ablauf, Rundenzählung und Übergabe wie im Startprompt (`WORKER-START.md`).
+Ist `project-foundation` oder `project-rethink` zuständig, ist das ein **Vorbereitungsblock**: Du
+führst ihn selbst aus, nicht im Blockarbeiter, und seine Fragen gehen an den Menschen.
 
 ## Übergabe
 
-Vom Worker, als `BLOCK <ID> UEBERGABE <done|blocked|aborted>`.
+Vom Worker, als `BLOCK <ID> UEBERGABE <done|blocked|exhausted>`.
 
-- **Status:** `<done | blocked | aborted>`
+- **Status:** `<done | blocked (Frage offen) | exhausted (fünf Runden ohne Freigabe)>`
+- **Runden:** `<Anzahl Tor-Aufrufe in diesem Block>`
 - **Ergebnis:** `<drei Sätze, was jetzt anders ist>`
 - **Commits / PR:** `<SHA … · PR-Link>`
 - **Geänderte Dateien:** `<Liste>`
@@ -37,6 +38,7 @@ Vom Worker, als `BLOCK <ID> UEBERGABE <done|blocked|aborted>`.
 
 - **Entscheidungen im Block:** `<was entschieden wurde und auf welcher Grundlage — oder „keine">`
 - **Offen / für Folgeblöcke:** `<höchstens fünf Zeilen, die ein Nachfolger wissen muss>`
+- **Bei `blocked`:** `<Frage, Optionen, Empfehlung>`
 
 ## Tor
 
@@ -52,4 +54,4 @@ Freigabe>`
 - [ ] Tor-Urteil `Freigabe: ja`
 - [ ] Jeder Abnahmebefehl mit Ausgabe belegt
 - [ ] Keine Datei außerhalb der Umfangsgrenze geändert
-- **Ergebnis:** `<done | zurück an Worker (Runde n) | escalated>` · **Datum:** `<…>`
+- **Ergebnis:** `<done | NACHARBEIT (was fehlt) | escalated>` · **Datum:** `<…>`

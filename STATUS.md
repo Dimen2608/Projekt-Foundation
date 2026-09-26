@@ -54,7 +54,7 @@ Blocker durch. Das Toolkit prüft sich selbst.
 | --- | --- |
 | Skill `project-foundation` | vollständig |
 | Skill `project-rethink` | vollständig (0.4.0, ADR-0013); `claude plugin validate --strict` grün, Auslöse-Test beider Skills bestanden am 2026-09-11 |
-| Skill `project-orchestrate` | vollständig (0.5.0, ADR-0014); `claude plugin validate --strict` grün, Auslöse-Test aller drei Skills bestanden am 2026-09-26. **Offen:** Prüfliste in `reference/mechanismen.md` (Rückkanal und Selbst-Leeren auf Claude Desktop, Hintergrundstart, Cloud-Spawn mit Probeblock) |
+| Skill `project-orchestrate` | vollständig (0.5.0, ADR-0014); `claude plugin validate --strict` grün, Auslöse-Test aller drei Skills bestanden am 2026-09-26. **Offen:** Prüfliste in `reference/mechanismen.md` (Remote-Control-Rückkanal über Rechnergrenzen, Selbst-Leeren auf Claude Desktop, Plugin-Agents im Worker, optional `claude --bg`) |
 | Vorlagen (13 für Foundation, 7 für Rethink, 4 für Orchestrate) | vollständig |
 | Agents (`rethink-umsetzer`, `rethink-gutachter`, `rethink-zahlenpruefer`, `orchestrate-blockarbeiter`, `orchestrate-tor`) | vollständig; wirken nach `/reload-plugins` |
 | Validator (`foundation_validate`) | vollständig, 45 mögliche Finding-IDs, Abdeckung erzwungen |

@@ -7,7 +7,8 @@
 
 Ein wiederverwendbares Toolkit, das beliebige Software-Projekte in einen Zustand bringt,
 in dem Menschen und AI-Agents ohne Rückfragen und ohne Raten arbeiten können — mit dem
-kleinstmöglichen Satz an Dokumenten, der dafür ausreicht.
+kleinstmöglichen Satz an Dokumenten, der dafür ausreicht — und das, wenn ein Vorhaben größer ist
+als eine Session, die Ausführung danach in Blöcken über mehrere Sessions steuert.
 
 ## Problem
 

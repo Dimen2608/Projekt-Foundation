@@ -48,7 +48,7 @@ in einem Satz ablehnen. Danach die Abnahmebefehle erneut ausführen.
 
 ## Ausgabeform
 
-**Status** (`done` / `blocked` / `aborted`) · **Ergebnis** (drei Sätze) · **Commits** ·
+**Status** (`done` / `blocked`) · **Ergebnis** (drei Sätze) · **Commits** ·
 **Geänderte Dateien** · **Abnahmebefehle mit Ausgabe** · **Entscheidungen im Block** (mit
 Grundlage) · **Offen / für Folgeblöcke** (höchstens fünf Zeilen) · bei `blocked`: **Frage,
 Optionen, Empfehlung**

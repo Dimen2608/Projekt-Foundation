@@ -23,7 +23,7 @@ Jeder Bereich ist bewertet mit `RELEVANT`, `NOT REQUIRED`, `FUTURE` oder `UNKNOW
 | Security | RELEVANT | Secret-Hygiene in fremden Projekten (`.env`), kein Secret Scanning — und der Validator schreibt dort nie. |
 | Configuration | RELEVANT | `.project-foundation.yml` im Zielprojekt. |
 | Secrets | NOT REQUIRED | Das Toolkit selbst braucht keine Secrets. |
-| Architecture Decisions | REQUIRED | Verteilung, Sprache, Manifest-Rolle und Report-Wortlaut sind tragende Entscheidungen — ADR-0001 bis ADR-0013. |
+| Architecture Decisions | REQUIRED | Verteilung, Sprache, Manifest-Rolle und Report-Wortlaut sind tragende Entscheidungen — ADR-0001 bis ADR-0014. |
 | Storage | NOT REQUIRED | Nur Dateisystem-Lesezugriffe im Zielprojekt. |
 | Background Jobs | NOT REQUIRED | Ein Lauf ist synchron und in Millisekunden fertig. |
 | Messaging / Events | NOT REQUIRED | Kein verteiltes System. |
@@ -84,13 +84,14 @@ lesend" — die Sperre ist damit begrenzt, nicht erzwungen, weil `Bash` bleibt.
 Änderungen an einer Agent-Definition wirken erst nach `/reload-plugins` oder Neustart.
 
 **Orchestrate.** Der Orchestrator ist eine Session im Heimat-Repo, die Worker sind
-eigenständige Sessions — keine Agents dieses Plugins. Die Agents `orchestrate-blockarbeiter`
+eigenständige Sessions — keine Agents dieses Plugins —, auch in anderen Repos und auf anderen
+Rechnern; alle mit Remote Control verbunden und per `SendMessage` im Gespräch. Die Agents `orchestrate-blockarbeiter`
 (schreibt) und `orchestrate-tor` (lesend, `isolation: worktree`) laufen als Subagents **im
 Worker**: Der Blockarbeiter führt einen Block in frischem Kontext aus, der mit seinem Ende
-verfällt; das Tor prüft danach in einem neuen Aufruf. Übergaben kommen per `SendMessage` oder,
-ohne Rückkanal, als Datei im Worker-Branch; die Wahrheit ist die Blockdatei unter
-`orchestrate/` im Heimat-Repo. Welche Start- und Rückkanäle in welcher Umgebung funktionieren,
-steht mit Datum und Version in `skills/project-orchestrate/reference/mechanismen.md` (ADR-0014).
+verfällt; das Tor prüft danach in einem neuen Aufruf. Ein Vorbereitungsblock (`project-foundation`
+oder `project-rethink`) läuft als einzige Ausnahme im Worker selbst. Übergaben kommen per
+`SendMessage`; die Wahrheit ist die Blockdatei unter `orchestrate/` im Heimat-Repo. Welche Start- und Rückkanäle in welcher Umgebung funktionieren,
+steht mit Quelle, Datum und Version in `skills/project-orchestrate/reference/mechanismen.md` (ADR-0014).
 
 ### Validator (`src/foundation_validate/`)
 
