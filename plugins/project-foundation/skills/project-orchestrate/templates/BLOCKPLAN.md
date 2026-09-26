@@ -28,7 +28,8 @@
 
 **Status:** `open` (vergebbar, wenn Abhängigkeiten `done`) · `assigned` (beim Worker, auch nach
 `NACHARBEIT`) · `gate` (Übergabe liegt vor, wird abgenommen) · `done` · `blocked` (`FRAGE` offen, Block bleibt beim Worker)
-· `escalated` (Übergabe `exhausted`: fünf Runden ohne Freigabe, liegt beim Menschen).
+· `escalated` (Übergabe `exhausted`: fünf Runden ohne Freigabe oder `NACHARBEIT` nach der
+fünften, liegt beim Menschen).
 **Tor-Runden** trägt der Orchestrator aus der Übergabe ein; gezählt werden sie nur vom Worker.
 
 ## Regeln

@@ -24,7 +24,7 @@ führst ihn selbst aus, nicht im Blockarbeiter, und seine Fragen gehen an den Me
 
 Vom Worker, als `BLOCK <ID> UEBERGABE <done|exhausted>`.
 
-- **Status:** `<done | exhausted (fünf Runden ohne Freigabe)>`
+- **Status:** `<done | exhausted (fünf Runden ohne Freigabe, oder NACHARBEIT nach der fünften Runde)>`
 - **Runden:** `<Anzahl Tor-Aufrufe in diesem Block>`
 - **Ergebnis:** `<drei Sätze, was jetzt anders ist>`
 - **Commits / PR:** `<SHA … · PR-Link>`

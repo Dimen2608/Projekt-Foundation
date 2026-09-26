@@ -15,7 +15,7 @@ orchestrate:
       purpose: <ein Satz>
       default_branch: <main>
       machine: <auf welchem Rechner der Worker läuft>
-      foundation: <VALID | NOT VALID — erster Block ist ein Vorbereitungsblock | unbekannt>
+      foundation: <VALID | NOT VALID — erster Block ist ein Vorbereitungsblock | nicht prüfbar>
   merge_mode: human              # human | orchestrator
   worker_start: attach           # attach | attach+local_bg
   gate_max_rounds: 5
