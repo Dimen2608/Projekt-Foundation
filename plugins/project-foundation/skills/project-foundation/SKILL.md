@@ -100,6 +100,7 @@ festen Dateisatz. Ein Artefakt wird angelegt, weil eine Frage sonst unbeantworte
 | Wie ist es strukturiert? | `docs/ARCHITECTURE.md` | immer |
 | Woran erkennt ein Werkzeug die Foundation? | `.project-foundation.yml` | immer |
 | Was muss ein AI-Agent wissen? | `CLAUDE.md` **oder** `AGENTS.md` | immer — dieses Werkzeug setzt AI-gestützte Entwicklung voraus |
+| Welcher Skill oder Agent übernimmt welche wiederkehrende Aufgabenart? | Abschnitt `Werkzeuge` in `CLAUDE.md` | wenn das Projekt eigene Skills oder Agents hat (`.claude/skills/`, `.claude/agents/`), sich auf Plugins verlässt oder das Review eine Lücke mit Fund findet (`reference/audit.md`, Werkzeug-Abdeckung) |
 | Warum wurde eine tragende Entscheidung so getroffen? | `docs/decisions/ADR-NNNN-*.md` | nur wenn es eine tragende Entscheidung gibt |
 | Was gilt gerade — Blocker, Command-Chain, offene Punkte? | `STATUS.md` | wenn der Zustand nicht ohnehin sichtbar ist |
 | Werkzeugspezifische Regeln für Cursor | `.cursor/rules/*.mdc` | nur bei Cursor-Einsatz |
@@ -219,5 +220,5 @@ Bei Bedarf gezielt nachladen — nicht alles vorab lesen:
 | `reference/phases.md` | Jede Phase im Detail, inkl. Discovery-Checkliste und Architektur-Bereichsliste |
 | `reference/quality-gates.md` | Foundation-, Change-, Architecture- und Security-Gate |
 | `reference/anti-overengineering.md` | Prüffragen gegen unnötige Tests, Abstraktionen, Infrastruktur |
-| `reference/audit.md` | AI-Readiness-Test, Blocker-Katalog, exaktes Report-Format |
+| `reference/audit.md` | AI-Readiness-Test, Werkzeug-Abdeckung, Blocker-Katalog, exaktes Report-Format |
 | `templates/` | Vorlagen für alle Foundation-Dateien |

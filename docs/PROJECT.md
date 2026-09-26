@@ -107,6 +107,7 @@ Erfahrungswerte aus mehreren Fremdprojekten — vorher wäre die Zuordnung erfun
 | FR-9 | Das Toolkit ist per `/plugin marketplace add` in fremden Projekten installierbar. |
 | FR-12 | `project-rethink` endet, wo `project-foundation` beginnt: Sein Ausgang ist der Eingang von DISCOVER. Seine Artefakte sind keine Pflichtstellen des Validators. |
 | FR-13 | `project-orchestrate` vergibt keinen Block ohne prüfbares Abnahmekriterium, keinen Bau-Block in ein Repo ohne `FOUNDATION VALID` und nimmt keinen Block ohne Tor-Freigabe ab. Der Orchestrator baut nicht; seine Artefakte sind keine Pflichtstellen des Validators. |
+| FR-14 | Das Review von `project-foundation` prüft die Werkzeug-Abdeckung: Es ordnet wiederkehrenden Aufgabenarten vorhandene Skills oder Agents zu, sucht für Arten ohne Zuständigen im Marketplace und schlägt Funde einzeln vor, nie ohne Bestätigung installiert. Eine Art ohne Fund bleibt ohne Zuständigen und ist keine Warnung. Kein Validator-Teil, keine Pflichtdatei. |
 
 ## Non-Functional Requirements
 

@@ -152,6 +152,7 @@ weglassen ohne Begründung erzeugt eine offene Frage.
 | `AGENTS.md` | Gemeinsamer Kontext, wenn mehrere Agent-Werkzeuge im Einsatz sind |
 | `.cursor/rules/*.mdc` | Kleine, fokussierte Regeln; `globs` für dateispezifische Regeln, `alwaysApply` nur bei echt globalen Regeln |
 | Skills | Nur für wiederverwendbare Prozesse, nicht für einzelne Regeln |
+| Abschnitt `Werkzeuge` in `CLAUDE.md` | Welcher Skill oder Agent welche wiederkehrende Aufgabenart übernimmt — Ergebnis der Werkzeug-Abdeckung in `reference/audit.md`. Ein Projekt nur mit `AGENTS.md`, das Claude-Skills oder -Plugins nutzt, braucht dafür eine `CLAUDE.md` |
 
 ---
 

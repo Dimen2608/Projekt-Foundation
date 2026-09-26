@@ -5,6 +5,28 @@
 >
 > Neueste Einträge oben.
 
+## 2026-09-26 — Werkzeug-Abdeckung im Review (0.6.0)
+
+**Anlass**
+
+Frage des Auftraggebers: Prüft das Toolkit, ob einem Projekt passende Skills oder Agents fehlen?
+Antwort: nur `project-orchestrate` in `SETUP` Schritt 6, also nur beim Orchestrieren. Anlass
+war ein Fremdprojekt mit anderem Stack (Godot/GDScript).
+
+**Entschieden (ADR-0016)**
+
+Werkzeug-Abdeckung als Review-Schritt der Domäne AI Foundation (`reference/audit.md`):
+wiederkehrende Aufgabenarten → vorhandener Skill/Agent → Lücke → Marketplace-Suche → einzeln
+vorschlagen, nie ohne Bestätigung installieren. Nur WARNING, und nur bei konkretem Fund mit
+benennbarem Nutzen. Ergebnis im optionalen Abschnitt `Werkzeuge` von `CLAUDE.md`.
+Kein Validator-Teil, keine Finding-ID, keine Pflichtdatei. Orchestrate verweist darauf.
+
+**Geändert**
+
+`project-foundation`: `SKILL.md` (Fragentabelle), `reference/audit.md`, `reference/phases.md`,
+`templates/CLAUDE.md`; `project-orchestrate/SKILL.md` Schritt 6; `docs/PROJECT.md` FR-14;
+ARCHITECTURE, STATUS; Version 0.6.0.
+
 ## 2026-09-26 — Start per Chip geprüft (0.5.3)
 
 Prüfliste 7 ausgeführt: Chip mit `cwd` eines fremden Repos angeklickt. Die Session startete in
