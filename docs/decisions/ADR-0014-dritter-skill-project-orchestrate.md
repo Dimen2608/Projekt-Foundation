@@ -212,3 +212,10 @@ Verworfene Alternativen:
 Neu zu bewerten, wenn Agent Teams GA werden oder Cloud-Sessions verlässlich zurückschreiben —
 dann kann das Spawnen wieder in Frage kommen. Und wenn der Blockplan anfängt, Termine zu tragen:
 Dann ist der Skill Projektmanagement geworden.
+
+## Nachtrag — 2026-09-26
+
+In mehreren Punkten ergänzt durch ADR-0015 nach dem Betrieb auf Claude Desktop: Das
+Selbst-Leeren ist dort geprüft, aber nur für Worker auf dem Rechner des Orchestrators
+vorgesehen; der Worker trägt sein Gedächtnis in `.claude/worker.md`; Freigaben laufen nie über
+den Orchestrator (Entscheidung 10 um `WARTET` und `WEITER` erweitert).

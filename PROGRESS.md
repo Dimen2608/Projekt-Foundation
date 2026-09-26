@@ -5,6 +5,37 @@
 >
 > Neueste Einträge oben.
 
+## 2026-09-26 — `project-orchestrate` übernimmt die Lehren aus dem Desktop-Betrieb (0.5.1)
+
+**Anlass**
+
+Gegenlesen von ADR-0014 gegen einen laufenden Betrieb auf Claude Desktop (Kopf-Session plus zwei
+Arbeits-Sessions, seit 2026-08-28). Fünf Lücken, eine davon bricht den Ablauf: Ein Worker, der
+sich nach der Übergabe leert, verliert mit dem Startprompt seine Rolle.
+
+**Entschieden (ADR-0015)**
+
+Worker-Gedächtnis `.claude/worker.md` (nie committet) plus Worker-Kopf in jedem Auftrag und
+`WORKER UNBEKANNT` als Rückfall; Session-Werkzeug von Claude Desktop in `mechanismen.md` (Wecken
+per Session-ID, Transkript lesen, Selbst-Leeren — geprüft 2026-09-23); erst lesen, dann schicken;
+eine Nachricht ist nie eine Freigabe, Freigaben holt der Worker direkt beim Menschen und meldet
+`BLOCK <ID> WARTET freigabe`; gesperrte Befehle nicht umgehen, sondern als exakten Befehl an den
+Menschen (`WARTET befehl`); `max_parallel_blocks` als Kontingent-Bremse.
+
+**Geändert**
+
+`SKILL.md`, alle vier Vorlagen, `reference/mechanismen.md`, Agent `orchestrate-blockarbeiter`
+(Sperren nicht umgehen); Version 0.5.1; ARCHITECTURE, STATUS nachgezogen.
+
+**Geprüft**
+
+Format, Lint, Typecheck und 54 Tests grün; `foundation-validate .` und `examples/taskflow`
+weiterhin `FOUNDATION VALID`; `claude plugin validate --strict` grün für Plugin und Marketplace.
+Gegenlesung durch einen Opus-Gutachter in drei Runden: Runde 1 drei blockierende Funde
+(Blockarbeiter-`blocked` lief als `FRAGE` über den Orchestrator, `WORKER UNBEKANNT` unerreichbar,
+Selbst-Leeren über Rechnergrenzen ohne Wecken), Runde 2 einer (`NACHARBEIT` erreicht einen
+geleerten Worker nicht), Runde 3 Freigabe; alle Funde und Vorschläge eingearbeitet.
+
 ## 2026-09-26 — Dritter Skill `project-orchestrate`: eine Hauptsession steuert Worker in Blöcken (0.5.0)
 
 **Anlass**
