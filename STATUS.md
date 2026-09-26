@@ -15,14 +15,14 @@
 | Project Definition | PASS |
 | Architecture | PASS |
 | Development Setup | PASS |
-| AI Foundation | WARNING |
+| AI Foundation | PASS |
 | Documentation | PASS |
 | Testing & Quality | PASS |
 | CI/CD & Infrastructure | PASS |
 | Security | PASS |
 
 Blockers: 0
-Warnings: 1
+Warnings: 0
 
 ## Blocker
 
@@ -30,9 +30,7 @@ Keine.
 
 ## Warnungen
 
-- **Werkzeug-Abdeckung (ADR-0016):** Für „Skill, Agent oder Vorlage schreiben oder ändern" ist
-  kein Werkzeug zuständig; gefunden wurde `plugin-dev` (Anthropic Directory). Installation
-  wartet auf die Entscheidung des Auftraggebers (`CLAUDE.md`, Abschnitt Werkzeuge).
+Keine.
 
 ## Command-Chain
 

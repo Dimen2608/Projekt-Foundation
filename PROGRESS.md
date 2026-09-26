@@ -5,6 +5,12 @@
 >
 > Neueste Einträge oben.
 
+## 2026-09-26 — `plugin-dev` installiert
+
+Vorschlag aus der Werkzeug-Abdeckung angenommen: Der Auftraggeber hat `plugin-dev` (Anthropic
+Directory) installiert. Es ist jetzt für „Skill, Agent oder Vorlage schreiben oder ändern"
+zuständig (`CLAUDE.md`, Abschnitt Werkzeuge); die Warnung in `STATUS.md` ist aufgelöst.
+
 ## 2026-09-26 — Werkzeug-Abdeckung im Review (0.6.0)
 
 **Anlass**
