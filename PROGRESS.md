@@ -5,6 +5,27 @@
 >
 > Neueste Einträge oben.
 
+## 2026-09-26 — Worker-Verfahren `chip`, Befund zu `start_session` (0.5.2)
+
+**Anlass**
+
+Der Orchestrator sollte eine Worker-Session selbst starten. Auf Claude Desktop fehlt dafür das
+Werkzeug `start_session`, das andere Werkzeugbeschreibungen der App nennen.
+
+**Befund**
+
+Im Code der App (Claude Desktop 2.9939.2, Windows) sitzen `start_session`, `hand_off_to_session`
+und `list_start_targets` im Server `ccd_session` neben `spawn_task`, geschaltet über ein
+serverseitiges Feature-Flag: an → `start_session` statt `spawn_task`, aus → nur der Chip. Kein
+Schalter beim Nutzer; die Freigabe ist als anthropics/claude-code#94697 „not planned"
+geschlossen, die Doku nennt die Werkzeuge nicht.
+
+**Geändert**
+
+Worker-Verfahren `chip` (`spawn_task` mit `cwd` des Ziel-Repos, Start per Klick) in `SKILL.md`,
+`ORCHESTRATE.md`, `BLOCKPLAN.md`, `WORKER-START.md`; Befund und Prüfliste 7 in
+`mechanismen.md`; Nachtrag in ADR-0015; Version 0.5.2.
+
 ## 2026-09-26 — `project-orchestrate` übernimmt die Lehren aus dem Desktop-Betrieb (0.5.1)
 
 **Anlass**

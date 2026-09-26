@@ -1,7 +1,7 @@
 {
   "name": "project-foundation",
   "description": "Drei Prozesse: ein Projekt arbeitsfähig machen, dann in Blöcken ausführen. project-foundation bereitet neue oder bestehende Projekte so vor, dass Menschen und AI-Agents ohne Raten daran arbeiten können — Projektdefinition, Architektur, ADRs, Dev-Setup, AI-Instruktionen, Teststrategie, Quality Gates und ein prüfbarer Foundation-Audit. project-rethink ist der Weg davor, für Projekte, deren Dokumente und Code auseinandergelaufen sind: Bestand messen, Ist-Verhalten als Spezifikation festschreiben, Lücken registrieren, Grundsatzfragen als Filter entscheiden und mit absichernden Tests festnageln — bis project-foundation ohne Raten übernehmen kann. project-orchestrate führt danach aus: Eine Hauptsession steuert Worker-Sessions über mehrere Repos, vergibt Aufgaben als Blöcke mit prüfbarem Abnahmekriterium, lässt jeden Block durch ein Tor prüfen und führt Übergaben und Stand im Heimat-Repo. Dazu fünf Agents: Umsetzer, Gutachter (Tor), Zahlenprüfer für Rethink; Blockarbeiter und Tor für Orchestrate.",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "author": {
     "name": "Dimen2608"
   },

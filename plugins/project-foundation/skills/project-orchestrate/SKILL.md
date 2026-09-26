@@ -106,7 +106,9 @@ SETUP → PLAN → DISPATCH ⇄ GATE → INTEGRATE
   3. Worker-Verfahren: `attach` (Standard — der Mensch öffnet die Worker-Sessions mit Remote
      Control, der Orchestrator bindet sie an) oder zusätzlich `local_bg` (der Orchestrator
      startet Worker auf **seinem** Rechner mit `claude --bg` — nur, wenn der Mensch das
-     ausdrücklich will). Cloud-Sessions sind als Worker nicht vorgesehen. Dazu
+     ausdrücklich will). Auf Claude Desktop zusätzlich `chip`: Der Orchestrator legt den
+     Startprompt als Aufgaben-Chip mit dem Ordner des Ziel-Repos vor, der Mensch startet die
+     Session mit einem Klick. Cloud-Sessions sind als Worker nicht vorgesehen. Dazu
      `max_parallel_blocks` (Standard: so viele, wie Abhängigkeiten zulassen; `1`, wenn das
      Kontingent knapp ist).
   4. **Erreichbarkeit prüfen, nicht annehmen:** Ist diese Session per Remote Control
@@ -149,7 +151,8 @@ SETUP → PLAN → DISPATCH ⇄ GATE → INTEGRATE
 
 - **Worker anbinden:** Je Repo einen Startprompt nach
   [WORKER-START.md](templates/WORKER-START.md) ausgeben. Der Mensch öffnet dort eine Session mit
-  Remote Control und fügt ihn ein — oder der Orchestrator startet sie bei `local_bg` selbst.
+  Remote Control und fügt ihn ein — oder der Orchestrator startet sie bei `local_bg` selbst,
+  oder er legt sie bei `chip` als Aufgaben-Chip vor, den der Mensch anklickt.
   Der Worker meldet sich mit `WORKER BEREIT`; erst dann steht er in `BLOCKPLAN.md`. Ein Worker
   im Heimat-Repo auf dem Rechner des Orchestrators arbeitet in einem eigenen Checkout oder
   Worktree, damit er dem `state_branch` nicht in die Quere kommt. Eine

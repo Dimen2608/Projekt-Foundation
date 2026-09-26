@@ -18,7 +18,7 @@
 
 | Name (wie `ListAgents` ihn zeigt) | Repo | Rechner | Angebunden über | Seit | Aktueller Block |
 | --- | --- | --- | --- | --- | --- |
-| `<w1>` | `<owner/repo>` | `<Rechner>` | `<attach / local_bg>` | `<Datum>` | `<ID oder —>` |
+| `<w1>` | `<owner/repo>` | `<Rechner>` | `<attach / local_bg / chip>` | `<Datum>` | `<ID oder —>` |
 
 ## Blöcke
 

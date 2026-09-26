@@ -3,7 +3,8 @@
 > Beantwortet: **Wie wird eine Session zum Worker?** Der Orchestrator füllt den Block unten aus.
 > Der Mensch öffnet im genannten Repo eine Session mit Remote Control (Claude Desktop, oder
 > `claude --rc` bzw. `claude remote-control` im Repo-Ordner) und fügt ihn als erste Nachricht ein.
-> Bei `local_bg` ist derselbe Text der Startprompt von `claude --bg`.
+> Bei `local_bg` ist derselbe Text der Startprompt von `claude --bg`, bei `chip` der Prompt des
+> Aufgaben-Chips.
 
 ---
 
