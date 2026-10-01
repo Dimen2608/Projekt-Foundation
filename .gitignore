@@ -17,3 +17,6 @@ venv/
 .DS_Store
 .idea/
 *.swp
+
+# Lokale Build-Artefakte (nicht Teil des Repos, ADR-0006)
+build/

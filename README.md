@@ -36,6 +36,11 @@ AI-assisted development foundation, currently optimized for **Claude Code** and 
   in its home repo (`SETUP → PLAN → DISPATCH → GATE → INTEGRATE`). Workers are real sessions —
   in other repos, on other machines — that you open with Remote Control; orchestrator and
   workers talk via `SendMessage`. Two agents (block worker, gate) carry the split;
+- a fourth skill **`project-werkstatt`** for repos where an AI build session merges green PRs
+  on its own: four role templates (implementer, test author, gate, retrospective), a definition
+  of "green" checked by a merge script instead of branch protection, a blocking AI gate bound to
+  the head SHA, locked rule paths with signed human commits, staging automatic and prod only by
+  a human, followed by a walking skeleton as a separate phase;
 - a **CLI** (`foundation-validate <path>`) that checks a project for structure, missing
   answers and contradictions. Exit code `0` means `FOUNDATION VALID`, `1` means at least
   one structural blocker.
@@ -62,7 +67,7 @@ Everything is read-only: the validator never writes into a project it inspects.
 
 </details>
 
-Es besteht aus vier Teilen:
+Es besteht aus fünf Teilen:
 
 - **Skill `project-foundation`** — führt einen Agenten durch
   `DISCOVER → ASSESS → ASK → DECIDE → GENERATE → VALIDATE → AUDIT`, inklusive Vorlagen
@@ -80,6 +85,12 @@ Es besteht aus vier Teilen:
   Stand im Heimat-Repo. Worker sind echte Sessions, auch in anderen Repos und auf anderen
   Rechnern, per Remote Control erreichbar; gesprochen wird per `SendMessage`. Zwei Agents
   (Blockarbeiter, Tor) tragen die Trennung (ADR-0014).
+- **Skill `project-werkstatt`** — für ein Repo, in dem eine KI-Bau-Session grüne PRs selbst
+  mergt: vier Rollen als Vorlagen (Umsetzer, Test-Autor, Gate, Rückschau), eine Grün-Definition,
+  die ein Merge-Skript statt eines Branch-Schutzes prüft, ein blockierendes KI-Gate mit
+  SHA-Bindung, gesperrte Regelpfade mit signierten Commits des Menschen, Staging automatisch und
+  Prod nur durch den Menschen, danach ein Walking Skeleton als eigene Phase (ADR-0018). Offene Teile sind als
+  offen markiert.
 - **CLI `foundation-validate`** — prüft ein Projekt maschinell auf Struktur, fehlende
   Entscheidungen und Widersprüche und erzeugt den Audit-Report.
 
@@ -101,7 +112,8 @@ Danach greift `project-foundation` automatisch bei Anfragen wie „setz das Proj
 „bau die Foundation" oder „ist das Repo bereit für Implementierung" — und `project-rethink`
 bei „die Doku stimmt nicht mehr mit dem Code überein", „wo stehen wir wirklich" oder „Neubau
 oder Umbau" — und `project-orchestrate` bei „Hauptsession soll andere Sessions steuern" oder
-„Arbeit in Blöcke aufteilen und verteilen". Die Agents sind nach `/reload-plugins` oder einem
+„Arbeit in Blöcke aufteilen und verteilen" — und `project-werkstatt` bei „Werkstatt aufsetzen"
+oder „grün heißt mergen absichern". Die Agents sind nach `/reload-plugins` oder einem
 Neustart verfügbar.
 
 ### CLI
@@ -238,7 +250,7 @@ Es gibt keinen Build-Schritt — das Projekt erzeugt kein Artefakt (siehe ADR-00
 ## Aufbau
 
 ```
-plugins/project-foundation/   Das Plugin: drei Skills (Reference, Vorlagen), fünf Agents
+plugins/project-foundation/   Das Plugin: vier Skills (Reference, Vorlagen), fünf Agents
 src/foundation_validate/      Der Validator
 examples/taskflow/            Ein vollständig ausgefülltes Beispielprojekt
 docs/                         Foundation dieses Repos (Dogfooding)

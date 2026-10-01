@@ -5,16 +5,16 @@
 
 ## Projekt
 
-Ein Toolkit, das andere Projekte auf Implementierung vorbereitet — bestehend aus drei
+Ein Toolkit, das andere Projekte auf Implementierung vorbereitet — bestehend aus vier
 Claude-Code-Skills mit Vorlagen (`project-foundation`, davor bei Bedarf `project-rethink`,
-danach bei Bedarf `project-orchestrate`), fünf Agents für die Rollen von Rethink und
+danach bei Bedarf `project-werkstatt` und `project-orchestrate`), fünf Agents für die Rollen von Rethink und
 Orchestrate und einem Python-CLI, das die Foundation maschinell prüft.
 Details: `docs/PROJECT.md`.
 
 ## Aufbau
 
 ```
-plugins/project-foundation/   Plugin: skills/{project-foundation,project-rethink,project-orchestrate}, agents/
+plugins/project-foundation/   Plugin: skills/{project-foundation,project-rethink,project-orchestrate,project-werkstatt}, agents/
 src/foundation_validate/      CLI-Validator (cli, report, validator, model)
 tests/                        Ein Test je Blocking-Regel + CLI-Schnittstelle
 docs/                         Foundation dieses Repos

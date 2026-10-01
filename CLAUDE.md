@@ -88,5 +88,6 @@ Anhalten und fragen, wenn:
 - Die Plugin-Verzeichnisstruktur geändert werden müsste (ADR-0001).
 - Eine Änderung dazu führen würde, dass der Validator schreibt statt nur liest.
 - Eine Agent-Definition ein Frontmatter-Feld jenseits von `name`, `description`, `tools`,
-  `model`, `effort`, `isolation` bräuchte, oder eine Rethink-Vorlage zur Pflichtstelle des
+  `model`, `effort`, `isolation` bräuchte (für die Agent-Vorlagen von `project-werkstatt`
+  zusätzlich `skills` und `hooks`, ADR-0019), oder eine Rethink-Vorlage zur Pflichtstelle des
   Validators würde (ADR-0013).

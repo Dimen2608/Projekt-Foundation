@@ -5,6 +5,29 @@
 >
 > Neueste Einträge oben.
 
+## 2026-10-01 — Vierter Skill `project-werkstatt` (0.8.0)
+
+**Anlass**
+
+Entscheidung des Auftraggebers: Das Werkstatt-Muster aus dem Neubau Atemluft V2 (Stand
+01.10.2026) wird ein eigener, wiederverwendbarer Skill mit Erklärung — jetzt mit dem entschiedenen
+Stand, Offenes sichtbar markiert.
+
+**Entschieden (ADR-0018, ADR-0019)**
+
+Skill `project-werkstatt`: vier Rollen als Agent-Vorlagen (Umsetzer, Test-Autor, Gate, Rückschau),
+vier Skill-Vorlagen, CI-Skizze mit Sperrpfad-Wächter und Merge-Vermerk, Merge-Skript-Skizze mit
+G-1 bis G-8 und Gate-SHA-Prüfung, Aufsetz-Checkliste; fünf Reference-Dateien (Prinzip und Rollen,
+Grün und Gate, Schutz und Deploy, eingebaute Skills und Evals, Walking Skeleton). Die
+Agent-Vorlagen dürfen `skills` und `hooks` tragen (ADR-0019); für die Plugin-Agents gilt ADR-0013
+unverändert. Keine Validator-Änderung, keine Finding-ID.
+
+**Offen**
+
+Leitplanken und ASVS-Level, Definition of Done, ausformulierte Agent-Texte, Hook-Skripte,
+Gate-Marker-Format, wer den ersten Stand der gesperrten Skills und Hooks schreibt. Auslöse-Test
+am 2026-10-01 bestanden (STATUS.md), mit geladenem Plugin zu wiederholen.
+
 ## 2026-09-26 — ADR-Format: fremde Nummerierung und deutsche Gliederung (0.7.0)
 
 **Anlass**
