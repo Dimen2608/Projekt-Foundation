@@ -53,6 +53,9 @@ belegen kann: **FOUNDATION VALID** (maschinell, durch das CLI) und **FOUNDATION 
   Ausführung über mehrere Sessions und Repos steuert: SETUP → PLAN → DISPATCH → GATE →
   INTEGRATE, Aufgaben als Blöcke mit prüfbarem Abnahmekriterium, Tor je Block, Übergaben und
   Stand im Heimat-Repo — mit eigenen Vorlagen und zwei Agents (Blockarbeiter, Tor).
+- Skill `project-werkstatt` (seit 0.8.0, ADR-0018), der in einem Repo festlegt, was „grün"
+  heißt, wenn eine KI-Bau-Session selbst mergt — vier Rollen als Vorlagen, Grün-Definition mit
+  Merge-Skript, blockierendes Gate, Sperrpfade, Deploy-Weg, danach der Walking Skeleton als eigene Phase.
 - Vorlagen für alle Foundation-Dateien (`PROJECT.md`, `ARCHITECTURE.md`, ADR, `STATUS.md`,
   `CLAUDE.md`, `AGENTS.md`, Cursor-Rule, `.env.example`, CI-Workflow, Manifest).
 - CLI `foundation-validate`, das die maschinell prüfbaren Regeln durchsetzt und den
@@ -108,6 +111,7 @@ Erfahrungswerte aus mehreren Fremdprojekten — vorher wäre die Zuordnung erfun
 | FR-12 | `project-rethink` endet, wo `project-foundation` beginnt: Sein Ausgang ist der Eingang von DISCOVER. Seine Artefakte sind keine Pflichtstellen des Validators. |
 | FR-13 | `project-orchestrate` vergibt keinen Block ohne prüfbares Abnahmekriterium, keinen Bau-Block in ein Repo ohne `FOUNDATION VALID` und nimmt keinen Block ohne Tor-Freigabe ab. Der Orchestrator baut nicht; seine Artefakte sind keine Pflichtstellen des Validators. |
 | FR-14 | Das Review von `project-foundation` prüft die Werkzeug-Abdeckung: Es ordnet wiederkehrenden Aufgabenarten vorhandene Skills oder Agents zu, sucht für Arten ohne Zuständigen im Marketplace und schlägt Funde einzeln vor, nie ohne Bestätigung installiert. Eine Art ohne Fund bleibt ohne Zuständigen und ist keine Warnung. Kein Validator-Teil, keine Pflichtdatei. |
+| FR-15 | `project-werkstatt` liefert keine Prüfung ohne Feuert-Nachweis, lässt Prod und Rechte beim Menschen, sperrt die Regelpfade für die Bau-Session und markiert, was die Quelle offen lässt, als offen. Seine Vorlagen sind keine Pflichtstellen des Validators. |
 
 ## Non-Functional Requirements
 

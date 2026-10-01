@@ -10,7 +10,7 @@ Jeder Bereich ist bewertet mit `RELEVANT`, `NOT REQUIRED`, `FUTURE` oder `UNKNOW
 
 | Bereich | Bewertung | Begründung |
 | --- | --- | --- |
-| Application Architecture | RELEVANT | Drei Skills + Vorlagen + fünf Agents + CLI-Validator, siehe unten. |
+| Application Architecture | RELEVANT | Vier Skills + Vorlagen + fünf Agents + CLI-Validator, siehe unten. |
 | Frontend | NOT REQUIRED | Kein UI. Bedienung über Agent und Terminal. |
 | Backend | NOT REQUIRED | Kein Server, kein Dienst. |
 | Database | NOT REQUIRED | Kein persistenter Zustand über den Lauf hinaus. |
@@ -23,7 +23,7 @@ Jeder Bereich ist bewertet mit `RELEVANT`, `NOT REQUIRED`, `FUTURE` oder `UNKNOW
 | Security | RELEVANT | Secret-Hygiene in fremden Projekten (`.env`), kein Secret Scanning — und der Validator schreibt dort nie. |
 | Configuration | RELEVANT | `.project-foundation.yml` im Zielprojekt. |
 | Secrets | NOT REQUIRED | Das Toolkit selbst braucht keine Secrets. |
-| Architecture Decisions | REQUIRED | Verteilung, Sprache, Manifest-Rolle und Report-Wortlaut sind tragende Entscheidungen — ADR-0001 bis ADR-0017. |
+| Architecture Decisions | REQUIRED | Verteilung, Sprache, Manifest-Rolle und Report-Wortlaut sind tragende Entscheidungen — ADR-0001 bis ADR-0019. |
 | Storage | NOT REQUIRED | Nur Dateisystem-Lesezugriffe im Zielprojekt. |
 | Background Jobs | NOT REQUIRED | Ein Lauf ist synchron und in Millisekunden fertig. |
 | Messaging / Events | NOT REQUIRED | Kein verteiltes System. |
@@ -39,7 +39,7 @@ Das Repository enthält drei Artefakte mit klar getrennten Aufgaben:
 
 ```
 Projekt-Foundation
-├── plugins/project-foundation/     Prozesswissen (3 Skills, Vorlagen, 5 Agents) → Agent liest
+├── plugins/project-foundation/     Prozesswissen (4 Skills, Vorlagen, 5 Agents) → Agent liest
 ├── src/foundation_validate/        Maschinelle Prüfung               → CI/Mensch führt aus
 └── docs/, examples/                Anwendung des Prozesses auf sich selbst
 ```
@@ -55,6 +55,7 @@ plugins/project-foundation/
 ├── skills/project-foundation/   DISCOVER → ASSESS → ASK → DECIDE → GENERATE → VALIDATE → AUDIT
 ├── skills/project-rethink/      MEASURE → MAP → GAPS → DECIDE → GUARD → HANDOFF
 ├── skills/project-orchestrate/  SETUP → PLAN → DISPATCH → GATE → INTEGRATE
+├── skills/project-werkstatt/    KLÄREN → RAHMEN → ROLLEN → GATES → SPERREN → PROBEN → ÜBERGABE → WALKING SKELETON
 └── agents/                      rethink-umsetzer, rethink-gutachter, rethink-zahlenpruefer,
                                  orchestrate-blockarbeiter, orchestrate-tor
 ```
@@ -68,13 +69,19 @@ Jeder Skill hat denselben Schnitt:
 Ein Skill lädt bewusst nur `SKILL.md` vorab; `reference/` und `templates/` werden gezielt
 nachgeladen. Das hält den Kontextverbrauch klein.
 
-**Drei Skills, eine Reihenfolge.** `project-rethink` endet dort, wo `project-foundation`
+**Vier Skills, eine Reihenfolge.** `project-rethink` endet dort, wo `project-foundation`
 anfängt: Sein `HANDOFF` ist der Eingang von `DISCOVER`. Weil beide auf derselben Ebene liegen,
 gibt es keine Vorrangregel — die Abgrenzung lebt in den beiden `description`-Feldern, die
 aufeinander zeigen (ADR-0013). `project-orchestrate` beginnt nach `FOUNDATION READY` und setzt
 in jedem Repo, in dem gebaut wird, `FOUNDATION VALID` voraus. Seine Trigger („mehrere Sessions
 steuern") überschneiden sich nicht mit denen der Vorbereitung; die Abgrenzung steht deshalb nur
-in seiner eigenen `description` (ADR-0014).
+in seiner eigenen `description` (ADR-0014). `project-werkstatt` legt in einem Repo fest, was
+„grün" heißt, wenn eine KI-Bau-Session selbst mergt: Rollen, Grün-Definition mit Merge-Skript,
+blockierendes Gate, gesperrte Regelpfade, Deploy-Weg, danach der Walking Skeleton als eigene Phase. Seine vier
+Rollen sind **Vorlagen** für `.claude/agents/` im Zielprojekt, keine Plugin-Agents, weil das Muster
+auf Frontmatter-Hooks beruht, die Plugin-Agents ignorieren; die Vorlagen dürfen deshalb `skills`
+und `hooks` tragen (ADR-0018, ADR-0019). Seine Abgrenzung steht nur in seiner eigenen
+`description`.
 
 **Agents.** Die drei Rollen des Rethink-Prozesses sind Agent-Definitionen, keine Textbausteine:
 Nur so bekommen sie eigenen Kontext, eine erzwungene Werkzeugliste und Isolation. Sie
@@ -186,4 +193,6 @@ Skills und Agents sind Prompt-Material und haben keine Tests (ADR-0009). Geprüf
 `claude plugin validate --strict plugins/project-foundation` (Manifest, Frontmatter) und durch
 den Auslöse-Test nach jeder Änderung an einer `description`: ein Satz, der `project-foundation`
 ziehen muss, einer, der `project-rethink` ziehen muss (ADR-0013), einer, der
-`project-orchestrate` ziehen muss (ADR-0014).
+`project-orchestrate` ziehen muss (ADR-0014), einer, der `project-werkstatt` ziehen muss
+(ADR-0018). Die Python-Skizze `templates/merge-gruen.py` von `project-werkstatt` läuft durch
+`ruff`, nicht durch `mypy` und `pytest`: Sie ist Vorlage, kein Code des Validators.

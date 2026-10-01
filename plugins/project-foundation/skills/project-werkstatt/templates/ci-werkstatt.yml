@@ -1,0 +1,170 @@
+# Werkstatt-CI — Skizze aus project-werkstatt.
+#
+# Kopieren nach .github/workflows/pr.yml und die {{Platzhalter}} ersetzen.
+# Die Job-Namen sind die Pflicht-Check-Liste (G-1); die Liste selbst liegt als Datei im Repo
+# ({{PFLICHT_CHECK_LISTE}}) und wird vom Merge-Skript aus origin/main gelesen.
+#
+# Wichtig: Bei pull_request nimmt GitHub diese Datei aus dem PR. Ein PR kann jeden Job hier
+# abschwächen. Die Ergebnisse dieser Jobs sind deshalb nur Vorwarnung; die eigentliche Prüfung
+# führt das Merge-Skript in der Fassung von origin/main selbst aus (G-4).
+#
+# Jeder Job meldet ein Lebenszeichen (Zahl geprüfter Einheiten > 0) in die Job-Zusammenfassung
+# (G-5). Ein Job, der nichts geprüft hat, ist rot.
+#
+# Offen: konkrete Werkzeuge je Job, Erkennung von Lockerungen in Workflow-Dateien, Zeitbudget.
+
+name: pr
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Nur so laeuft jeder Schritt mit `bash --noprofile --norc -eo pipefail {0}`.
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  lint:
+    # Erlaubnisliste fuer runs-on: genau diese Menge, nichts anderes. Kein Job auf dem Prod-Host.
+    runs-on: [self-hosted, "{{RUNNER_LABEL}}"]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint
+        run: "{{LINT_BEFEHL}}"
+
+  typen:
+    runs-on: [self-hosted, "{{RUNNER_LABEL}}"]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Typpruefung (ein Pruefer, strikt)
+        run: "{{TYP_BEFEHL}}"
+
+  tests:
+    runs-on: [self-hosted, "{{RUNNER_LABEL}}"]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Volle Suite, Bericht mit SHA (Vergleich im Merge-Skript offen, G-2)
+        run: |
+          {{TEST_BEFEHL}} --junit-xml=testbericht.xml
+          echo "sha=${{ github.event.pull_request.head.sha || github.sha }}" >> testbericht.sha
+      - name: Lebenszeichen und Skip-Zahl (G-5)
+        run: |
+          gesammelt=$(grep -o 'tests="[0-9]*"' testbericht.xml | head -1 | grep -o '[0-9]*')
+          test "${gesammelt:-0}" -gt 0
+          echo "Lebenszeichen: ${gesammelt} Tests" >> "$GITHUB_STEP_SUMMARY"
+          # Offen: skipped > 0 gegen die Skip-Erlaubnisliste aus origin/main pruefen.
+
+  diff-coverage:
+    runs-on: [self-hosted, "{{RUNNER_LABEL}}"]
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Diff-Coverage mit Zweigen
+        run: "{{DIFF_COVERAGE_BEFEHL}}"
+
+  sicherheit:
+    runs-on: [self-hosted, "{{RUNNER_LABEL}}"]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Abhaengigkeiten, Secret-Scan, statische Analyse
+        run: "{{SICHERHEIT_BEFEHLE}}"
+
+  waechter:
+    # Vorwarnung. Dieselbe Pruefung fuehrt das Merge-Skript aus origin/main aus (G-4).
+    runs-on: [self-hosted, "{{RUNNER_LABEL}}"]
+    timeout-minutes: 5
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Sperrpfade
+        # --no-renames: Eine Umbenennung aus einem Sperrpfad heraus zaehlt als Aenderung am
+        # alten Pfad. Gross- und Kleinschreibung egal (.Claude/ auf Dateisystemen ohne
+        # Unterschied).
+        run: |
+          base="origin/${{ github.base_ref }}"
+          geaendert=$(git diff --no-renames --name-only "$base"...HEAD)
+          echo "Lebenszeichen: $(printf '%s\n' "$geaendert" | grep -c .) Dateien geprueft" \
+            >> "$GITHUB_STEP_SUMMARY"
+          if printf '%s\n' "$geaendert" | grep -iE \
+            '^\.claude/(agents|skills|hooks)/|^\.claude/settings[^/]*\.json$'; then
+            echo "Sperrpfad beruehrt. Diese Pfade aendert nur ein signierter Commit des Menschen."
+            exit 1
+          fi
+      - name: Aufgeweichte Tests und Workflow-Lockerung
+        # Offen: Verfahren (AST oder Text) legt der Aufsetz-Block fest; Probe-PRs sind das
+        # Abnahmekriterium. Prueft u. a. runs-on auf Mengengleichheit mit der Erlaubnisliste.
+        run: "{{WAECHTER_BEFEHL}}"
+
+  merge-vermerk:
+    # Nur auf main: Jeder neue Commit der First-Parent-Linie ist ein Merge-Commit mit
+    # "Gemergt-durch: merge-gruen <sha>", und <sha> ist sein zweiter Elternteil (der gemergte
+    # PR-Kopf). Einzige Ausnahme: ein direkter Commit des Menschen, der nur Sperrpfade aendert
+    # und gegen allowed_signers aus dem ELTERN-Commit verifiziert wird, nie aus dem Commit selbst.
+    # Solange die Restgrenze gilt (die Bau-Session konnte signieren), ist die Ausnahme
+    # ausgesetzt: Der Mensch nimmt seinen Schluessel mit einem letzten signierten Commit aus
+    # allowed_signers und mergt Aenderungen an Sperrpfaden selbst als PR mit Merge-Vermerk.
+    runs-on: [self-hosted, "{{RUNNER_LABEL}}"]
+    timeout-minutes: 5
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Merge-Vermerk pruefen
+        run: |
+          vorher="${{ github.event.before }}"
+          if [ -z "$vorher" ] || [ "$vorher" = "0000000000000000000000000000000000000000" ]; then
+            # Erster Push: Startpunkt aus dem Aufsetz-Block. Dieser Job wird als LETZTER
+            # Setup-Commit scharf geschaltet; Startpunkt ist dessen Vorgaenger (alle Setup-Commits
+            # davor liegen ausserhalb der Pruefung). Wird er per Folge-Commit gesetzt, gilt dasselbe.
+            vorher="{{C2_STARTPUNKT}}"
+          fi
+          if ! git rev-parse -q --verify "${vorher}^{commit}" > /dev/null; then
+            echo "Startpunkt '$vorher' ist kein Commit (Platzhalter nicht ersetzt?). Rot."
+            exit 1
+          fi
+          sperr='^\.claude/(agents|skills|hooks)/|^\.claude/settings[^/]*\.json$'
+          geprueft=0
+          for c in $(git rev-list --first-parent "$vorher"..HEAD); do
+            geprueft=$((geprueft + 1))
+            vermerk=$(git log -1 --format=%B "$c" \
+              | sed -n 's/^Gemergt-durch: merge-gruen \([0-9a-f]\{40\}\)$/\1/p')
+            if [ -n "$vermerk" ]; then
+              zweiter=$(git rev-parse -q --verify "$c^2" || true)
+              if [ "$vermerk" = "$zweiter" ]; then
+                continue
+              fi
+              echo "Commit $c: Vermerk $vermerk ungleich zweitem Elternteil ${zweiter:-fehlt}."
+              exit 1
+            fi
+            dateien=$(git diff --no-renames --name-only "$c^" "$c")
+            # Ohne Pipe-Abbruch: grep -v liefert unter pipefail bei leerer Ausgabe Exit 1,
+            # deshalb "|| true" und der Vergleich auf leere Zeichenkette.
+            fremd=$(printf '%s\n' "$dateien" | grep -viE "$sperr" || true)
+            if [ -n "$dateien" ] && [ -z "$fremd" ]; then
+              anker=$(mktemp)
+              if git show "$c^:{{ALLOWED_SIGNERS_PFAD}}" > "$anker" 2>/dev/null \
+                && git -c gpg.format=ssh -c gpg.ssh.allowedSignersFile="$anker" \
+                  verify-commit "$c"; then
+                continue
+              fi
+            fi
+            echo "Commit $c ohne gueltigen Merge-Vermerk und ohne gueltige Signatur."
+            exit 1
+          done
+          echo "Lebenszeichen: ${geprueft} Commits geprueft" >> "$GITHUB_STEP_SUMMARY"
