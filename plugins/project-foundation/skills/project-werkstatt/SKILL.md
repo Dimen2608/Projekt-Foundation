@@ -4,17 +4,20 @@ description: >-
   Richtet in einem Repo die Werkstatt ein, in der eine KI-Bau-Session ohne Einzelfreigabe je
   PR arbeiten darf: vier Rollen als Agents (Umsetzer, Test-Autor, Gate, Rückschau), wenige
   Handwerks-Skills, eine Grün-Definition, die ein Merge-Skript statt eines Branch-Schutzes
-  prüft, ein blockierendes KI-Gate mit SHA-Bindung, gesperrte Regelpfade und ein Deploy-Weg, auf
-  dem Prod nur der Mensch auslöst. Nicht verwenden, um ein Projekt vorzubereiten — dann
-  project-foundation —, nicht für einen Bestand ohne beschreibbaren Ist-Zustand — dann
-  project-rethink — und nicht, um Arbeit auf mehrere Sessions zu verteilen — dann
-  project-orchestrate.
+  prüft, ein blockierendes KI-Gate mit SHA-Bindung, gesperrte Regelpfade, Leitplanken als
+  Deny-Regeln außerhalb des Repos, ein Sicherheitskatalog nach ASVS mit Level-Wahl, isolierte
+  Dev-Umgebungen je Worktree und ein Deploy-Weg, auf dem Prod nur der Mensch auslöst. Nicht
+  verwenden, um ein Projekt vorzubereiten — dann project-foundation —, nicht für einen Bestand
+  ohne beschreibbaren Ist-Zustand — dann project-rethink — und nicht, um Arbeit auf mehrere
+  Sessions zu verteilen — dann project-orchestrate.
 when_to_use: >-
   „Werkstatt aufsetzen", „KI-Bau-Session einrichten", „Agents und Skills für den Bau",
   „Gate einrichten", „KI-Review-Gate", „grün heißt mergen absichern", „Merge ohne Freigabe
   je PR", „Umsetzer und Test-Autor als Agents", „Sperrpfade für Agents und Hooks", „Prod nur
-  durch den Menschen" — oder wenn eine Session künftig selbst mergen soll und niemand sagen
-  kann, was dann den Schutz der Einzelfreigabe trägt.
+  durch den Menschen", „Leitplanken und Deny-Regeln für die Bau-Session", „ASVS-Level für den
+  Sicherheitskatalog der Bau-Session", „eigene Dev-Datenbank je Worktree" — oder wenn eine
+  Session künftig selbst mergen soll und niemand sagen kann, was dann den Schutz der
+  Einzelfreigabe trägt.
 ---
 
 # Project Werkstatt
@@ -53,8 +56,9 @@ gebracht. Begründung und Herkunft:
 - `FOUNDATION VALID` im Ziel-Repo (`foundation-validate`).
 - Der Mensch entscheidet, dass die Bau-Session grüne PRs selbst mergen darf. Ohne diese
   Entscheidung ist die Werkstatt Aufwand ohne Gegenwert.
-- Ein eigener CI-Runner oder gehostete Runner, und ein Ort für die Deny-Regeln außerhalb des
-  Repos (Benutzer-Einstellungen des Menschen).
+- Ein eigener CI-Runner oder gehostete Runner, und Orte für die Deny-Regeln außerhalb des
+  Repos: eine `--settings`-Datei, mit der die Bau-Session startet, und die Benutzer-Einstellungen
+  des Menschen für die Sperrpfade.
 
 ## Ablauf
 
@@ -72,6 +76,13 @@ Empfehlung.
 - **Vorgehen:** Mit dem Menschen klären: Welche Freigaben fallen weg? Welche Werte sind per
   Entscheidung festgelegt und damit nie lockerbar (Coverage-Schwelle, Prüfpunkte des Wächters)?
   Was kostet Geld oder geht nach außen (bleibt beim Menschen)? Welcher Runner, welches Label?
+  Dazu drei Fragen mit Empfehlung:
+  - **Laufumgebung:** Empfehlung mit Sandbox (unter Windows WSL2), nach einer Probe, und Start mit
+    einer `--settings`-Datei außerhalb des Repos. Siehe [leitplanken.md](reference/leitplanken.md).
+  - **ASVS-Level und L3-Inseln:** eine Risikoentscheidung; Faustregel des Skills L2, wenn
+    personenbezogene Daten oder mehrere Kunden im Spiel sind, Inseln nur mit Begründung. Siehe [asvs-baseline.md](reference/asvs-baseline.md).
+  - **Worktree-Pflicht:** Empfehlung Test-Autor und Rückschau immer, dazu jeder zweite gleichzeitig
+    schreibende Lauf. Siehe [isolation.md](reference/isolation.md).
 - **Ausgang:** Die Entscheidungen stehen als ADR im Ziel-Repo, mit Filtersatz.
 
 ### 2. RAHMEN — Grün-Definition und Merge-Skript
@@ -82,8 +93,12 @@ Empfehlung.
   [merge-gruen.py](templates/merge-gruen.py) übernehmen, Platzhalter ersetzen, Pflicht-Check-Liste,
   Skip-Erlaubnisliste und Abweichungsliste anlegen. Je Pflicht-Check eine Rauchprobe, damit „grün
   auf leerem Repo" ein Lebenszeichen über null hat.
+- **Isolation:** [dev-env.py](templates/dev-env.py) als `dev_env` übernehmen, die
+  Dev-Compose-Datei nach seinem Vertrag schreiben, den Portbereich messen. Für den
+  Sicherheitskatalog die Nachweisdatei und der Test SK-1 bis SK-5.
+- **Leitplanken Stufe 1** setzt der Mensch vorher, nach [LEITPLANKEN.md](templates/LEITPLANKEN.md).
 - **Ausgang:** CI läuft auf dem leeren Repo, jeder Pflicht-Check meldet mindestens eine geprüfte
-  Einheit.
+  Einheit. `dev_env up` und `down` laufen.
 
 ### 3. ROLLEN — vier Agents, vier Skills
 
@@ -93,12 +108,14 @@ Empfehlung.
   ersetzen. Die Agents gehören **nicht** in ein Plugin: Plugin-Agents ignorieren `hooks`, und die
   Umsetzer-Kette lebt davon. **Alle Rollen laufen mit dem Projekt-Repo als Arbeitsverzeichnis**
   (Grund: [eingebaute-skills.md](reference/eingebaute-skills.md)).
-- **Offen — wer den ersten Stand der gesperrten Skills und Hooks schreibt.** Für die
-  Agent-Dateien ist es geregelt: geprüfte Vorlage, wörtliche Kopie, Hash-Vergleich. Für
-  `.claude/skills/**`, `.claude/hooks/**` und die Hook-Verdrahtung in den Einstellungen ist es in
-  der Quelle noch nicht entschieden. Schreibt die Bau-Session sie selbst, legt der Geprüfte den
-  Vertrauensanker an (das Gate lädt `code-gutachten` vor). Empfehlung der Quelle: dasselbe Muster
-  wie bei den Agents. Bis zur Entscheidung als offen führen und dem Menschen vorlegen.
+- **Wer den ersten Stand schreibt:** für **jeden** Sperrpfad eine geprüfte Vorlage, die die
+  Bau-Session wörtlich kopiert. Das gilt für Agents, Skills samt Katalog und Evals, Hook-Skripte
+  und Hook-Verdrahtung. Ein Dritter vergleicht den Hash, der Mensch nickt ab. Sonst legte der
+  Geprüfte den Vertrauensanker an.
+- **Sicherheitskatalog:** [sicherheits-katalog.md](templates/skills/sicherheits-katalog.md) mit
+  [katalog.json](templates/sicherheit/katalog.json) und der unveränderten ASVS-CSV. Stufe 1 enthält
+  die Zeilen aus eigenen Entscheidungen, die Auswahl aus der CSV folgt in Stufe 2. Kein ASVS-Text
+  in Katalog oder Skill, nur Nummern.
 - **Ausgang:** Vier Agent-Dateien, vier Skills, Hook-Skripte unter `.claude/hooks/`, noch nicht
   committet.
 
@@ -119,13 +136,17 @@ Empfehlung.
 - **Ziel:** Die Bau-Session kann ihre eigenen Prüfer nicht ändern. Siehe
   [schutz-und-deploy.md](reference/schutz-und-deploy.md).
 - **Reihenfolge:** (1) Der Mensch legt `allowed_signers` an; die Signatur-Probe läuft —
-  `git commit -S` durch die Bau-Session muss scheitern. (2) Agent-Dateien als wörtliche Kopie der
-  geprüften Vorlage, SHA-256-Vergleich, der Mensch nickt ab. (3) Commit. (4) Der Mensch setzt die
-  Deny-Regeln außerhalb des Repos. Der CI-Wächter macht ab dann jeden PR an den Sperrpfaden rot.
+  `git commit -S` durch die Bau-Session muss scheitern. (2) Sperrpfad-Dateien als wörtliche Kopie
+  der geprüften Vorlage, SHA-256-Vergleich, der Mensch nickt ab. (3) Commit. (4) Der Mensch setzt
+  die Deny-Regeln für die Sperrpfade (Leitplanken Stufe 2). (5) Nach dem Merge, der das
+  Merge-Skript auf `origin/main` bringt, setzt er das Deny auf `gh pr merge` (Stufe 3). Der
+  CI-Wächter macht ab dann jeden PR an den Sperrpfaden rot, der Arbeitskopie-Abgleich des Skripts
+  fängt Änderungen in der laufenden Session. Die drei Stufen und LP-1 bis LP-8:
+  [leitplanken.md](reference/leitplanken.md).
 - **Ausgang:** Signatur-Probe gescheitert wie verlangt; nach Einführung der Pipeline auf `main`
   die Proben auf einem Wegwerf-Repo (unsignierter Commit, fremder Schlüssel im Commit selbst,
   signierter Commit mit Datei außerhalb der Sperrpfade → rot; signierter Commit nur an Sperrpfaden
-  → grün).
+  → grün). Leitplanken-Proben LP-1 bis LP-8 je mit Mutant, auf Zuruf des Menschen.
 
 ### 6. PROBEN — Deploy-Weg
 
@@ -160,6 +181,10 @@ dem Bau der Fachbereiche. Die Werkstatt ist sein Eingang.
   Bau-Session nimmt den nächsten unabhängigen Block. Stillstand ist das benannte Risiko.
 - **Prod und Rechte bleiben beim Menschen.** Allow/Deny-Regeln, Workspace-Trust, Prod-Deploy,
   alles, was Geld kostet — nie durch die Bau-Session, nie über eine Nachricht.
+- **Schutzregeln liegen außerhalb des Repos.** Was im Repo liegt, kann die Session in der
+  Arbeitskopie sofort ändern. Im Repo stehen Führung und Erkennung, die Sperre liegt draußen.
+- **Netz ist nicht Sperre.** Jede Leitplanke nennt ihre Klasse (Sperre, Netz, Erkennung). Ein
+  Hook ohne Managed-Ebene ist ein Netz.
 - **Selbstauskunft benennen.** Was nur die Bau-Session über sich selbst sagt (Gate-Marker,
   Abweichungseinträge), steht als Grenze im ADR, nicht als Schutz.
 
@@ -168,6 +193,10 @@ dem Bau der Fachbereiche. Die Werkstatt ist sein Eingang.
 Anhalten und fragen, wenn:
 
 - eine Prüfung keinen Feuert-Nachweis bekommen kann,
+- Schutzregeln für die Bau-Session im Repo abgelegt werden sollen, oder die Bau-Session ohne
+  Sandbox und ohne Rückfrage arbeiten soll,
+- ASVS-Text wörtlich in Katalog, Skill oder Doku übernommen werden soll,
+- ein Dump aus Prod oder Staging in eine Dev-Umgebung soll,
 - die Bau-Session Rechte, Hooks, Agents oder Skills nach dem Einspielen ändern müsste,
 - ein Wert gelockert werden soll, den eine Entscheidung festlegt,
 - ein CI-Job auf dem Prod-Host laufen soll,
@@ -186,11 +215,15 @@ Anhalten und fragen, wenn:
 | [agents/rueckschau.md](templates/agents/rueckschau.md) | `.claude/agents/rueckschau.md` | Prüft, ob Gates noch feuern und Lockerungen begründet sind |
 | [skills/belastbar-messen.md](templates/skills/belastbar-messen.md) | `.claude/skills/belastbar-messen/SKILL.md` | Belegpflicht für Zustandsaussagen |
 | [skills/code-gutachten.md](templates/skills/code-gutachten.md) | `.claude/skills/code-gutachten/SKILL.md` | Handwerk des Gates |
-| [skills/sicherheits-katalog.md](templates/skills/sicherheits-katalog.md) | `.claude/skills/sicherheits-katalog/SKILL.md` | Prüfkatalog, Gerüst |
+| [skills/sicherheits-katalog.md](templates/skills/sicherheits-katalog.md) | `.claude/skills/sicherheits-katalog/SKILL.md` | Ordnet den Diff den Katalogzeilen zu, nennt Prüfart und Nachweis |
+| [sicherheit/katalog.json](templates/sicherheit/katalog.json) | `.claude/skills/sicherheits-katalog/katalog.json` | Katalog nach ASVS 5.0.0, nur Nummern, Level und Inseln |
+| [sicherheit/nachweise.json](templates/sicherheit/nachweise.json) | `{{NACHWEIS_PFAD}}` | Test oder Check je geltender Katalogzeile |
 | [skills/test-qualitaet.md](templates/skills/test-qualitaet.md) | `.claude/skills/test-qualitaet/SKILL.md` | Handwerk des Test-Autors |
 | [ci-werkstatt.yml](templates/ci-werkstatt.yml) | `.github/workflows/pr.yml` | Pflicht-Checks, Sperrpfad-Wächter, Merge-Vermerk |
 | [merge-gruen.py](templates/merge-gruen.py) | `{{MERGE_SKRIPT_PFAD}}` | Merge-Skript mit G-1 bis G-8 |
 | [AUFSETZEN.md](templates/AUFSETZEN.md) | `docs/werkstatt/AUFSETZEN.md` | Handgriffe des Menschen und Probenliste |
+| [LEITPLANKEN.md](templates/LEITPLANKEN.md) | `docs/werkstatt/LEITPLANKEN.md` | Deny-Regeln je Stufe zum Kopieren in Dateien außerhalb des Repos, Probenliste LP-1 bis LP-8 |
+| [dev-env.py](templates/dev-env.py) | `{{DEV_ENV_PFAD}}` | Isolierte Dev-Umgebung je Worktree: Slot, Ports, Wegwerf-Zugang, Sweep |
 
 ## Additional Resources
 
@@ -204,3 +237,9 @@ Anhalten und fragen, wenn:
   `/simplify` und `/security-review`, Evals.
 - [reference/walking-skeleton.md](reference/walking-skeleton.md) — der kleinste Faden als eigene
   Phase nach der Werkstatt, Eingang und Filtersatz.
+- [reference/leitplanken.md](reference/leitplanken.md) — Schichtung, Freigabeliste, LP-1 bis LP-8
+  mit Feuert-Probe, drei Stufen, Arbeitskopie-Abgleich, Laufumgebung.
+- [reference/asvs-baseline.md](reference/asvs-baseline.md) — Level-Wahl mit Inseln, Katalog- und
+  Nachweisdatei, Mandantentest als Beispiel, Feuert-Nachweis.
+- [reference/isolation.md](reference/isolation.md) — Worktree-Pflicht, Dev-DB je Worktree, Slots,
+  Zugangsdaten, Proben F-1 bis F-11.

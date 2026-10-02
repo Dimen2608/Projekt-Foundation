@@ -1,0 +1,10 @@
+{
+  "SK-001": {
+    "art": "test",
+    "ziel": "{{TESTKNOTEN_LOG_HYGIENE}}"
+  },
+  "SK-002": {
+    "art": "test",
+    "ziel": "{{TESTKNOTEN_MANDANTENTEST}}"
+  }
+}

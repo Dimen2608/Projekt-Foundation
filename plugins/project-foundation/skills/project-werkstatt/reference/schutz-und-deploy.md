@@ -23,6 +23,10 @@ Ganz `.claude/skills/**` ist gesperrt, nicht nur der Skill des Gates: Das Gate l
 per `skills:` vor, ein änderbarer Skill wäre eine zweite Tür zum Urteil. Eine Regel ist leichter zu
 prüfen als eine Ausnahmeliste. Braucht der Bau einen neuen Skill, kommt er per signiertem Commit.
 
+**Erweiterung nach der Definition of Done:** Die Wurzel-`CLAUDE.md` und die Regeldatei des Repos
+kommen dazu, sobald ihr Ort feststeht, per Nachtrag zur Entscheidung, nicht still. Begründung,
+Gegenposition und Option stehen in [leitplanken.md](leitplanken.md).
+
 ## Drei Schichten, eine trägt
 
 1. **Einspielen per wörtlicher Kopie mit Hash-Vergleich.** Die Agent-Dateien entstehen aus einer
@@ -30,23 +34,27 @@ prüfen als eine Ausnahmeliste. Braucht der Bau einen neuen Skill, kommt er per 
    Commit vergleicht ein Dritter die SHA-256-Werte von Vorlage und Ergebnis
    (`sha256sum vorlage.md .claude/agents/gate.md`), der Mensch nickt ab. Weichen sie ab, wird nicht
    committet.
-2. **Deny-Regeln außerhalb des Repos, gesetzt vom Menschen.** Unmittelbar nach dem Commit setzt
-   der Mensch Deny-Regeln für die Sperrpfade in einer Einstellungsdatei **außerhalb** des Repos
-   (seine Benutzer-Einstellungen), damit kein Commit der Bau-Session sie aufheben kann.
-   **Vorschlag**, Ort und Wortlaut offen: dazu eine Deny-Regel für `gh pr merge`, damit der Merge
-   nur über das Skript geht.
+2. **Deny-Regeln außerhalb des Repos, gesetzt vom Menschen.** Unmittelbar nach dem Hash-Vergleich
+   setzt der Mensch Deny-Regeln für die Sperrpfade in seinen **Benutzer-Einstellungen**, mit
+   absolutem Repo-Pfad (Stufe 2 der Leitplanken). Kein Commit der Bau-Session kann sie aufheben.
+   Das Deny auf `gh pr merge` kommt in die `--settings`-Datei der Bau-Session, sobald das
+   Merge-Skript auf `origin/main` liegt (Stufe 3). Ebenen, Wortlaut und Proben stehen in
+   [leitplanken.md](leitplanken.md).
 3. **Der CI-Wächter ist der eigentliche Schutz.** Deny-Regeln sperren Edit und Write, aber nicht
    zuverlässig jeden Shell-Befehl. Deshalb macht der Wächter (G-4) jeden PR rot, der einen
    Sperrpfad berührt — ohne Ausnahme, auch nicht über einen Abweichungseintrag. Er vergleicht mit
    `git diff --no-renames` (eine Umbenennung aus einem Sperrpfad heraus zählt am alten Pfad) und
-   ohne Unterschied der Groß- und Kleinschreibung.
+   ohne Unterschied der Groß- und Kleinschreibung. **Grenze:** Er schützt den Commit-Weg, nicht
+   die Arbeitskopie. Eine Änderung an Hook oder Einstellung wirkt in der laufenden Session sofort.
+   Das prüft der Arbeitskopie-Abgleich des Merge-Skripts vor jedem Merge.
 
-**Offen — wer den ersten Stand der gesperrten Skills und Hooks schreibt.** Schicht 1 deckt in der
-Quelle nur die Agent-Dateien. Für `.claude/skills/**`, `.claude/hooks/**` und die
-Hook-Verdrahtung in `.claude/settings*.json` (ohne `permissions`, die setzt nur der Mensch) ist
-nicht entschieden, wer sie schreibt. Schreibt die Bau-Session sie selbst, legt der Geprüfte den
-Vertrauensanker an. Empfehlung der Quelle: dasselbe Muster wie bei den Agents — geprüfte Vorlage,
-wörtliche Kopie, Hash-Vergleich, Nicken des Menschen.
+**Wer den ersten Stand schreibt** (entschieden in der Quelle): für **jeden** Sperrpfad,
+den die Bau-Session im Aufsetz-Block füllt, dasselbe Muster wie bei den Agents. Das gilt für Skills
+samt Evals und Plugin-Manifest, für die Hook-Skripte und für die Hook-Verdrahtung in
+`.claude/settings*.json`, aber ohne `permissions`, die setzt nur der Mensch. Das Muster: geprüfte
+Vorlage, wörtliche Kopie, Hash-Vergleich durch einen Dritten, Nicken des Menschen. Schriebe die
+Bau-Session sie selbst, legte der Geprüfte den Vertrauensanker an. Eine Regel für alle Sperrpfade
+ist leichter zu prüfen als eine Ausnahme.
 
 **Reihenfolge im Aufsetz-Block:**
 

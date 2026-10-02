@@ -6,7 +6,9 @@
 ## Herkunft
 
 Das Muster stammt aus dem Werkstatt-Plan eines Neubaus (Atemluft V2), entschieden in ENT-190,
-ENT-201 und ENT-202 mit ihren Nachträgen, Stand 01.10.2026. Dort hat der Mensch festgelegt, dass
+ENT-201 und ENT-202 mit ihren Nachträgen, Stand 01.10.2026. Leitplanken, Sicherheitskatalog und
+Isolation kamen mit ENT-203 P4, ENT-206 und dem Vierten Nachtrag zu ENT-202 dazu, Stand
+02.10.2026 (Teilblock 100-4). Dort hat der Mensch festgelegt, dass
 die Bau-Session jeden grünen PR ohne Rückfrage mergt und die Prüfungen den ganzen Schutz tragen,
 den vorher die Einzelfreigabe getragen hat. Das Vorgängerprojekt hatte 25 Agent-Rollen und 15
 Skills; geblieben sind vier Rollen und vier Skills. Die Vorlagen hier sind entprojektiert und
@@ -63,8 +65,11 @@ dürfen als Plugin verpackt werden (dann prüfbar mit `claude plugin validate --
 bleiben Dateien unter `.claude/agents/`.
 
 **Workspace-Trust:** Frontmatter-Hooks eines Projekt-Agents laufen nur nach Workspace-Trust für
-genau diesen Ordner, und eine `claude -p`-Sitzung gilt nicht als vertraut. Umsetzer und Gate laufen
-deshalb als Subagent einer interaktiven Bau-Session, nicht aus einem Skript.
+genau diesen Ordner. Ob eine `claude -p`-Sitzung als vertraut gilt und Projekt-Hooks ausführt, ist
+in der Doku-Lage widersprüchlich belegt ([leitplanken.md](leitplanken.md), Offen 5). Umsetzer und
+Gate laufen deshalb als Subagent einer interaktiven Bau-Session, nicht aus einem Skript. Proben mit
+`claude -p` laufen in einem Klon von `origin/main`, weil sie dessen Projekt-Hooks mit den Rechten
+des Menschen ausführen könnten.
 
 ## Der Weg einer Änderung
 
@@ -98,20 +103,29 @@ belegt den **Aufruf**, nicht die Wirkung. Das Gate prüft das Protokoll selbst n
 `/simplify`, `/security-review`, Gate und Evals laufen **nie in der CI**: Sie sind nicht
 deterministisch und kosten Kontingent des Menschen.
 
+## Entschieden seit 0.8.0
+
+| Teil | Stand | Wo |
+| --- | --- | --- |
+| Leitplanken: Schichtung, Freigabeliste, LP-1 bis LP-8, drei Stufen, Arbeitskopie-Abgleich, Laufumgebung mit Sandbox, Env-Scrub | entschieden (ENT-206 P1 bis P5) | [leitplanken.md](leitplanken.md), Vorlage `LEITPLANKEN.md` |
+| ASVS-Level und Sicherheitskatalog: Level-Wahl mit L3-Inseln, Katalog- und Nachweisdatei, Prüfung SK-1 bis SK-5, Füllung in zwei Stufen | entschieden (ENT-206 P6 bis P8) | [asvs-baseline.md](asvs-baseline.md), Vorlagen unter `sicherheit/` und `skills/sicherheits-katalog.md` |
+| Isolation je Session: Worktree-Pflicht, Container je Worktree, Slots, Zugangsdaten-Regeln | entschieden (ENT-206 P9 bis P11) | [isolation.md](isolation.md), Vorlage `dev-env.py` |
+| Wer den ersten Stand der gesperrten Skills, Hook-Skripte und Hook-Verdrahtung schreibt | entschieden (ENT-203 P4): dasselbe Muster wie bei den Agents | [schutz-und-deploy.md](schutz-und-deploy.md) |
+| Deny-Regel für `gh pr merge`: Ort und Wortlaut | entschieden: `--settings`-Datei, Stufe 3 | [leitplanken.md](leitplanken.md) |
+| `CLAUDE.md` und Regeldatei als Sperrpfad | entschieden (Vierter Nachtrag zu ENT-202), wirksam nach der Definition of Done | [leitplanken.md](leitplanken.md) |
+
 ## Offen
 
-Diese Teile hat die Quelle am 01.10.2026 noch nicht entschieden. Sie **folgen aus der Quelle
+Diese Teile hat die Quelle am 02.10.2026 noch nicht entschieden. Sie **folgen aus der Quelle
 (Atemluft V2), noch offen**, und werden dann hier nachgezogen.
 
 | Teil | Stand | Folgt aus |
 | --- | --- | --- |
-| Leitplanken (Hooks, Freigabeliste, Log-Hygiene) und ASVS-Level des Sicherheitskatalogs | offen | folgt aus der Quelle, noch offen |
-| Isolation je Session (Worktree-Regeln) | offen | folgt aus der Quelle, noch offen |
-| Definition of Done (feste Liste je Änderung mit Nachweisweg), Git-Ablauf | offen | folgt aus der Quelle, noch offen |
-| Ausformulierte Agent-Texte (Prompt der vier Rollen) | offen — die Vorlagen hier sind Gerüste mit dem belegten Frontmatter | folgt aus der Quelle, noch offen |
-| Wer den ersten Stand der gesperrten Skills, Hook-Skripte und Hook-Verdrahtung schreibt | offen — für Agent-Dateien geregelt (Vorlage, Kopie, Hash-Vergleich); Empfehlung der Quelle: dasselbe Muster für alle Sperrpfade | Entscheidung des Menschen |
-| Deny-Regel für `gh pr merge`: Ort und Wortlaut | Vorschlag | folgt aus der Quelle, noch offen |
-| Hook-Skripte der Umsetzer-Kette und des Gates | offen — Verfahren legt der Aufsetz-Block fest | Aufsetz-Block |
+| Definition of Done (feste Liste je Änderung mit Nachweisweg), Git-Ablauf | offen | Quelle, Teilblock 100-5 |
+| Ausformulierte Agent-Texte (Prompt der vier Rollen) | offen — die Vorlagen hier sind Gerüste mit dem belegten Frontmatter | Quelle, Teilblock 100-6 |
+| Hook-Skripte der Umsetzer-Kette, des Gates und der Leitplanken | offen — Konvention LP-8 steht, Verfahren legt der Aufsetz-Block fest | Aufsetz-Block |
 | Format der Gate-Marker | offen — die Vorlage enthält einen Vorschlag | Aufsetz-Block |
+| Proben der Leitplanken und der Isolation (P3b, P2b, F-10, F-11 u. a.) und die Doku-Fragen dazu | offen — Ergebnisse entscheiden über Ebene und Pfadform | [leitplanken.md](leitplanken.md), [isolation.md](isolation.md) |
+| Stufe 2 des Sicherheitskatalogs (Auswahl aus der CSV), Lizenzpflichten der CSV | offen | [asvs-baseline.md](asvs-baseline.md) |
 | `maxTurns` für das Stopp-Veto | offen — ob es eine Hook-Schleife beendet, ist nicht geprüft | Aufsetz-Block |
 | Übergabe der Testdateien aus dem Worktree des Test-Autors | offen — Probe | Aufsetz-Block |

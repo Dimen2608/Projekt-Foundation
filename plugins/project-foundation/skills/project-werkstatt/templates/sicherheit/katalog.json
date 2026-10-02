@@ -1,0 +1,45 @@
+{
+  "asvs_version": "5.0.0",
+  "csv_datei": "OWASP_Application_Security_Verification_Standard_5.0.0_en.csv",
+  "csv_sha256": "{{CSV_SHA256}}",
+  "auswahl_stand": "{{DATUM}}",
+  "level": "{{ASVS_LEVEL}}",
+  "inseln": ["{{INSEL}}"],
+  "ausloeser_pfade": {
+    "endpunkt": ["{{PFADMUSTER_ENDPUNKTE}}"],
+    "datenmodell": ["{{PFADMUSTER_MODELLE}}", "{{PFADMUSTER_MIGRATIONEN}}"],
+    "auth": ["{{PFADMUSTER_AUTH}}"],
+    "krypto": ["{{PFADMUSTER_KRYPTO}}"],
+    "eingabe": ["{{PFADMUSTER_EINGABE}}"],
+    "log": ["{{PFADMUSTER_LOG}}"],
+    "abhaengigkeit": ["{{ABHAENGIGKEITSDATEIEN}}"]
+  },
+  "zeilen": [
+    {
+      "id": "SK-001",
+      "quelle": "entscheidung",
+      "ref": "{{ENTSCHEIDUNG_NUMMER_PUNKT}}",
+      "kapitel": "{{KAPITEL}}",
+      "stufe_csv": null,
+      "stufe_projekt": "{{ASVS_LEVEL}}",
+      "gilt": "ja",
+      "pruefart": "test",
+      "ausloeser": ["log"],
+      "blockierend": "ja"
+    },
+    {
+      "id": "SK-002",
+      "quelle": "asvs-5.0.0",
+      "ref": "V8.4.1",
+      "kapitel": "Authorization",
+      "stufe_csv": 2,
+      "stufe_projekt": "L3-Insel:mandantengrenze",
+      "gilt": "bedingt",
+      "begruendung": "Nur bei mehreren Mandanten.",
+      "bedingung": "{{ENTSCHEIDUNG_MANDANTEN}}",
+      "pruefart": "test",
+      "ausloeser": ["endpunkt", "datenmodell"],
+      "blockierend": "ja"
+    }
+  ]
+}

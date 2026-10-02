@@ -39,8 +39,9 @@ AI-assisted development foundation, currently optimized for **Claude Code** and 
 - a fourth skill **`project-werkstatt`** for repos where an AI build session merges green PRs
   on its own: four role templates (implementer, test author, gate, retrospective), a definition
   of "green" checked by a merge script instead of branch protection, a blocking AI gate bound to
-  the head SHA, locked rule paths with signed human commits, staging automatic and prod only by
-  a human, followed by a walking skeleton as a separate phase;
+  the head SHA, locked rule paths with signed human commits, guardrails as deny rules outside the
+  repo, an ASVS-based security catalog, isolated dev environments per worktree, staging automatic
+  and prod only by a human, followed by a walking skeleton as a separate phase;
 - a **CLI** (`foundation-validate <path>`) that checks a project for structure, missing
   answers and contradictions. Exit code `0` means `FOUNDATION VALID`, `1` means at least
   one structural blocker.
@@ -88,8 +89,10 @@ Es besteht aus fünf Teilen:
 - **Skill `project-werkstatt`** — für ein Repo, in dem eine KI-Bau-Session grüne PRs selbst
   mergt: vier Rollen als Vorlagen (Umsetzer, Test-Autor, Gate, Rückschau), eine Grün-Definition,
   die ein Merge-Skript statt eines Branch-Schutzes prüft, ein blockierendes KI-Gate mit
-  SHA-Bindung, gesperrte Regelpfade mit signierten Commits des Menschen, Staging automatisch und
-  Prod nur durch den Menschen, danach ein Walking Skeleton als eigene Phase (ADR-0018). Offene Teile sind als
+  SHA-Bindung, gesperrte Regelpfade mit signierten Commits des Menschen, Leitplanken als
+  Deny-Regeln außerhalb des Repos, ein Sicherheitskatalog nach ASVS mit Level-Wahl, isolierte
+  Dev-Umgebungen je Worktree, Staging automatisch und Prod nur durch den Menschen, danach ein
+  Walking Skeleton als eigene Phase (ADR-0018, ADR-0020). Offene Teile sind als
   offen markiert.
 - **CLI `foundation-validate`** — prüft ein Projekt maschinell auf Struktur, fehlende
   Entscheidungen und Widersprüche und erzeugt den Audit-Report.
