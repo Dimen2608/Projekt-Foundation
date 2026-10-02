@@ -5,6 +5,29 @@
 >
 > Neueste Einträge oben.
 
+## 2026-10-02 — `project-werkstatt`: Leitplanken, ASVS-Baseline, Isolation (0.9.0)
+
+**Anlass**
+
+Die Quelle (Werkstatt-Plan Atemluft V2, Teilblock 100-4) hat Leitplanken, ASVS-Level und Isolation
+mit ENT-203 P4, ENT-206 und dem Vierten Nachtrag zu ENT-202 entschieden. Auftrag des
+Auftraggebers: den Skill darauf nachziehen, verallgemeinert, ohne ASVS-Text.
+
+**Entschieden (ADR-0020)**
+
+Drei neue Reference-Dateien (`leitplanken.md`, `asvs-baseline.md`, `isolation.md`) und vier neue
+Vorlagen (`LEITPLANKEN.md`, `dev-env.py`, `sicherheit/katalog.json`, `sicherheit/nachweise.json`).
+Gefüllt wurde der Skill `sicherheits-katalog`. `merge-gruen.py` bekommt den Arbeitskopie-Abgleich
+und `LOCKED_FILES`. SKILL.md fragt in KLÄREN nach Laufumgebung, ASVS-Level und Worktree-Pflicht und
+führt die Leitplanken in SPERREN in drei Stufen ein. Neu sind zwei Harte Regeln und drei
+Stop-Conditions. Der erste Stand aller Sperrpfade kommt aus einer geprüften Vorlage. Keine
+Validator-Änderung.
+
+**Offen**
+
+Definition of Done und Git-Ablauf, Agent-Texte, Hook-Skripte, Gate-Marker-Format, die Proben der
+Leitplanken und der Isolation, Stufe 2 der Katalogauswahl und die Lizenzfrage zur ASVS-CSV.
+
 ## 2026-10-01 — Vierter Skill `project-werkstatt` (0.8.0)
 
 **Anlass**

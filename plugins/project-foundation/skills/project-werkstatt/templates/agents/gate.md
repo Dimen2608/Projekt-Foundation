@@ -43,7 +43,10 @@ Sonst brich ab.
 0. Das Protokoll der Umsetzer-Kette (`.claude/run/kette.log`) zum Endstand-Baum-Hash: Reihenfolge
    `/simplify` < Tests < `/security-review`, Berichte vorhanden.
 1. Redundanz gegen den Bestand. 2. Tote Pfade. 3. Abstraktionshöhe. 4. Layer und Musterbruch.
-5. Verstoß gegen eine Entscheidung oder Regel des Repos.
+5. Verstoß gegen eine Entscheidung oder Regel des Repos. Dazu gehört jede Zeile des
+   Sicherheitskatalogs (`.claude/skills/sicherheits-katalog/katalog.json`) mit `gilt: ja`, deren
+   `ausloeser` der Diff trifft: Fehlt ihr Nachweis in `{{NACHWEIS_PFAD}}`, oder löscht oder schwächt
+   der Diff ihn, und trägt sie `blockierend: ja`, dann BLOCKIEREND.
 6. **Sicherheitsbericht** (`.claude/run/sicherheitsbericht.md`), zuletzt gelesen: Jeder Befund ist
    behoben oder in `.claude/run/sicherheitsvermerke.md` mit einem Vermerk versehen, den du gegen
    den Code nachprüfst. Sonst BLOCKIEREND.

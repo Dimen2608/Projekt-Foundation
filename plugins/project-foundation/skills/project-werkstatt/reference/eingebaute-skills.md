@@ -60,7 +60,9 @@ kostenlos und deterministisch.
 
 **Offen:** ob der Grader den Agent-Aufruf einer Projekt-Rolle erfasst. Fällt die Probe negativ
 aus, Eigenbau: `claude -p --agent <rolle> --output-format json` und Auswertung des Transkripts.
-Unter `-p` laufen Frontmatter-Hooks nicht; für die Auslöse-Frage spielt das keine Rolle.
+Ob unter `-p` Frontmatter- und Projekt-Hooks laufen, ist widersprüchlich belegt
+([leitplanken.md](leitplanken.md), Offen 5); für die Auslöse-Frage spielt das keine Rolle. Evals
+laufen in einem Klon von `origin/main`.
 
 **Feuert-Nachweis des Harness** (Wegwerf-Kopie außerhalb des Repos):
 

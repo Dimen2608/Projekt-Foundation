@@ -16,6 +16,8 @@ Offen (im Aufsetz-Block festzulegen, die Probe-PRs sind das Abnahmekriterium):
 - G-2: Vergleich der SHA im Testbericht mit dem PR-Kopf (der Merge selbst ist per
   --match-head-commit gebunden).
 - G-4: Waechter gegen aufgeweichte Tests und Workflow-Lockerung, Skip-Erlaubnisliste.
+  Der Arbeitskopie-Abgleich (g4_working_copy) ist ausgefuehrt; seine Proben stehen in
+  reference/leitplanken.md.
 - G-5: Wie das Lebenszeichen je Check gelesen wird (Job-Zusammenfassung, Artefakt).
 - G-7: Pruefung der Abweichungsliste.
 - G-8: Format der Gate-Marker (hier ein Vorschlag) und die Erlaubnisliste der Gate-Autoren.
@@ -26,6 +28,7 @@ Offen (im Aufsetz-Block festzulegen, die Probe-PRs sind das Abnahmekriterium):
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -38,6 +41,11 @@ GATE_AUTHORS = ("{{GATE_AUTOREN}}",)  # Logins, deren Gate-Kommentare zaehlen
 LOCKED_PATHS = re.compile(
     r"^\.claude/(agents|skills|hooks)/|^\.claude/settings[^/]*\.json$", re.IGNORECASE
 )
+# Nach der Definition of Done per Entscheidung ergaenzen, z. B. ("CLAUDE.md", Regeldatei).
+LOCKED_FILES: tuple[str, ...] = ()
+LOCKED_DIRS = (".claude/agents", ".claude/hooks", ".claude/skills")
+SETTINGS_GLOB = ":(glob).claude/settings*.json"
+SETTINGS_ALLOWED_UNTRACKED = (".claude/settings.local.json",)
 GATE_MARKER = re.compile(r"<!-- gate-urteil sha=([0-9a-f]{40}) urteil=(ja|nein) -->")
 # Abschnitt "Geprueft" reicht bis zur naechsten Zeile, die mit ** beginnt; im Abschnitt selbst
 # darf deshalb keine Zeile mit ** beginnen (so steht es im Gate-Format der Vorlage).
@@ -87,11 +95,51 @@ def g3_up_to_date(sha: str) -> None:
         raise Red("G-3: PR-Kopf enthaelt origin/main nicht -- rebasen, neuen Lauf abwarten")
 
 
+def is_locked(path: str) -> bool:
+    locked_files = {f.lower() for f in LOCKED_FILES}
+    return bool(LOCKED_PATHS.search(path)) or path.lower() in locked_files
+
+
 def g4_locked_paths(files: list[str]) -> None:
-    touched = [f for f in files if LOCKED_PATHS.search(f)]
+    touched = [f for f in files if is_locked(f)]
     if touched:
         raise Red(f"G-4: Sperrpfad beruehrt: {', '.join(touched)}")
     # Offen: Waechter und Skip-Erlaubnisliste aus origin/main gegen den PR-Diff ausfuehren.
+
+
+def worktree_paths() -> list[str]:
+    porcelain = run("git", "worktree", "list", "--porcelain")
+    paths = [z.split(" ", 1)[1] for z in porcelain.splitlines() if z.startswith("worktree ")]
+    missing = [p for p in paths if not os.path.isdir(p)]
+    if missing:
+        raise Red(f"G-4: Worktree fehlt ({', '.join(missing)}) -- git worktree prune, neu starten")
+    return paths
+
+
+def g4_working_copy() -> None:
+    """Arbeitskopie-Abgleich: G-4 schuetzt den Commit-Weg, nicht die laufende Session."""
+    locked = [*LOCKED_DIRS, SETTINGS_GLOB, *LOCKED_FILES]
+    for wt in worktree_paths():
+        changed = run("git", "-C", wt, "diff", "--name-only", "origin/main", "--", *locked)
+        if changed.strip():
+            raise Red(f"G-4: Sperrpfad in der Arbeitskopie {wt} geaendert: {changed.splitlines()}")
+        # Ohne --exclude-standard: ignorierte Dateien zaehlen mit.
+        # Auch __pycache__ zaehlt: Eine passende .pyc ersetzt beim Import die Quelle. Hooks
+        # laufen deshalb mit `python -B` (LP-8), dann entsteht legitim keine.
+        untracked = run("git", "-C", wt, "ls-files", "--others", "--", *LOCKED_DIRS).splitlines()
+        if untracked:
+            raise Red(f"G-4: ungetrackte Datei unter einem Sperrpfad in {wt}: {untracked}")
+        settings = run("git", "-C", wt, "ls-files", "--others", "--", SETTINGS_GLOB).splitlines()
+        foreign = [s for s in settings if s not in SETTINGS_ALLOWED_UNTRACKED]
+        if foreign:
+            raise Red(f"G-4: fremde ungetrackte Einstellungsdatei in {wt}: {foreign}")
+        for name in [
+            *settings,
+            *run("git", "-C", wt, "ls-files", "--", SETTINGS_GLOB).splitlines(),
+        ]:
+            with open(f"{wt}/{name}", encoding="utf-8") as datei:
+                if "disableAllHooks" in datei.read():
+                    raise Red(f"G-4: disableAllHooks in {wt}/{name}")
 
 
 def g6_main_green(labels: list[str]) -> None:
@@ -164,6 +212,7 @@ def main(argv: list[str]) -> int:
         # G-2: Merge per --match-head-commit; SHA-Vergleich des Testberichts offen (Docstring).
         g3_up_to_date(sha)
         g4_locked_paths(files)
+        g4_working_copy()
         # G-5 offen: Lebenszeichen je Pflicht-Check > 0.
         g6_main_green(labels)
         g7_workshop(files)

@@ -77,7 +77,8 @@ in jedem Repo, in dem gebaut wird, `FOUNDATION VALID` voraus. Seine Trigger („
 steuern") überschneiden sich nicht mit denen der Vorbereitung; die Abgrenzung steht deshalb nur
 in seiner eigenen `description` (ADR-0014). `project-werkstatt` legt in einem Repo fest, was
 „grün" heißt, wenn eine KI-Bau-Session selbst mergt: Rollen, Grün-Definition mit Merge-Skript,
-blockierendes Gate, gesperrte Regelpfade, Deploy-Weg, danach der Walking Skeleton als eigene Phase. Seine vier
+blockierendes Gate, gesperrte Regelpfade, Leitplanken außerhalb des Repos, Sicherheitskatalog nach
+ASVS, isolierte Dev-Umgebungen je Worktree (ADR-0020), Deploy-Weg, danach der Walking Skeleton als eigene Phase. Seine vier
 Rollen sind **Vorlagen** für `.claude/agents/` im Zielprojekt, keine Plugin-Agents, weil das Muster
 auf Frontmatter-Hooks beruht, die Plugin-Agents ignorieren; die Vorlagen dürfen deshalb `skills`
 und `hooks` tragen (ADR-0018, ADR-0019). Seine Abgrenzung steht nur in seiner eigenen
@@ -194,5 +195,6 @@ Skills und Agents sind Prompt-Material und haben keine Tests (ADR-0009). Geprüf
 den Auslöse-Test nach jeder Änderung an einer `description`: ein Satz, der `project-foundation`
 ziehen muss, einer, der `project-rethink` ziehen muss (ADR-0013), einer, der
 `project-orchestrate` ziehen muss (ADR-0014), einer, der `project-werkstatt` ziehen muss
-(ADR-0018). Die Python-Skizze `templates/merge-gruen.py` von `project-werkstatt` läuft durch
-`ruff`, nicht durch `mypy` und `pytest`: Sie ist Vorlage, kein Code des Validators.
+(ADR-0018). Die Python-Skizzen `templates/merge-gruen.py` und `templates/dev-env.py` von
+`project-werkstatt` laufen durch `ruff`, nicht durch `mypy` und `pytest`: Sie sind Vorlage, kein
+Code des Validators (ADR-0020).

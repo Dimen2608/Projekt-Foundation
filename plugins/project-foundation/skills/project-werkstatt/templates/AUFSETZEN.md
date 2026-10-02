@@ -11,10 +11,19 @@
 - [ ] [M] Werte, die nie lockerbar sind (z. B. Diff-Coverage-Schwelle, Prüfpunkte des Wächters),
       stehen in einer Entscheidung.
 - [ ] [M] Was Geld kostet oder nach außen geht, bleibt beim Menschen — benannt.
-- [ ] [M] **Offen bis entschieden:** Wer schreibt den ersten Stand der gesperrten Skills, der
-      Hook-Skripte und der Hook-Verdrahtung in `.claude/settings*.json`? Für die Agent-Dateien
-      gilt: geprüfte Vorlage, wörtliche Kopie, Hash-Vergleich. Empfehlung: dasselbe Muster für
-      alle Sperrpfade, sonst legt der Geprüfte den Vertrauensanker an.
+- [ ] [M] Den ersten Stand **aller** Sperrpfade (Agents, Skills samt Katalog und Evals,
+      Hook-Skripte, Hook-Verdrahtung in `.claude/settings*.json` ohne `permissions`) schreibt eine
+      geprüfte Vorlage; die Bau-Session kopiert wörtlich, ein Dritter vergleicht den Hash.
+- [ ] [M] ASVS-Level der Anwendung und L3-Inseln, mit Begründung, als ADR mit Filtersatz
+      (`reference/asvs-baseline.md`).
+- [ ] [M] Laufumgebung der Bau-Session: mit Sandbox (unter Windows WSL2). Probe: Docker im
+      Sandbox-Lauf, Ladeweg einer übergeordneten `CLAUDE.md`, `gh`-Login, Startweg. Scheitert sie:
+      neu entscheiden.
+- [ ] [M] Startweg mit `--settings {{SCHUTZ_DATEI}}` geklärt. Geht er nicht (etwa Desktop-Sitzung):
+      Ersatz nach `reference/leitplanken.md`.
+- [ ] [M] Worktree-Pflicht: Test-Autor und Rückschau immer; jeder zweite gleichzeitig schreibende
+      Lauf; Umsetzer im Haupt-Checkout bis Probe F-8 (`reference/isolation.md`).
+- [ ] [M] Nachbar-Repos, die die Bau-Session nur lesen darf (LP-4), benannt — oder keine.
 
 ## 2. Runner und Repo-Einstellungen
 
@@ -26,6 +35,12 @@
 - [ ] [M] Dependabot alerts und security updates eingeschaltet.
 - [ ] [M] Environment `prod` mit dem Menschen als Required Reviewer.
 
+## 2a. Leitplanken Stufe 1 — vor dem Aufsetz-Block
+
+- [ ] [M] `{{SCHUTZ_DATEI}}` außerhalb des Repos nach `LEITPLANKEN.md`, Stufe 1: Push-Teil von
+      LP-1, LP-4 bis LP-7, `"disableAllHooks": false`, Env-Scrub. Die Bau-Session startet damit.
+- [ ] [M] Transkript-Frist bleibt beim Standard (30 Tage) oder ist bewusst geändert.
+
 ## 3. Rahmen im Repo
 
 - [ ] [B] `.github/workflows/pr.yml` aus `ci-werkstatt.yml`, `defaults: run: shell: bash`.
@@ -35,12 +50,22 @@
 - [ ] [B] Merge-Skript unter `{{MERGE_SKRIPT_PFAD}}` aus `merge-gruen.py`; Gate-Marker-Format und
       Erlaubnisliste der Gate-Autoren festgelegt (offen bis hier).
 - [ ] [B] Je Pflicht-Check eine Rauchprobe; CI grün auf dem leeren Repo mit Lebenszeichen > 0.
-- [ ] [B] `.claude/run/` in `.gitignore`.
+- [ ] [B] `.claude/run/`, `.env.worktree`, `*env.list`, `*env.txt`, `*env.dump` in `.gitignore`;
+      keine `.worktreeinclude`, die `.env*` nennt.
+- [ ] [B] `dev_env` aus `dev-env.py` unter `{{DEV_ENV_PFAD}}`; Dev-Compose-Datei nach dem Vertrag im
+      Docstring (nur Variablen aus `.env.worktree`, keine Vorgabewerte, Ports an `127.0.0.1`).
+      Portbereich gemessen gewählt.
+- [ ] [B] Nachweisdatei `{{NACHWEIS_PFAD}}` aus `sicherheit/nachweise.json` und der Test SK-1 bis
+      SK-5 über Katalog, CSV und Nachweisdatei.
 
 ## 4. Rollen, Skills, Hooks, Evals — alles vor der Sperre
 
-- [ ] [B oder Vorlage, siehe 1] Hook-Skripte unter `.claude/hooks/` (Umsetzer-Kette, Test-Autor,
-      Gate). Alles, was sie ausführen, liegt selbst unter den Sperrpfaden; keine Symlinks dort.
+- [ ] [B, wörtlich aus der Vorlage] Hook-Skripte unter `.claude/hooks/` (Umsetzer-Kette,
+      Test-Autor, Gate), nach der Konvention LP-8. Alles, was sie ausführen, liegt selbst unter den
+      Sperrpfaden; keine Symlinks dort.
+- [ ] [B, wörtlich aus der Vorlage] Skill `sicherheits-katalog` mit `katalog.json` (Stufe 1:
+      Zeilen aus eigenen Entscheidungen, Lebenszeichen > 0) und der unveränderten ASVS-CSV daneben,
+      ihr SHA-256 im Kopf des Katalogs.
 - [ ] [M] Workspace-Trust für genau diesen Ordner.
 - [ ] [B] Proben der Umsetzer-Kette mit echtem Payload: ohne `/simplify` → verweigert;
       Sicherheitsbericht vor den Tests → verweigert; Baum nach Bericht geändert → verweigert;
@@ -62,6 +87,8 @@
       wird zur neuen geprüften Vorlage; der Hash-Vergleich läuft auf ihr.
 - [ ] [B] Feuert-Nachweis des Harness (verdorbener Skill fällt, zu breiter Skill fällt).
 - [ ] Evals nie in der CI.
+- [ ] [B] Isolation F-1 bis F-11 (`reference/isolation.md`), je mit Mutant.
+- [ ] [B] Sicherheitskatalog F-1 (Prüfung der Dateien) und F-3 (Skill-Eval, Inhaltsprobe).
 
 ## 5. Merge-Skript feuert
 
@@ -71,7 +98,13 @@
 - [ ] [B] Negativkontrolle: sauberer PR mit „ja" wird gemergt.
 - [ ] [B] Merge am Skript vorbei auf einem Wegwerf-Repo → Lauf auf `main` rot; Merge-Vermerk mit
       einer SHA, die nicht der zweite Elternteil ist → rot.
-- [ ] [M] **Vorschlag:** Deny-Regel für `gh pr merge` außerhalb des Repos (Ort und Wortlaut offen).
+- [ ] [B] Arbeitskopie-Abgleich: ungetrackter Hook, `disableAllHooks` in `settings.local.json`,
+      geänderte getrackte `.claude/settings.json`, fremde `settings.extra.json` → je rot; sauberer
+      Klon mit den Dauerdateien → grün.
+- [ ] [M] **Stufe 3** nach dem Merge, der das Skript auf `origin/main` bringt: Deny
+      `gh pr merge *` (Bash, PowerShell) samt E1-Hook in `{{SCHUTZ_DATEI}}`; ein Allow auf
+      `gh pr merge` in einer `settings.local.json` entfernt. Bis dahin mergt die Bau-Session nach
+      grüner CI per `gh pr merge` (Restgrenze, benannt).
 
 ## 6. Sperren — in dieser Reihenfolge
 
@@ -80,15 +113,16 @@
          Bau-Session.
 3. - [ ] [B] Signatur-Probe (1): `git commit -S` durch die Bau-Session **scheitert** schon beim
          Signieren. Gelingt er: Restgrenze (siehe unten), bis die Ursache behoben ist.
-4. - [ ] [B] Agent-Dateien (und nach Entscheidung 1 die Skills und Hooks) als wörtliche Kopie der
-         geprüften Vorlage angelegt.
+4. - [ ] [B] Agent-Dateien, Skills samt Katalog, Hook-Skripte und Hook-Verdrahtung als wörtliche
+         Kopie der geprüften Vorlage angelegt.
 5. - [ ] [M] SHA-256 von Vorlage und Ergebnis verglichen und abgenickt. Abweichung → kein Commit.
-6. - [ ] [B] Commit der Agent-Dateien.
+6. - [ ] [B] Commit der Sperrpfad-Dateien.
    - [ ] [B] **Letzter Setup-Commit:** Job `merge-vermerk` scharf schalten, `{{C2_STARTPUNKT}}`
          = Vorgänger dieses Commits (oder per Folge-Commit gesetzt). Ein nicht ersetzter
          Platzhalter lässt den Job mit klarer Meldung rot werden.
-7. - [ ] [M] Deny-Regeln für `.claude/agents/**`, `.claude/skills/**`, `.claude/hooks/**`,
-         `.claude/settings*.json` in den Benutzer-Einstellungen, außerhalb des Repos.
+7. - [ ] [M] **Stufe 2:** Deny-Regeln für `.claude/agents/**`, `.claude/skills/**`,
+         `.claude/hooks/**`, `.claude/settings*.json` in den Benutzer-Einstellungen, mit absolutem
+         Repo-Pfad (`LEITPLANKEN.md`, Stufe 2).
 8. - [ ] [B] Probe-PR an einem Sperrpfad, auch mit Abweichungseintrag, auch als Umbenennung,
          auch als `.Claude/…` → rot.
 9. - [ ] [B] Signatur-Proben auf einem Wegwerf-Repo mit derselben Pipeline:
@@ -98,6 +132,11 @@
          (4) signierter Commit des Menschen, der auch eine Datei außerhalb der Sperrpfade ändert →
          rot;
          (5) Negativkontrolle: signierter Commit des Menschen nur an Sperrpfaden → grün.
+
+10. - [ ] [M] Leitplanken-Proben LP-1 bis LP-8 auf Zuruf, in einem Wegwerf-Klon von `origin/main`,
+          Ergebnisse in `LEITPLANKEN.md`. Kein Eintrag und kein Ergebnis heißt unentschieden.
+11. - [ ] [M] Nach der Definition of Done: Wurzel-`CLAUDE.md` und Regeldatei per Nachtrag zu den
+          Sperrpfaden (G-4, `LOCKED_FILES` im Merge-Skript, Deny-Regeln Stufe 2).
 
 **Restgrenze, solange Probe (1) gelingt:** Die Signatur-Ausnahme ist ausgesetzt. Der Mensch nimmt
 seinen Schlüssel mit einem letzten signierten Commit aus `allowed_signers` und mergt Änderungen an
