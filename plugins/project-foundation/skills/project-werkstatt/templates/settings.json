@@ -1,0 +1,6 @@
+{
+  "autoMemoryEnabled": false,
+  "claudeMdExcludes": [
+    "{{UEBERGEORDNETE_CLAUDE_MD}}"
+  ]
+}

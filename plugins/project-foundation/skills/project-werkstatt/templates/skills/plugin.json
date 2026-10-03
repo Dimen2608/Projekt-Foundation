@@ -1,0 +1,8 @@
+{
+  "name": "{{PLUGIN}}",
+  "description": "Handwerks-Skills der Bau-Session von {{PROJEKT}}: belastbar-messen, code-gutachten, test-qualitaet, sicherheits-katalog, mit Auslöse-Evals.",
+  "version": "1.0.0",
+  "author": {
+    "name": "{{AUTOR}}"
+  }
+}

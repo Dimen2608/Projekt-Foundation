@@ -96,14 +96,29 @@ Benutzer-Einstellungen des Menschen (`~/.claude/settings.json`), pfadgebunden, m
       "Edit(//{{REPO_PFAD_POSIX}}/**/.claude/hooks/**)",
       "Write(//{{REPO_PFAD_POSIX}}/**/.claude/hooks/**)",
       "Edit(//{{REPO_PFAD_POSIX}}/**/.claude/settings*.json)",
-      "Write(//{{REPO_PFAD_POSIX}}/**/.claude/settings*.json)"
+      "Write(//{{REPO_PFAD_POSIX}}/**/.claude/settings*.json)",
+      "Edit(//{{REPO_PFAD_POSIX}}/**/.claude/output-styles/**)",
+      "Write(//{{REPO_PFAD_POSIX}}/**/.claude/output-styles/**)",
+      "Edit(//{{REPO_PFAD_POSIX}}/**/.claude/agent-memory*/**)",
+      "Write(//{{REPO_PFAD_POSIX}}/**/.claude/agent-memory*/**)",
+      "Edit(//{{REPO_PFAD_POSIX}}/**/.claude/rules/**)",
+      "Write(//{{REPO_PFAD_POSIX}}/**/.claude/rules/**)",
+      "Edit(//{{REPO_PFAD_POSIX}}/**/CLAUDE.md)",
+      "Write(//{{REPO_PFAD_POSIX}}/**/CLAUDE.md)",
+      "Edit(//{{REPO_PFAD_POSIX}}/**/CLAUDE.local.md)",
+      "Write(//{{REPO_PFAD_POSIX}}/**/CLAUDE.local.md)",
+      "Edit(//{{REPO_PFAD_POSIX}}/**/AGENTS.md)",
+      "Write(//{{REPO_PFAD_POSIX}}/**/AGENTS.md)"
     ]
   }
 }
 ```
 
-LP-2. Die Muster folgen der Sperrpfad-Liste aus G-4. Wird sie erweitert (etwa um `CLAUDE.md` und
-die Regeldatei nach der Definition of Done), kommen die Zeilen hier mit. Hat diese Datei schon
+LP-2. Die Muster folgen der Sperrpfad-Liste aus G-4, samt den Ladewegen für Anweisungen
+(Wurzel-`CLAUDE.md`, Regeldatei, `CLAUDE.md` in Unterordnern, Output-Styles, Agent-Memory). Ändert
+sich die Liste, ändern sich diese Zeilen mit `LOCKED_PATHS` im Merge-Skript und den beiden Stellen
+in `ci-werkstatt.yml`. Projekteigene Sperrdateien (etwa Soll-Bilder) kommen als weitere Zeilen
+dazu. Ob `**/CLAUDE.md` auch die Datei in der Wurzel trifft, zeigt Probe P2a. Hat diese Datei schon
 einen `permissions`-Block, werden die Zeilen dort ergänzt, nicht ersetzt.
 
 ## Stufe 3 — nach dem Merge, der das Merge-Skript auf `origin/main` bringt

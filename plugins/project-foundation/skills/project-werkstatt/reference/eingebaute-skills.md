@@ -28,11 +28,20 @@ kein maschinenlesbares Urteil und ist ohne ausdrückliche Effort-Stufe uneinheit
 - Beschreibung und `when_to_use` zusammen höchstens 1.536 Zeichen je Skill; das Listing insgesamt
   1 % des Kontextfensters. Vorschlag der Quelle: höchstens 6 Skills, Beschreibung höchstens 700
   Zeichen.
-- Die Skills dürfen als Plugin im Repo verpackt sein (`.claude/skills/<plugin>/.claude-plugin/
-  plugin.json`); dann sind sie mit `claude plugin validate --strict` prüfbar, kostenlos und
-  deterministisch. Die Agents nicht (Plugin-Agents ignorieren `hooks`).
+- Die Skills liegen als Plugin im Repo (`.claude/skills/<plugin>/.claude-plugin/plugin.json`,
+  Skills unter `skills/<name>/SKILL.md`, Evals unter `evals/`). Claude Code lädt solche
+  `@skills-dir`-Plugins nur unter `<repo>/.claude/skills/`, nach Workspace-Trust, nicht aus
+  Elternordnern. So sind sie mit `claude plugin validate --strict` prüfbar, kostenlos und
+  deterministisch; `author` im Manifest, sonst warnt `--strict`. Die Agents nicht (Plugin-Agents
+  ignorieren `hooks`).
+- **Gemessen in der Quelle (2.1.285):** `validate --strict` endet an der Vorlage mit Exit 0 und mit
+  einem Manifestpfad außerhalb des Plugins mit Exit 1. **Ein Skill mit kaputtem YAML-Frontmatter
+  besteht `--strict` mit Exit 0.** Die Frontmatter prüft deshalb eine eigene Probe: mit PyYAML
+  parsen, Name gleich Ordner, Beschreibung in Anführungszeichen und höchstens 700 Zeichen, höchstens
+  500 Zeilen.
 - Ob Plugin-Skills in `skills:` mit Namensraum (`<plugin>:<skill>`) geschrieben werden müssen, ist
-  **offen** — Probe beim Aufsetzen.
+  **offen** — Probe beim Aufsetzen. Die Grader nehmen beide Schreibweisen an
+  (`(?:[\w-]+:)?<skill>`).
 
 ## Evals
 
@@ -58,8 +67,20 @@ ohne etwas zu messen. Nur freie Grader (`tool_used`, `regex`); ein `llm`-Grader 
 geprüft. `/simplify` und `/security-review` bekommen keinen Eval — ihre Reihenfolge prüft der Hook
 kostenlos und deterministisch.
 
-**Offen:** ob der Grader den Agent-Aufruf einer Projekt-Rolle erfasst. Fällt die Probe negativ
-aus, Eigenbau: `claude -p --agent <rolle> --output-format json` und Auswertung des Transkripts.
+**Die sieben Skill-Fälle** liegen als Vorlage unter `templates/skills/eval-faelle/` (Ziel
+`.claude/skills/<plugin>/evals/`): je Fall `prompt.md` mit `runs: 5`, `max_turns: 10`,
+`allowed_tools: [Read, Glob, Grep, Skill]` und ein Grader `tool_used`; „bleibt still“ mit `min: 0`,
+`max: 0`, `arm: both`. `belastbar-messen` löst aus und bleibt still, `code-gutachten` bleibt still
+(sein Auslösen prüfen die Probe-PRs des Gates), `test-qualitaet` und `sicherheits-katalog` je beide.
+**Lücke, benannt:** Die Fälle haben noch keine Fixture (ein Mini-Repo je Fall); zwei Prompts nennen
+einen Test bzw. Endpunkt, den ein leerer Lauf nicht hat. Die Fixture entsteht mit der Baseline beim
+Aufsetzen und wird Teil der geprüften Vorlage.
+
+**Rollen über den Eigenbau:** Laut Doku (Abschnitt „How runs are isolated“, Probe beim Aufsetzen)
+lädt ein Lauf von `claude plugin eval` keine Projekt-Konfiguration und kein `.claude/`, sieht also
+keinen Projekt-Agent. Die Rollen-Fälle laufen deshalb als `claude -p "<prompt>" --output-format
+json` in einem Klon von `origin/main`, mit Auswertung des Transkripts auf den Agent-Aufruf der
+Rolle.
 Ob unter `-p` Frontmatter- und Projekt-Hooks laufen, ist widersprüchlich belegt
 ([leitplanken.md](leitplanken.md), Offen 5); für die Auslöse-Frage spielt das keine Rolle. Evals
 laufen in einem Klon von `origin/main`.

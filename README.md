@@ -40,8 +40,10 @@ AI-assisted development foundation, currently optimized for **Claude Code** and 
   on its own: four role templates (implementer, test author, gate, retrospective), a definition
   of "green" checked by a merge script instead of branch protection, a blocking AI gate bound to
   the head SHA, locked rule paths with signed human commits, guardrails as deny rules outside the
-  repo, an ASVS-based security catalog, isolated dev environments per worktree, staging automatic
-  and prod only by a human, followed by a walking skeleton as a separate phase;
+  repo, an ASVS-based security catalog, isolated dev environments per worktree, a definition of
+  done with git workflow, every instruction loading path locked, ready-to-copy templates for
+  agents, hooks, skills with evals, `CLAUDE.md` and rules file, staging automatic and prod only by
+  a human, followed by a walking skeleton as a separate phase;
 - a **CLI** (`foundation-validate <path>`) that checks a project for structure, missing
   answers and contradictions. Exit code `0` means `FOUNDATION VALID`, `1` means at least
   one structural blocker.
@@ -92,7 +94,9 @@ Es besteht aus fünf Teilen:
   SHA-Bindung, gesperrte Regelpfade mit signierten Commits des Menschen, Leitplanken als
   Deny-Regeln außerhalb des Repos, ein Sicherheitskatalog nach ASVS mit Level-Wahl, isolierte
   Dev-Umgebungen je Worktree, Staging automatisch und Prod nur durch den Menschen, danach ein
-  Walking Skeleton als eigene Phase (ADR-0018, ADR-0020). Offene Teile sind als
+  Walking Skeleton als eigene Phase (ADR-0018, ADR-0020). Seit ADR-0021 mit Definition of Done,
+  Git-Ablauf, gesperrten Ladewegen und ausformulierten Vorlagen für Agents, Hooks, Skills mit Evals,
+  `CLAUDE.md` und Regeldatei. Offene Teile sind als
   offen markiert.
 - **CLI `foundation-validate`** — prüft ein Projekt maschinell auf Struktur, fehlende
   Entscheidungen und Widersprüche und erzeugt den Audit-Report.

@@ -20,7 +20,7 @@ Offen (im Aufsetz-Block festzulegen, die Probe-PRs sind das Abnahmekriterium):
   reference/leitplanken.md.
 - G-5: Wie das Lebenszeichen je Check gelesen wird (Job-Zusammenfassung, Artefakt).
 - G-7: Pruefung der Abweichungsliste.
-- G-8: Format der Gate-Marker (hier ein Vorschlag) und die Erlaubnisliste der Gate-Autoren.
+- G-8: die Erlaubnisliste der Gate-Autoren. Das Marker-Format v1 steht (gleich gate_stop.py).
   Grenze: Schreibt das Gate unter derselben Identitaet, die mergt, bleibt der Marker
   Selbstauskunft; die Autorpruefung faengt nur Kommentare fremder Konten.
 """
@@ -38,18 +38,36 @@ REQUIRED_CHECKS_FILE = "{{PFLICHT_CHECK_LISTE}}"  # Datei im Repo, ein Check-Nam
 WORKFLOW = "{{WORKFLOW_DATEI}}"  # z. B. pr.yml
 WORKSHOP_PATHS = ("{{WERKSTATT_PFADE}}",)  # z. B. ".github/workflows/", Waechter, Listen
 GATE_AUTHORS = ("{{GATE_AUTOREN}}",)  # Logins, deren Gate-Kommentare zaehlen
+# Sperrpfade: die Pruefer (Agents, Skills, Hooks, Einstellungen) und jeder Ladeweg fuer
+# Anweisungen -- CLAUDE.md, CLAUDE.local.md und AGENTS.md in jedem Ordner, .claude/rules/ in
+# jedem Ordner, Output-Styles, Agent-Memory. Gleich der Liste in ci-werkstatt.yml (zweimal).
 LOCKED_PATHS = re.compile(
-    r"^\.claude/(agents|skills|hooks)/|^\.claude/settings[^/]*\.json$", re.IGNORECASE
+    r"^\.claude/(agents|skills|hooks|output-styles)/|^\.claude/settings[^/]*\.json$"
+    r"|^\.claude/agent-memory[^/]*/|(^|/)\.claude/rules/|(^|/)(CLAUDE|CLAUDE\.local|AGENTS)\.md$",
+    re.IGNORECASE,
 )
-# Nach der Definition of Done per Entscheidung ergaenzen, z. B. ("CLAUDE.md", Regeldatei).
+# Weitere einzelne Dateien des Projekts per Entscheidung, z. B. eine Token-Datei, die ein
+# Bildvergleich byte-gleich verlangt. Regeldatei und jede CLAUDE.md deckt LOCKED_PATHS ab.
 LOCKED_FILES: tuple[str, ...] = ()
-LOCKED_DIRS = (".claude/agents", ".claude/hooks", ".claude/skills")
-SETTINGS_GLOB = ":(glob).claude/settings*.json"
+LOCKED_DIRS = (
+    ":(icase).claude/agents",
+    ":(icase).claude/hooks",
+    ":(icase).claude/skills",
+    ":(icase).claude/output-styles",
+    ":(glob,icase).claude/agent-memory*/**",
+)
+LOADING_PATHS = (
+    ":(glob,icase)**/CLAUDE.md",
+    ":(glob,icase)**/CLAUDE.local.md",
+    ":(glob,icase)**/AGENTS.md",
+    ":(glob,icase)**/.claude/rules/**",
+)
+SETTINGS_GLOB = ":(glob,icase).claude/settings*.json"
 SETTINGS_ALLOWED_UNTRACKED = (".claude/settings.local.json",)
-GATE_MARKER = re.compile(r"<!-- gate-urteil sha=([0-9a-f]{40}) urteil=(ja|nein) -->")
-# Abschnitt "Geprueft" reicht bis zur naechsten Zeile, die mit ** beginnt; im Abschnitt selbst
-# darf deshalb keine Zeile mit ** beginnen (so steht es im Gate-Format der Vorlage).
-SCOPE_SECTION = re.compile(r"\*\*Gepr(?:ü|ue)ft\*\*(.*?)(?=\n\s*\*\*[^*\n]+\*\*|\Z)", re.DOTALL)
+# Gate-Marker v1: erste Zeile des Kommentars, gleich dem Muster in gate_stop.py.
+GATE_MARKER = re.compile(r"\A<!-- werkstatt-gate v1 sha=([0-9a-f]{40}) urteil=(ja|nein) -->$", re.M)
+# Abschnitt "## Geprueft" reicht bis zur naechsten Ueberschrift "## ".
+SCOPE_SECTION = re.compile(r"^## Gepr(?:ü|ue)ft[ \t]*$(.*?)(?=^## |\Z)", re.DOTALL | re.MULTILINE)
 MIN_SCOPE_CHARS = 20  # Buchstaben/Ziffern im Abschnitt "Geprueft"
 DEPENDABOT_LOGINS = ("dependabot[bot]", "app/dependabot", "dependabot")
 
@@ -92,7 +110,7 @@ def g1_checks(sha: str) -> None:
 def g3_up_to_date(sha: str) -> None:
     probe = subprocess.run(["git", "merge-base", "--is-ancestor", "origin/main", sha])
     if probe.returncode != 0:
-        raise Red("G-3: PR-Kopf enthaelt origin/main nicht -- rebasen, neuen Lauf abwarten")
+        raise Red("G-3: PR-Kopf enthaelt origin/main nicht -- gh pr update-branch, kein Rebase")
 
 
 def is_locked(path: str) -> bool:
@@ -118,7 +136,7 @@ def worktree_paths() -> list[str]:
 
 def g4_working_copy() -> None:
     """Arbeitskopie-Abgleich: G-4 schuetzt den Commit-Weg, nicht die laufende Session."""
-    locked = [*LOCKED_DIRS, SETTINGS_GLOB, *LOCKED_FILES]
+    locked = [*LOCKED_DIRS, *LOADING_PATHS, SETTINGS_GLOB, *LOCKED_FILES]
     for wt in worktree_paths():
         changed = run("git", "-C", wt, "diff", "--name-only", "origin/main", "--", *locked)
         if changed.strip():
@@ -126,7 +144,9 @@ def g4_working_copy() -> None:
         # Ohne --exclude-standard: ignorierte Dateien zaehlen mit.
         # Auch __pycache__ zaehlt: Eine passende .pyc ersetzt beim Import die Quelle. Hooks
         # laufen deshalb mit `python -B` (LP-8), dann entsteht legitim keine.
-        untracked = run("git", "-C", wt, "ls-files", "--others", "--", *LOCKED_DIRS).splitlines()
+        untracked = run(
+            "git", "-C", wt, "ls-files", "--others", "--", *LOCKED_DIRS, *LOADING_PATHS
+        ).splitlines()
         if untracked:
             raise Red(f"G-4: ungetrackte Datei unter einem Sperrpfad in {wt}: {untracked}")
         settings = run("git", "-C", wt, "ls-files", "--others", "--", SETTINGS_GLOB).splitlines()
@@ -178,7 +198,7 @@ def g8_gate(pr: str, sha: str, author: str, files: list[str]) -> None:
     assert isinstance(data, dict)
     verdicts: list[tuple[str, str, str]] = []
     for comment in data["comments"]:
-        match = GATE_MARKER.search(comment["body"])
+        match = GATE_MARKER.search(comment["body"].strip())
         if not match:
             continue
         login = (comment.get("author") or {}).get("login")

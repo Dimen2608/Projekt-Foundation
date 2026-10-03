@@ -12,10 +12,10 @@ den Prüfer abschwächen, der ihn danach durchwinkt.
 ## Sperrpfade
 
 ```
-.claude/agents/**
-.claude/skills/**
-.claude/hooks/**
-.claude/settings*.json
+.claude/agents/**            .claude/skills/**          .claude/hooks/**
+.claude/settings*.json       .claude/output-styles/**   .claude/agent-memory*/**
+**/CLAUDE.md                 **/CLAUDE.local.md         **/AGENTS.md
+**/.claude/rules/**          dazu projekteigene Dateien (etwa Soll-Bilder, Token-Datei)
 ```
 
 Nach dem Aufsetzen ändert diese Pfade **nur noch ein direkter, signierter Commit des Menschen**.
@@ -23,9 +23,13 @@ Ganz `.claude/skills/**` ist gesperrt, nicht nur der Skill des Gates: Das Gate l
 per `skills:` vor, ein änderbarer Skill wäre eine zweite Tür zum Urteil. Eine Regel ist leichter zu
 prüfen als eine Ausnahmeliste. Braucht der Bau einen neuen Skill, kommt er per signiertem Commit.
 
-**Erweiterung nach der Definition of Done:** Die Wurzel-`CLAUDE.md` und die Regeldatei des Repos
-kommen dazu, sobald ihr Ort feststeht, per Nachtrag zur Entscheidung, nicht still. Begründung,
-Gegenposition und Option stehen in [leitplanken.md](leitplanken.md).
+**Die Ladewege gehören dazu** (entschieden in der Quelle mit der Definition of Done): jede
+`CLAUDE.md`, `CLAUDE.local.md` und `AGENTS.md` in jedem Ordner, die Regeldatei unter
+`.claude/rules/`, Output-Styles und Agent-Memory. Sonst erreicht ein PR die Wirkung der gesperrten
+Wurzel-`CLAUDE.md` über einen ungesperrten Ort. Das Auto-Memory liegt außerhalb des Repos und ist
+deshalb aus (`autoMemoryEnabled: false`). Herleitung: [regeldateien.md](regeldateien.md). Dieselbe
+Liste steht an vier Stellen und ändert sich nur zusammen: `LOCKED_PATHS` im Merge-Skript, zweimal
+in `ci-werkstatt.yml` (Wächter und Merge-Vermerk), Deny-Regeln der Stufe 2 in `LEITPLANKEN.md`.
 
 ## Drei Schichten, eine trägt
 
@@ -52,7 +56,11 @@ Gegenposition und Option stehen in [leitplanken.md](leitplanken.md).
 den die Bau-Session im Aufsetz-Block füllt, dasselbe Muster wie bei den Agents. Das gilt für Skills
 samt Evals und Plugin-Manifest, für die Hook-Skripte und für die Hook-Verdrahtung in
 `.claude/settings*.json`, aber ohne `permissions`, die setzt nur der Mensch. Das Muster: geprüfte
-Vorlage, wörtliche Kopie, Hash-Vergleich durch einen Dritten, Nicken des Menschen. Schriebe die
+Vorlage, wörtliche Kopie, Hash-Vergleich durch einen Dritten, Nicken des Menschen. Die Vorlagen
+liefert dieser Skill unter `templates/` (Agents, Hook-Skripte, Skills mit Manifest und Evals,
+`settings.json`, Wurzel-`CLAUDE.md`, Regeldatei); nach dem Ersetzen der Platzhalter ist die
+ausgefüllte Fassung die geprüfte Vorlage des Ziel-Repos. Hash: SHA-256 über den Git-Blob, beidseitig
+LF (`git show <sha>:<vorlage> | sha256sum` gegen `git show <sha>:<zielpfad> | sha256sum`). Schriebe die
 Bau-Session sie selbst, legte der Geprüfte den Vertrauensanker an. Eine Regel für alle Sperrpfade
 ist leichter zu prüfen als eine Ausnahme.
 

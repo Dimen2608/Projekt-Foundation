@@ -66,8 +66,8 @@ Die Entscheidung kommt als ADR ins Ziel-Repo, mit Filtersatz.
 
 ## Die Katalogdatei
 
-**Ort:** `.claude/skills/sicherheits-katalog/katalog.json`, also neben dem Skill und unter dem
-Sperrpfad. Die ASVS-CSV liegt unverändert daneben. Der Katalog führt ihren SHA-256 und nimmt nur
+**Ort:** `.claude/skills/<plugin>/skills/sicherheits-katalog/katalog.json`, also neben dem Skill im
+Skill-Plugin des Repos und unter dem Sperrpfad. Die ASVS-CSV liegt unverändert daneben. Der Katalog führt ihren SHA-256 und nimmt nur
 Nummern und eigene Felder auf. Legacy-Dateien aus ASVS 4.x gehören nicht hinein: Die Nummern aus
 4.0.3 lassen sich nicht auf 5.0.0 übertragen.
 
@@ -81,6 +81,7 @@ Repos, sie entstehen mit dem Layout).
 | --- | --- |
 | `id` | `SK-<nnn>`, stabil, wird nie umgewidmet |
 | `quelle`, `ref` | `asvs-5.0.0` mit der Anforderungsnummer aus der CSV (`req_id`); `entscheidung` mit Nummer und Punkt; `cheatsheet` mit dem Muster |
+| `text` | nur bei `entscheidung` und `cheatsheet`: der eigene Wortlaut der Zeile. Bei `asvs-5.0.0` nie, dort steht der Text nur in der CSV |
 | `kapitel`, `stufe_csv` | Kapitelname und Level der CSV (`L` als Zahl 1, 2 oder 3) |
 | `stufe_projekt` | `L1`, `L2` oder `L3-Insel:<name>` |
 | `gilt` | `ja`, `nein` oder `bedingt`. Bei `nein` und `bedingt` sind `begruendung` und `bedingung` Pflicht |

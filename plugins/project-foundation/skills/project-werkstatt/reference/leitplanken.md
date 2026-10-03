@@ -190,13 +190,15 @@ misst es.
 ## Regeldateien als Sperrpfad
 
 Die Wurzel-`CLAUDE.md` und eine Regeldatei des Repos wirken wie Agent-Dateien sofort auf jede
-Session. Der Classifier liest die Projekt-`CLAUDE.md` mit. **Empfehlung, entschieden in der
-Quelle:** Sie werden Sperrpfad, **sobald ihr Ort mit der Definition of Done feststeht**, per
-Nachtrag zur Entscheidung über die Sperrpfade, nicht still. Danach gilt für sie dasselbe wie für
-`.claude/**`: Ein PR daran ist rot, und es ändert sie nur ein signierter Commit des Menschen.
-**Gegenposition:** Die `CLAUDE.md` ändert sich im Bau häufiger, und jeder signierte Commit ist ein
-Engpass beim Menschen. **Option:** Werkstatt-PR mit Abweichungseintrag und Gate-Urteil, das ist
-dann Selbstauskunft.
+Session. Der Classifier liest die Projekt-`CLAUDE.md` mit. **Entschieden in der Quelle** (mit der
+Definition of Done, 03.10.2026): Sie sind Sperrpfad, und mit ihnen **jeder Ladeweg** für
+Anweisungen im Repo (`**/CLAUDE.md`, `**/CLAUDE.local.md`, `**/AGENTS.md`, `**/.claude/rules/**`,
+`.claude/output-styles/**`, `.claude/agent-memory*/**`). Das Auto-Memory ist aus. Für sie gilt
+dasselbe wie für `.claude/**`: Ein PR daran ist rot, und es ändert sie nur ein signierter Commit
+des Menschen. Die Deny-Zeilen der Stufe 2 kommen mit (Vorlage `LEITPLANKEN.md`). Herleitung,
+Ladewege und Aufteilung: [regeldateien.md](regeldateien.md). **Preis, benannt:** Die `CLAUDE.md`
+ändert sich im Bau häufiger, und jeder signierte Commit ist ein Engpass beim Menschen; deshalb steht
+in ihr nur, was kein Gate trägt.
 
 ## Filtersatz
 
