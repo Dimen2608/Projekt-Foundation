@@ -65,6 +65,9 @@ belegen kann: **FOUNDATION VALID** (maschinell, durch das CLI) und **FOUNDATION 
   Audit-Report im festgelegten Format erzeugt.
 - Verteilung als Claude-Code-Plugin über einen Marketplace im selben Repo.
 - Ein vollständig ausgefülltes Beispielprojekt unter `examples/`.
+- PA-Kit unter `kits/pa/` (ADR-0022): Gerüst für einen persönlichen Assistenten über allen
+  Projekten — Meta-`CLAUDE.md`, PA-Ordner, Agent `task-manager`, Einrichtung und gemessene
+  Grenzen. Kopiervorlage, nicht Teil des Plugins.
 
 ### V1
 
@@ -87,7 +90,8 @@ Erfahrungswerte aus mehreren Fremdprojekten — vorher wäre die Zuordnung erfun
   Zielprojekts bauen; er selbst erzeugt keinen Code.
 - Projektmanagement, Ticketing, Roadmaps, Zeitschätzung. Auch `project-orchestrate` ist das
   nicht: Sein Blockplan ist ein Ausführungsvertrag ohne Termine und Prioritäten auf Zeit
-  (ADR-0014).
+  (ADR-0014). Das PA-Kit unter `kits/pa/` (ADR-0022) ändert das nicht: Es ist eine
+  Kopiervorlage für die Meta-Session eines Menschen; das Toolkit selbst führt kein Board.
 - Inhaltliche Bewertung von Architekturqualität durch den Validator. Er prüft Struktur
   und Widersprüche; die fachliche Bewertung bleibt beim Review.
 - Sprach- oder Framework-spezifische Scaffolds (kein `create-react-app`-Ersatz).

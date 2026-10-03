@@ -19,6 +19,7 @@ src/foundation_validate/      CLI-Validator (cli, report, validator, model)
 tests/                        Ein Test je Blocking-Regel + CLI-Schnittstelle
 docs/                         Foundation dieses Repos
 examples/taskflow/            Vollständig ausgefülltes Beispielprojekt
+kits/pa/                      Kopiervorlage PA-Ebene (ADR-0022), kein Teil des Plugins
 ```
 
 Details: `docs/ARCHITECTURE.md`.

@@ -236,6 +236,13 @@ per `SendMessage` melden, nimmt Übergaben erst nach dem Tor ab und führt alles
 Heimat-Repo. Er baut selbst nicht, und er ist kein Projektmanagement: keine Termine, keine
 Roadmap (ADR-0014).
 
+## Ein persönlicher Assistent über allen Projekten
+
+`kits/pa/` ist ein Gerüst für eine Meta-Session über allen Projekten: Sie plant und
+entscheidet mit dir, führt Board und Entscheidungen und steuert die Arbeits-Sessions der
+Projekte. Kopiervorlage, nicht Teil des Plugins; Einrichtung und ehrliche Grenzen in
+[kits/pa/README.md](kits/pa/README.md) (ADR-0022).
+
 ## AI-Unterstützung
 
 Ausgelegt auf **Claude Code** (Skill, `CLAUDE.md`) und **Cursor** (`.cursor/rules/`),
@@ -260,6 +267,7 @@ Es gibt keinen Build-Schritt — das Projekt erzeugt kein Artefakt (siehe ADR-00
 plugins/project-foundation/   Das Plugin: vier Skills (Reference, Vorlagen), fünf Agents
 src/foundation_validate/      Der Validator
 examples/taskflow/            Ein vollständig ausgefülltes Beispielprojekt
+kits/pa/                      Kopiervorlage für einen persönlichen Assistenten (PA)
 docs/                         Foundation dieses Repos (Dogfooding)
 ```
 

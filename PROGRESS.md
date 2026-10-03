@@ -5,6 +5,25 @@
 >
 > Neueste Einträge oben.
 
+## 2026-10-03 — PA-Kit (`kits/pa/`), 0.10.1
+
+**Anlass**
+
+Ein zweiter Mensch soll am 2026-10-04 einen eigenen PA bekommen, eine Meta-Session über allen
+Projekten. Das Plugin hatte dafür keine Vorlage.
+
+**Entschieden (ADR-0022)**
+
+Kopiervorlage unter `kits/pa/`, nicht im Plugin: Meta-`CLAUDE.md` als `meta-CLAUDE.md`, PA-Ordner
+(`BOARD`, `INBOX`, `PROJEKTE`, `ENTSCHEIDUNGEN`, `uebergabe`, `logbuch`, `prompts/`), Agent-Vorlage
+`task-manager` (Sonnet, nur lesend), Einrichtung für Windows mit Claude Desktop und die gemessenen
+Grenzen. Nichts aus der Quelle außer der Form. Die Befunde vom 2026-10-03 stehen mit Quelle auch in `mechanismen.md` von
+`project-orchestrate`, deshalb Plugin 0.10.1. Keine Validator-Änderung.
+
+**Offen**
+
+Einrichtung an einem zweiten Rechner nicht geprobt; Plugin-Installation ohne CLI nicht geprüft.
+
 ## 2026-10-03 — `project-werkstatt`: Definition of Done, Regeldateien, Vorlagen (0.10.0)
 
 **Anlass**

@@ -36,7 +36,7 @@ eine Session auf einem anderen Rechner, hat der Empfänger keine Antwortadresse.
   Die erste Zeile ist oft alles, was der Empfänger in der Vorschau sieht — deshalb das feste
   Nachrichtenformat in `SKILL.md`. *(Doku)*
 - **Befehle laufen nicht.** Ein `/clear` oder `/compact` im Text kommt als Text an. Eine Session
-  kann eine andere nicht leeren. *(Doku)*
+  kann eine andere per Nachricht nicht leeren; per Werkzeug nur eingeschränkt, siehe Tabelle unten. *(Doku, Betrieb 2026-10-03)*
 - **`@datei` hängt nichts an.** Inhalte als Text schicken. *(Doku)*
 - **Keine Fertig-Meldung über Rechnergrenzen.** `notify_when_idle` gilt nur für Sessions auf
   demselben Rechner. Der Worker schickt die Übergabe deshalb selbst. *(Doku)*
@@ -60,10 +60,10 @@ auf einem Rechner ist es der tragende Weg:
 | Worker benennen | `set_session_title` | *Geprüft 2026-09-26:* Der Titel ist die Adresse für `SendMessage`; ein vom App vergebener Titel wird ohne Rückfrage ersetzt. |
 | Ruhenden oder geleerten Worker wecken | `send_message` an die Session-ID | *Betrieb.* Weckt zuverlässig. `SendMessage` an den Namen ist nach dem Leeren **nicht sicher** zustellbar. |
 | Wartenden Worker erreichen (`ANTWORT`, `NACHARBEIT`), wenn er sich geleert haben kann | `send_message` an die Session-ID | *Betrieb.* Ein wartender Worker ruht; der Weg ist derselbe wie beim Wecken. |
-| Laufenden Worker mitten im Turn erreichen | `SendMessage` an den Namen | *Betrieb.* Namen fest vergeben (`claude --name`, `/rename`); ohne das leitet sich der Name aus dem Ordner ab und wechselt bei jedem Neustart. Sitzungstitel taugen nicht als Adresse. |
+| Laufenden Worker mitten im Turn erreichen | `SendMessage` an den Namen | *Betrieb.* Die Nachricht wird eingereiht; arbeitet der Worker bis zu seinem Selbst-Leeren durch, kommt sie erst danach an (Betrieb 2026-10-03). Namen fest vergeben (`claude --name`, `/rename`); ohne das leitet sich der Name aus dem Ordner ab und wechselt bei jedem Neustart. Sitzungstitel taugen nicht als Adresse. |
 | Ist-Stand des Workers lesen | `list_events`, bei Suche `search_session_transcripts` | *Betrieb.* Das Transkript enthält **beide** Kanäle — die Nachrichten und das, was der Mensch direkt mit dem Worker bespricht. Die Nachricht allein ist blind für den zweiten: In einer Woche mit anwesendem Menschen standen 154 direkte Rückfragen im Worker gegen 6 Nachrichten an den Kopf. |
 | Selbst leeren | `clear_session` mit `session_id: "self"` | *Geprüft 2026-09-23:* läuft ohne Klick des Menschen; Session-ID, Titel, Modell und Effort bleiben; `list_events` liest weiter; Remote Control ist nach dem Wecken wieder da. |
-| Fremde Session leeren | `clear_session` mit fremder ID | *Geprüft:* verweigert. |
+| Fremde Session leeren | `clear_session` mit fremder ID | *Geprüft:* verweigert. *Betrieb 2026-10-03:* geht nur bei eigenen, untätigen, nicht angehefteten Sessions ohne Remote Control; sonst verweigert. In Desktop-WSL gibt es `clear_session` nicht. |
 
 **Warum leeren:** Eine Session liest bei jeder Anfrage ihren ganzen Verlauf mit — gemessen
 250–290k Token gegen 60–70k bei einer frischen. Leeren kostet nichts, `/compact` ist selbst eine

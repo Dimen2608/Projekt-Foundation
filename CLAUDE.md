@@ -40,6 +40,7 @@ grün sein.
 - Genau eine Laufzeit-Abhängigkeit (`PyYAML`). Jede weitere braucht ein ADR (ADR-0003).
 - Die Skills und Agents existieren nur unter `plugins/project-foundation/` — keine zweite
   Kopie unter `.claude/skills/` oder `.claude/agents/` (ADR-0002, ADR-0013).
+  Ausnahme: Kopiervorlagen unter `kits/` (ADR-0022), nie unter `.claude/`.
 - Der Validator **schreibt nie** in ein geprüftes Projekt. Reine Lesezugriffe.
 - Der Validator behauptet nur, was er geprüft hat: `FOUNDATION VALID`, nie
   `FOUNDATION READY`; `NOT CHECKED` statt `OK` für Domänen ohne Regel; Secret-*Hygiene*
