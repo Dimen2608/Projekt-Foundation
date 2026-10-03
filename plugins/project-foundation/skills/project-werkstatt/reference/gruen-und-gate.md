@@ -27,7 +27,7 @@ bricht beim ersten Fehlschlag ab; die Meldung nennt den Punkt.
 | --- | --- | --- |
 | G-1 | Jeder Check der **Pflicht-Check-Liste** (Datei im Repo, gelesen aus `origin/main`) hat auf dem PR-Kopf `success`. `skipped`, `neutral`, `cancelled` und ein fehlender Check sind nicht grün. | Ein Job, der nicht lief, sieht in der Summe grün aus |
 | G-2 | Die geprüfte SHA ist der PR-Kopf und wird gemergt (`gh pr merge --match-head-commit <sha>`). Testbericht trägt die SHA. | Geprüft wurde ein anderer Stand als der gemergte |
-| G-3 | Der PR-Kopf enthält `origin/main` (`git merge-base --is-ancestor`). Sonst rebasen und neu laufen lassen. | Ohne Merge-Queue: zwei PRs, einzeln grün, zusammen kaputt |
+| G-3 | Der PR-Kopf enthält `origin/main` (`git merge-base --is-ancestor`). Sonst `gh pr update-branch` (Merge von `main`, kein Rebase eines gepushten Branches, [git-und-dod.md](git-und-dod.md)) und neu laufen lassen. | Ohne Merge-Queue: zwei PRs, einzeln grün, zusammen kaputt |
 | G-4 | Das Skript führt Wächter, Skip-Erlaubnisliste und Pflicht-Check-Liste selbst in der Fassung von `origin/main` aus. **Sperrpfade:** Jeder PR, der `.claude/agents/**`, `.claude/skills/**`, `.claude/hooks/**` oder `.claude/settings*.json` berührt, ist rot, ohne Ausnahme. Die geänderten Dateien kommen aus einem lokalen `git diff --no-renames --name-only origin/main...<sha>` (eine Umbenennung aus einem Sperrpfad heraus zählt am alten Pfad; die API-Dateiliste kann gekappt sein), verglichen ohne Unterschied der Groß- und Kleinschreibung. **Arbeitskopie-Abgleich:** Vor dem Merge prüft das Skript zusätzlich jeden Eintrag von `git worktree list` auf geänderte oder ungetrackte Dateien unter den Sperrpfaden und auf `disableAllHooks` ([leitplanken.md](leitplanken.md)). | Ein PR, der seinen eigenen Prüfer abschwächt; eine Session, die ihn in der Arbeitskopie abschwächt |
 | G-5 | Jeder Pflicht-Check meldet ein **Lebenszeichen** mit Zahl > 0 (Tests gesammelt, Dateien geprüft). | Ein Wächter, der nichts geprüft hat |
 | G-6 | Der letzte Lauf auf `main` ist grün. Steht `main` rot, mergt das Skript nur PRs mit dem Label `nacharbeit`. | Aufbau auf einem kaputten Stand |
@@ -85,6 +85,16 @@ und Musterbruch; 5. Verstoß gegen eine Entscheidung oder Regel des Repos; 6. de
 Sicherheitsbericht — jeder Befund behoben oder mit tragendem Vermerk, sonst blockierend. Es liest
 PR-Beschreibung und Diff (`gh pr view`, `gh pr diff`), den Bericht des Umsetzers nicht zuerst, und
 den Sicherheitsbericht zuletzt. Es urteilt und ändert nichts.
+
+**Gate-Marker v1:** erste Zeile des PR-Kommentars
+`<!-- werkstatt-gate v1 sha=<40 Zeichen Kopf-SHA> urteil=<ja|nein> -->`, danach die Abschnitte
+`## Geprüft`, `## Blockierend`, `## Sicherheitsbericht`, `## Vorschläge`, `## Notizen`,
+`## Freigabe`. Das Gate schreibt das Urteil nach `.claude/run/gate-urteil.md` und postet es mit
+`gh pr comment --body-file`. Zwei Stellen lesen dasselbe Muster und ändern sich nur zusammen: der
+Stop-Hook des Gates (`gate_stop.py`: Marker zur HEAD-SHA, „Geprüft“, „Sicherheitsbericht“ und
+„Freigabe“ nicht leer, Freigabe gleich Marker, „ja“ ohne blockierenden Fund) und das Merge-Skript
+(G-8: genau ein Marker zur Kopf-SHA mit „ja“ und gefülltem „Geprüft“, höchstens ein „nein“ über alle
+SHAs).
 
 **Gate nicht in der CI:** Ein Claude-Lauf je PR kostet Geld, das beim Menschen liegt.
 

@@ -56,7 +56,8 @@ belegen kann: **FOUNDATION VALID** (maschinell, durch das CLI) und **FOUNDATION 
 - Skill `project-werkstatt` (seit 0.8.0, ADR-0018), der in einem Repo festlegt, was „grün"
   heißt, wenn eine KI-Bau-Session selbst mergt — vier Rollen als Vorlagen, Grün-Definition mit
   Merge-Skript, blockierendes Gate, Sperrpfade, Leitplanken außerhalb des Repos, Sicherheitskatalog
-  nach ASVS, isolierte Dev-Umgebungen je Worktree (seit 0.9.0, ADR-0020), Deploy-Weg, danach der
+  nach ASVS, isolierte Dev-Umgebungen je Worktree (seit 0.9.0, ADR-0020), Definition of Done, Git-Ablauf,
+  gesperrte Ladewege und ausformulierte Vorlagen aller Sperrpfade (seit 0.10.0, ADR-0021), Deploy-Weg, danach der
   Walking Skeleton als eigene Phase.
 - Vorlagen für alle Foundation-Dateien (`PROJECT.md`, `ARCHITECTURE.md`, ADR, `STATUS.md`,
   `CLAUDE.md`, `AGENTS.md`, Cursor-Rule, `.env.example`, CI-Workflow, Manifest).

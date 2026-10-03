@@ -5,6 +5,34 @@
 >
 > Neueste Einträge oben.
 
+## 2026-10-03 — `project-werkstatt`: Definition of Done, Regeldateien, Vorlagen (0.10.0)
+
+**Anlass**
+
+Die Quelle (Werkstatt-Plan Atemluft V2) hat mit den Teilblöcken 100-5 und 100-6 und ENT-214 samt
+zwei Nachträgen Git-Ablauf, Definition of Done, Regeldateien und die Vorlagen aller Sperrpfade
+entschieden. Auftrag des Auftraggebers: beides in einem Lauf nachziehen, verallgemeinert.
+
+**Entschieden (ADR-0021)**
+
+Zwei neue Reference-Dateien (`git-und-dod.md`, `regeldateien.md`). Die vier Agent-Vorlagen tragen
+den vollen Prompt; fünf Hook-Skripte unter `templates/hooks/`; die vier Skills auf dem Stand der
+Quelle als Plugin mit Manifest und sieben Eval-Fällen; Vorlagen für Wurzel-`CLAUDE.md`, Regeldatei,
+`settings.json` und Livegang-Liste. Jeder Ladeweg für Anweisungen ist Sperrpfad, in Merge-Skript,
+CI und Deny-Regeln. Gate-Marker v1 in Gate, Stop-Hook und Merge-Skript. Mutationsprobe neuer
+Wachposten durch den Umsetzer nach dem Bau. Keine Validator-Änderung, Beschreibung unverändert.
+
+**Geprobt**
+
+Hook-Skripte ohne Modell im Wegwerf-Repo: 24 Proben, 0 Abweichungen. Sperrpfad-Muster der CI und
+des Merge-Skripts: 10 von 10 Ladewegen erkannt, 0 von 4 Negativfällen.
+
+**Offen**
+
+Hooks mit echtem Payload, Sperr-Hooks der Leitplanken, Proben der Leitplanken und der Isolation,
+`maxTurns`, Übergabe der Testdateien aus dem Worktree, Fixture und Baseline der Evals, Stufe 2 des
+Katalogs, Lizenzfrage der ASVS-CSV.
+
 ## 2026-10-02 — `project-werkstatt`: Leitplanken, ASVS-Baseline, Isolation (0.9.0)
 
 **Anlass**

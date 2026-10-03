@@ -19,6 +19,7 @@
       "id": "SK-001",
       "quelle": "entscheidung",
       "ref": "{{ENTSCHEIDUNG_NUMMER_PUNKT}}",
+      "text": "{{EIGENER_WORTLAUT_DER_ENTSCHEIDUNG}}",
       "kapitel": "{{KAPITEL}}",
       "stufe_csv": null,
       "stufe_projekt": "{{ASVS_LEVEL}}",

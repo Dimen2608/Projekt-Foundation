@@ -8,7 +8,11 @@
 Das Muster stammt aus dem Werkstatt-Plan eines Neubaus (Atemluft V2), entschieden in ENT-190,
 ENT-201 und ENT-202 mit ihren Nachträgen, Stand 01.10.2026. Leitplanken, Sicherheitskatalog und
 Isolation kamen mit ENT-203 P4, ENT-206 und dem Vierten Nachtrag zu ENT-202 dazu, Stand
-02.10.2026 (Teilblock 100-4). Dort hat der Mensch festgelegt, dass
+02.10.2026 (Teilblock 100-4). Git-Ablauf, Definition of Done und Regeldateien kamen mit ENT-214,
+die ausformulierten Vorlagen der Sperrpfade (Agents, Hook-Skripte, Skills mit Evals, Einstellungen,
+Wurzel-`CLAUDE.md`, Regeldatei), der Gate-Marker v1, die Livegang-Liste und die Mutationsprobe nach
+dem Bau mit ihren beiden Nachträgen dazu, Stand 03.10.2026 (Teilblöcke 100-5 und 100-6). Dort hat
+der Mensch festgelegt, dass
 die Bau-Session jeden grünen PR ohne Rückfrage mergt und die Prüfungen den ganzen Schutz tragen,
 den vorher die Einzelfreigabe getragen hat. Das Vorgängerprojekt hatte 25 Agent-Rollen und 15
 Skills; geblieben sind vier Rollen und vier Skills. Die Vorlagen hier sind entprojektiert und
@@ -45,8 +49,8 @@ Menschen läuft und ein fehlender Wert sonst den der Session erbt.
 
 | Rolle | Zweck | Modell / Effort | Werkzeugrechte | Isolation | Vorgeladen | Hooks |
 | --- | --- | --- | --- | --- | --- | --- |
-| **Umsetzer** | Baut, bis die Tests des Test-Autors grün sind; ruft `/simplify` und `/security-review`; öffnet den PR | `sonnet` / `high` | Read, Write, Edit, Grep, Glob, Bash, Skill, Agent — `Skill` darf nicht fehlen, `Agent` startet die Review-Agents von `/simplify` | keine (sieht den Feature-Branch) | — | `PostToolUse` auf `Skill` protokolliert, `Stop` verweigert bei falscher Reihenfolge |
-| **Test-Autor** | Schreibt die Tests zum Abnahmekriterium **vor** dem Bau, gegen die Schnittstelle, mit Mutationsprobe | `sonnet` / `high` | Read, Grep, Glob, Edit, Write, Bash | `worktree` ohne `baseRef: head` — sieht den Feature-Diff nicht | `test-qualitaet` | `Stop`: Abgabe nur im Testverzeichnis |
+| **Umsetzer** | Baut, bis die Tests des Test-Autors grün sind; ruft `/simplify` und `/security-review`; öffnet den PR | `sonnet` / `high` | Read, Write, Edit, Grep, Glob, Bash, Skill, Agent — `Skill` darf nicht fehlen, `Agent` startet die Review-Agents von `/simplify` | keine (sieht den Feature-Branch) | — | `PostToolUse` auf `Skill\|Bash` protokolliert Skills, Testläufe und Mutationsproben; `Stop` verweigert bei falscher Reihenfolge oder fehlender Mutationsprobe |
+| **Test-Autor** | Schreibt die Tests zum Abnahmekriterium **vor** dem Bau, gegen die Schnittstelle, mit Mutationsprobe; führt die Liste der Wachposten, deren Probe erst nach dem Bau geht | `sonnet` / `high` | Read, Grep, Glob, Edit, Write, Bash | `worktree` ohne `baseRef: head` — sieht den Feature-Diff nicht | `test-qualitaet` | `Stop`: Abgabe nur im Testverzeichnis |
 | **Gate** | Urteilt zur PR-Kopf-SHA blockierend: Redundanz, tote Pfade, Abstraktionshöhe, Layer, Regelverstoß, Sicherheitsbericht | in der Quelle `claude-opus-5-5` / `high` (Prüfen eine Effort-Stufe höher) | Read, Grep, Glob, Bash (lesend, `gh pr view/diff/comment`) — kein Edit, Write, Agent | keine (muss den Endstand sehen) | `code-gutachten` | `Stop`: Arbeitsbaum unverändert, Urteil vollständig |
 | **Rückschau** | Prüft periodisch, ob Gates noch feuern, ob Lockerungen begründet sind, ob abgelehnte PRs wiederkommen | in der Quelle `claude-opus-5-5` / `medium` | Read, Grep, Glob, Bash, Agent (Fan-out lesender Agents) | `worktree` (prüft `main`, Proben bleiben im Wegwerf-Baum) | — | keine |
 
@@ -74,16 +78,21 @@ des Menschen ausführen könnten.
 ## Der Weg einer Änderung
 
 ```
-Test-Autor → Umsetzer → commit → /simplify → Tests → /security-review → Wächter
-  → Push, PR → Gate (Kopf-SHA) → CI → Merge-Skript → Staging
-                                                      Prod: nur der Mensch
+Test-Autor → Umsetzer → commit → /simplify → Tests → Mutationsprobe → /security-review
+  → Wächter → Push, PR → Gate (Kopf-SHA) → CI → Merge-Skript → Staging
+                                                                Prod: nur der Mensch
 ```
 
 1. **Test-Autor** schreibt die Tests zum Abnahmekriterium im eigenen Worktree. Sie sind rot,
-   solange das Feature fehlt — gewollt.
+   solange das Feature fehlt — gewollt. Wachposten, die es auf `main` noch nicht gibt, trägt er in
+   `wachposten-offen.txt` ein; deren Mutationsprobe ist vor dem Bau nicht möglich.
 2. **Umsetzer** baut, bis alle Tests grün sind.
 3. **Committen.** `/simplify` ändert Dateien; der Commit ist der Rückweg.
-4. **`/simplify`** einmal am Blockende, ohne Flag. Danach die Tests erneut grün.
+4. **`/simplify`** einmal am Blockende, ohne Flag. Danach die Tests erneut grün, danach die
+   **Mutationsprobe** je Eintrag der Liste im Produktcode: Mutant setzen, der Test wird mit
+   `failure` rot, Mutant zurück. Das Protokoll hält je Fang den Mutanten-Baum fest; der Stop-Hook
+   prüft, dass er sich außerhalb der Tests vom Endstand unterscheidet. Im Neubau ist das fast jeder
+   Wachposten; ohne diesen Schritt fiele die Probe bis zu einem nächtlichen Mutationslauf still weg.
 5. **`/security-review`** ohne Argument, Ergebnis als Bericht in eine Datei unter `.claude/run/`
    (gitignored). Jeder Befund wird behoben (dann ab 3 erneut) oder in einer Vermerkdatei mit
    „nicht zutreffend, weil …" markiert.
@@ -96,9 +105,11 @@ Test-Autor → Umsetzer → commit → /simplify → Tests → /security-review 
 10. **Staging** automatisch aus `main`. **Prod** löst nur der Mensch aus.
 
 Die Reihenfolge 3 bis 5 trägt kein Satz im Prompt, sondern ein Hook (`PostToolUse` protokolliert
-jeden Skill-Aufruf mit Baum-Hash, `Stop` verweigert das Beenden bei falscher Reihenfolge). Der Hook
-belegt den **Aufruf**, nicht die Wirkung. Das Gate prüft das Protokoll selbst nach, damit ein
-übersprungener Hook auffällt.
+jeden Skill-Aufruf, Testlauf und jede Mutationsprobe mit Baum-Hash, `Stop` verweigert das Beenden
+bei falscher Reihenfolge). Der Hook belegt den **Aufruf**, nicht die Wirkung, und nicht die Echtheit
+der Zeilen: `.claude/run/` ist für den Umsetzer per Bash beschreibbar. Netze: Das Gate prüft das
+Protokoll selbst nach (Punkt 0), die CI fährt die volle Suite, die Rückschau sieht einen
+Schreibbefehl auf das Protokoll im Transkript. Vorlagen: `templates/hooks/`.
 
 `/simplify`, `/security-review`, Gate und Evals laufen **nie in der CI**: Sie sind nicht
 deterministisch und kosten Kontingent des Menschen.
@@ -112,20 +123,35 @@ deterministisch und kosten Kontingent des Menschen.
 | Isolation je Session: Worktree-Pflicht, Container je Worktree, Slots, Zugangsdaten-Regeln | entschieden (ENT-206 P9 bis P11) | [isolation.md](isolation.md), Vorlage `dev-env.py` |
 | Wer den ersten Stand der gesperrten Skills, Hook-Skripte und Hook-Verdrahtung schreibt | entschieden (ENT-203 P4): dasselbe Muster wie bei den Agents | [schutz-und-deploy.md](schutz-und-deploy.md) |
 | Deny-Regel für `gh pr merge`: Ort und Wortlaut | entschieden: `--settings`-Datei, Stufe 3 | [leitplanken.md](leitplanken.md) |
-| `CLAUDE.md` und Regeldatei als Sperrpfad | entschieden (Vierter Nachtrag zu ENT-202), wirksam nach der Definition of Done | [leitplanken.md](leitplanken.md) |
+| `CLAUDE.md` und Regeldatei als Sperrpfad | entschieden (Vierter Nachtrag zu ENT-202, ENT-214 P4 bis P6): mit ihnen **jeder Ladeweg** im Repo, Auto-Memory aus, übergeordnete `CLAUDE.md` ausgeschlossen; Regeldatei `.claude/rules/regeln.md` | [regeldateien.md](regeldateien.md), Vorlagen `wurzel-CLAUDE.md`, `rules/regeln.md`, `settings.json` |
+
+## Entschieden seit 0.10.0
+
+| Teil | Stand | Wo |
+| --- | --- | --- |
+| Git-Ablauf: acht Schritte, PR-Vorlage, kein Rebase eines gepushten Branches, Aufräumen per Repo-Einstellung | entschieden (ENT-214 P7) | [git-und-dod.md](git-und-dod.md) |
+| Definition of Done D-1 bis D-10, Design-Gate mit Bildvergleich in zwei Stufen, Soll-Bilder und Token-Datei als Sperrpfad | entschieden (ENT-214 P1 bis P3); D-7 und D-8 projektabhängig | [git-und-dod.md](git-und-dod.md) |
+| Release-Prüfung und Livegang-Liste vor dem ersten Prod-Deploy | angelegt in der Quelle (100-6) | [git-und-dod.md](git-und-dod.md), Vorlage `LIVEGANG.md` |
+| Agent-Texte der vier Rollen | ausformuliert (100-6a) | `templates/agents/` |
+| Hook-Skripte der Umsetzer-Kette, des Test-Autors und des Gates | geschrieben (100-6a, 100-6c), Konvention LP-8; ohne Modell geprobt, in der Quelle 37 Proben, hier 24 an der verallgemeinerten Fassung | `templates/hooks/` |
+| Format der Gate-Marker | entschieden: v1 | [gruen-und-gate.md](gruen-und-gate.md), `gate.md`, `gate_stop.py`, `merge-gruen.py` |
+| Skill-Vorlagen als Plugin mit sieben Auslöse-Evals | geschrieben (100-6b) | `templates/skills/`, [eingebaute-skills.md](eingebaute-skills.md) |
+| Mutationsprobe neuer Wachposten | entschieden (Zweiter Nachtrag zu ENT-214 P2): der Umsetzer nach dem Bau, protokolliert, Stop-Hook prüft, Gate liest; Liste schreibt der Test-Autor | oben, Weg einer Änderung |
+| Umfang der Vorlagen | entschieden (Zweiter Nachtrag zu ENT-214 P1 mit Berichtigung): je Vorlage ein eigener Rahmen, ein Skill höchstens 500 Zeilen; Plan und Vorlagen zusammen kürzer als die Spezifikation | — |
 
 ## Offen
 
-Diese Teile hat die Quelle am 02.10.2026 noch nicht entschieden. Sie **folgen aus der Quelle
-(Atemluft V2), noch offen**, und werden dann hier nachgezogen.
+Diese Teile hat die Quelle am 03.10.2026 noch nicht entschieden oder nicht gemessen. Sie werden
+hier nachgezogen, sobald sie es sind.
 
 | Teil | Stand | Folgt aus |
 | --- | --- | --- |
-| Definition of Done (feste Liste je Änderung mit Nachweisweg), Git-Ablauf | offen | Quelle, Teilblock 100-5 |
-| Ausformulierte Agent-Texte (Prompt der vier Rollen) | offen — die Vorlagen hier sind Gerüste mit dem belegten Frontmatter | Quelle, Teilblock 100-6 |
-| Hook-Skripte der Umsetzer-Kette, des Gates und der Leitplanken | offen — Konvention LP-8 steht, Verfahren legt der Aufsetz-Block fest | Aufsetz-Block |
-| Format der Gate-Marker | offen — die Vorlage enthält einen Vorschlag | Aufsetz-Block |
+| Hooks mit echtem Payload: mit und ohne Workspace-Trust, unter `claude -p`, mit Projekt-`disableAllHooks`; Name im Feld `skill`; `cwd` im Worktree-Subagent | offen — Proben | Aufsetz-Block |
+| Sperr-Hooks der Leitplanken (LP-1 `sh -c`, LP-2 Shell, LP-4) | offen — Konvention LP-8 steht | Aufsetz-Block |
 | Proben der Leitplanken und der Isolation (P3b, P2b, F-10, F-11 u. a.) und die Doku-Fragen dazu | offen — Ergebnisse entscheiden über Ebene und Pfadform | [leitplanken.md](leitplanken.md), [isolation.md](isolation.md) |
-| Stufe 2 des Sicherheitskatalogs (Auswahl aus der CSV), Lizenzpflichten der CSV | offen | [asvs-baseline.md](asvs-baseline.md) |
-| `maxTurns` für das Stopp-Veto | offen — ob es eine Hook-Schleife beendet, ist nicht geprüft | Aufsetz-Block |
+| Stufe 2 des Sicherheitskatalogs (Auswahl aus der CSV) | offen — eigener Teilblock nach Threat Model und Architektur | [asvs-baseline.md](asvs-baseline.md) |
+| Lizenzpflichten der ASVS-CSV (CC BY-SA 4.0) | offen — rechtliche Frage | [asvs-baseline.md](asvs-baseline.md) |
+| `maxTurns` für das Stopp-Veto | offen — Vorschlag der Quelle 200 (Umsetzer) und 60 (Gate); ob es eine Hook-Schleife beendet, ist nicht geprüft, deshalb nicht in den Vorlagen | Aufsetz-Block |
 | Übergabe der Testdateien aus dem Worktree des Test-Autors | offen — Probe | Aufsetz-Block |
+| Fixture je Eval-Fall, Eval-Baseline, Namensraum in `skills:` und `input_match` | offen — kommt mit der Baseline | Aufsetz-Block |
+| Ob `claudeMdExcludes` eine Elterndatei auch unter WSL2 ausschließt | offen — Probe | Aufsetz-Block |

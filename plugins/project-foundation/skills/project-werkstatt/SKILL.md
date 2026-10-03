@@ -102,11 +102,15 @@ Empfehlung.
 
 ### 3. ROLLEN — vier Agents, vier Skills
 
-- **Ziel:** Umsetzer, Test-Autor, Gate, Rückschau unter `.claude/agents/`, die Skills unter
-  `.claude/skills/`. Rollen und Modelle: [prinzip.md](reference/prinzip.md).
-- **Vorgehen:** Vorlagen aus `templates/agents/` und `templates/skills/` kopieren, Platzhalter
-  ersetzen. Die Agents gehören **nicht** in ein Plugin: Plugin-Agents ignorieren `hooks`, und die
-  Umsetzer-Kette lebt davon. **Alle Rollen laufen mit dem Projekt-Repo als Arbeitsverzeichnis**
+- **Ziel:** Umsetzer, Test-Autor, Gate, Rückschau unter `.claude/agents/`, die Skills als Plugin
+  unter `.claude/skills/<plugin>/` mit Evals, die Hook-Skripte unter `.claude/hooks/`, dazu
+  `.claude/settings.json`, Wurzel-`CLAUDE.md` und Regeldatei `.claude/rules/regeln.md`. Rollen und
+  Modelle: [prinzip.md](reference/prinzip.md); Ladewege und Regeln:
+  [regeldateien.md](reference/regeldateien.md); Git-Ablauf und Definition of Done:
+  [git-und-dod.md](reference/git-und-dod.md).
+- **Vorgehen:** Vorlagen aus `templates/` kopieren, Platzhalter ersetzen. Die Agents gehören
+  **nicht** in ein Plugin: Plugin-Agents ignorieren `hooks`, und die Umsetzer-Kette lebt davon.
+  **Alle Rollen laufen mit dem Projekt-Repo als Arbeitsverzeichnis**
   (Grund: [eingebaute-skills.md](reference/eingebaute-skills.md)).
 - **Wer den ersten Stand schreibt:** für **jeden** Sperrpfad eine geprüfte Vorlage, die die
   Bau-Session wörtlich kopiert. Das gilt für Agents, Skills samt Katalog und Evals, Hook-Skripte
@@ -116,8 +120,8 @@ Empfehlung.
   [katalog.json](templates/sicherheit/katalog.json) und der unveränderten ASVS-CSV. Stufe 1 enthält
   die Zeilen aus eigenen Entscheidungen, die Auswahl aus der CSV folgt in Stufe 2. Kein ASVS-Text
   in Katalog oder Skill, nur Nummern.
-- **Ausgang:** Vier Agent-Dateien, vier Skills, Hook-Skripte unter `.claude/hooks/`, noch nicht
-  committet.
+- **Ausgang:** Vier Agent-Dateien, vier Skills mit Evals, fünf Hook-Skripte, Einstellungen,
+  Wurzel-`CLAUDE.md` und Regeldatei, noch nicht committet. Definition of Done abgenommen.
 
 ### 4. GATES — Proben und Evals, bevor etwas gesperrt wird
 
@@ -133,7 +137,9 @@ Empfehlung.
 
 ### 5. SPERREN — die Regeln schützen
 
-- **Ziel:** Die Bau-Session kann ihre eigenen Prüfer nicht ändern. Siehe
+- **Ziel:** Die Bau-Session kann ihre eigenen Prüfer und Anweisungen nicht ändern. Gesperrt sind
+  die Prüfer unter `.claude/` und jeder Ladeweg für Anweisungen (`CLAUDE.md`, `CLAUDE.local.md`,
+  `AGENTS.md` in jedem Ordner, `.claude/rules/`, Output-Styles, Agent-Memory). Siehe
   [schutz-und-deploy.md](reference/schutz-und-deploy.md).
 - **Reihenfolge:** (1) Der Mensch legt `allowed_signers` an; die Signatur-Probe läuft —
   `git commit -S` durch die Bau-Session muss scheitern. (2) Sperrpfad-Dateien als wörtliche Kopie
@@ -150,9 +156,11 @@ Empfehlung.
 
 ### 6. PROBEN — Deploy-Weg
 
-- **Ziel:** Staging automatisch, Prod nur durch den Menschen, kein CI-Job auf dem Prod-Host.
+- **Ziel:** Staging automatisch, Prod nur durch den Menschen, kein CI-Job auf dem Prod-Host. Vor
+  dem ersten Prod-Deploy eine Release-Prüfung mit Livegang-Liste
+  ([git-und-dod.md](reference/git-und-dod.md)).
 - **Ausgang:** Probe-PR mit `runs-on` außerhalb der Erlaubnisliste ist rot; der Prod-Workflow
-  wartet auf den Required Reviewer.
+  wartet auf den Required Reviewer; `LIVEGANG.md` angelegt.
 
 ### 7. ÜBERGABE
 
@@ -209,16 +217,23 @@ Anhalten und fragen, wenn:
 
 | Vorlage | Ziel im Repo | Zweck |
 | --- | --- | --- |
-| [agents/umsetzer.md](templates/agents/umsetzer.md) | `.claude/agents/umsetzer.md` | Baut, ruft `/simplify` und `/security-review`, Hooks erzwingen die Reihenfolge |
-| [agents/test-autor.md](templates/agents/test-autor.md) | `.claude/agents/test-autor.md` | Schreibt Tests vor dem Bau, im eigenen Worktree |
-| [agents/gate.md](templates/agents/gate.md) | `.claude/agents/gate.md` | Urteilt blockierend zur PR-Kopf-SHA, ändert nichts |
+| [agents/umsetzer.md](templates/agents/umsetzer.md) | `.claude/agents/umsetzer.md` | Baut, ruft `/simplify` und `/security-review`, Mutationsprobe nach dem Bau, Hooks erzwingen die Reihenfolge |
+| [agents/test-autor.md](templates/agents/test-autor.md) | `.claude/agents/test-autor.md` | Schreibt Tests vor dem Bau, im eigenen Worktree, führt die Wachposten-Liste |
+| [agents/gate.md](templates/agents/gate.md) | `.claude/agents/gate.md` | Urteilt blockierend zur PR-Kopf-SHA mit Gate-Marker v1, ändert nichts |
 | [agents/rueckschau.md](templates/agents/rueckschau.md) | `.claude/agents/rueckschau.md` | Prüft, ob Gates noch feuern und Lockerungen begründet sind |
-| [skills/belastbar-messen.md](templates/skills/belastbar-messen.md) | `.claude/skills/belastbar-messen/SKILL.md` | Belegpflicht für Zustandsaussagen |
-| [skills/code-gutachten.md](templates/skills/code-gutachten.md) | `.claude/skills/code-gutachten/SKILL.md` | Handwerk des Gates |
-| [skills/sicherheits-katalog.md](templates/skills/sicherheits-katalog.md) | `.claude/skills/sicherheits-katalog/SKILL.md` | Ordnet den Diff den Katalogzeilen zu, nennt Prüfart und Nachweis |
-| [sicherheit/katalog.json](templates/sicherheit/katalog.json) | `.claude/skills/sicherheits-katalog/katalog.json` | Katalog nach ASVS 5.0.0, nur Nummern, Level und Inseln |
+| [hooks/](templates/hooks/) (fünf Skripte) | `.claude/hooks/` | Gemeinsame Teile nach LP-8, Kette-Protokoll, Stop-Hooks von Umsetzer, Test-Autor und Gate |
+| [skills/plugin.json](templates/skills/plugin.json) | `.claude/skills/<plugin>/.claude-plugin/plugin.json` | Manifest des Skill-Plugins |
+| [skills/belastbar-messen.md](templates/skills/belastbar-messen.md) | `.claude/skills/<plugin>/skills/belastbar-messen/SKILL.md` | Belegpflicht für Zustandsaussagen |
+| [skills/code-gutachten.md](templates/skills/code-gutachten.md) | `.claude/skills/<plugin>/skills/code-gutachten/SKILL.md` | Handwerk des Gates |
+| [skills/sicherheits-katalog.md](templates/skills/sicherheits-katalog.md) | `.claude/skills/<plugin>/skills/sicherheits-katalog/SKILL.md` | Ordnet den Diff den Katalogzeilen zu, nennt Prüfart und Nachweis |
+| [sicherheit/katalog.json](templates/sicherheit/katalog.json) | `.claude/skills/<plugin>/skills/sicherheits-katalog/katalog.json` | Katalog nach ASVS 5.0.0, nur Nummern, Level und Inseln |
 | [sicherheit/nachweise.json](templates/sicherheit/nachweise.json) | `{{NACHWEIS_PFAD}}` | Test oder Check je geltender Katalogzeile |
-| [skills/test-qualitaet.md](templates/skills/test-qualitaet.md) | `.claude/skills/test-qualitaet/SKILL.md` | Handwerk des Test-Autors |
+| [skills/test-qualitaet.md](templates/skills/test-qualitaet.md) | `.claude/skills/<plugin>/skills/test-qualitaet/SKILL.md` | Handwerk des Test-Autors |
+| [skills/eval-faelle/](templates/skills/eval-faelle/) (sieben Fälle) | `.claude/skills/<plugin>/evals/` | Auslöse-Evals: je Skill „löst aus“ und „bleibt still“ |
+| [settings.json](templates/settings.json) | `.claude/settings.json` | Auto-Memory aus, übergeordnete `CLAUDE.md` ausgeschlossen; ohne `permissions`, ohne Hooks |
+| [wurzel-CLAUDE.md](templates/wurzel-CLAUDE.md) | `CLAUDE.md` | Wer die Bau-Session ist, Grenzen, Kommunikation, Übergabe |
+| [rules/regeln.md](templates/rules/regeln.md) | `.claude/rules/regeln.md` | Bau-Regeln RV-1 bis RV-10, Sperrpfade, Kette, Definition of Done, Git, Auftragsvorlage |
+| [LIVEGANG.md](templates/LIVEGANG.md) | `docs/werkstatt/LIVEGANG.md` | Release-Prüfung und Livegang-Liste vor dem ersten Prod-Deploy |
 | [ci-werkstatt.yml](templates/ci-werkstatt.yml) | `.github/workflows/pr.yml` | Pflicht-Checks, Sperrpfad-Wächter, Merge-Vermerk |
 | [merge-gruen.py](templates/merge-gruen.py) | `{{MERGE_SKRIPT_PFAD}}` | Merge-Skript mit G-1 bis G-8 |
 | [AUFSETZEN.md](templates/AUFSETZEN.md) | `docs/werkstatt/AUFSETZEN.md` | Handgriffe des Menschen und Probenliste |
@@ -243,3 +258,7 @@ Anhalten und fragen, wenn:
   Nachweisdatei, Mandantentest als Beispiel, Feuert-Nachweis.
 - [reference/isolation.md](reference/isolation.md) — Worktree-Pflicht, Dev-DB je Worktree, Slots,
   Zugangsdaten, Proben F-1 bis F-11.
+- [reference/git-und-dod.md](reference/git-und-dod.md) — Git-Ablauf in acht Schritten, PR-Vorlage,
+  Definition of Done D-1 bis D-10, Design-Gate, Release-Prüfung und Livegang-Liste.
+- [reference/regeldateien.md](reference/regeldateien.md) — Ladewege für Anweisungen, Wurzel-`CLAUDE.md`
+  und Regeldatei, Bau-Regeln RV-1 bis RV-10, Auftragsvorlage.

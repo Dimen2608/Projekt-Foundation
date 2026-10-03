@@ -94,14 +94,18 @@ jobs:
       - name: Sperrpfade
         # --no-renames: Eine Umbenennung aus einem Sperrpfad heraus zaehlt als Aenderung am
         # alten Pfad. Gross- und Kleinschreibung egal (.Claude/ auf Dateisystemen ohne
-        # Unterschied).
+        # Unterschied). Die Liste ist gleich LOCKED_PATHS im Merge-Skript: Pruefer und jeder
+        # Ladeweg fuer Anweisungen. Weitere Sperrdateien des Projekts (LOCKED_FILES) als
+        # zusaetzliche Alternative anhaengen.
         run: |
           base="origin/${{ github.base_ref }}"
           geaendert=$(git diff --no-renames --name-only "$base"...HEAD)
           echo "Lebenszeichen: $(printf '%s\n' "$geaendert" | grep -c .) Dateien geprueft" \
             >> "$GITHUB_STEP_SUMMARY"
-          if printf '%s\n' "$geaendert" | grep -iE \
-            '^\.claude/(agents|skills|hooks)/|^\.claude/settings[^/]*\.json$'; then
+          sperr='^\.claude/(agents|skills|hooks|output-styles)/|^\.claude/settings[^/]*\.json$'
+          sperr="$sperr"'|^\.claude/agent-memory[^/]*/|(^|/)\.claude/rules/'
+          sperr="$sperr"'|(^|/)(CLAUDE|CLAUDE\.local|AGENTS)\.md$'
+          if printf '%s\n' "$geaendert" | grep -iE "$sperr"; then
             echo "Sperrpfad beruehrt. Diese Pfade aendert nur ein signierter Commit des Menschen."
             exit 1
           fi
@@ -138,7 +142,9 @@ jobs:
             echo "Startpunkt '$vorher' ist kein Commit (Platzhalter nicht ersetzt?). Rot."
             exit 1
           fi
-          sperr='^\.claude/(agents|skills|hooks)/|^\.claude/settings[^/]*\.json$'
+          sperr='^\.claude/(agents|skills|hooks|output-styles)/|^\.claude/settings[^/]*\.json$'
+          sperr="$sperr"'|^\.claude/agent-memory[^/]*/|(^|/)\.claude/rules/'
+          sperr="$sperr"'|(^|/)(CLAUDE|CLAUDE\.local|AGENTS)\.md$'
           geprueft=0
           for c in $(git rev-list --first-parent "$vorher"..HEAD); do
             geprueft=$((geprueft + 1))
