@@ -5,6 +5,12 @@
 >
 > Neueste Einträge oben.
 
+## 2026-10-03 — Berichtigung `clear_session` (0.10.2)
+
+„Fremde Session leeren“ hieß im PA-Kit und in `mechanismen.md` „eigene“ Sessions. Laut Beschreibung
+des Werkzeugs sind das nur Sessions, die die leerende Session selbst gestartet hat; vom Menschen
+angelegte Sessions leert der PA nie. Beide Stellen berichtigt.
+
 ## 2026-10-03 — PA-Kit (`kits/pa/`), 0.10.1
 
 **Anlass**

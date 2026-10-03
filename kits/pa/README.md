@@ -73,10 +73,13 @@ Stand 2026-10-03, Claude Desktop (Windows), Claude Code 2.1.285. Jede Zeile trä
 nur gelesen. Vor der Einrichtung neu feststellen, nicht übernehmen: Diese Stellen ändern sich mit
 jeder Version.
 
-- **Fremde Sessions leeren geht nur eingeschränkt.** Per `clear_session` mit fremder ID nur bei
-  eigenen, untätigen, nicht angehefteten Sessions ohne Remote Control; sonst verweigert. Der
-  Normalfall ist deshalb der **Selbst-Clear** der Arbeits-Session nach jedem Block. *(Betrieb
-  2026-10-03)*
+- **Der PA leert keine Session, die der Mensch angelegt hat.** `clear_session` mit fremder ID
+  wirkt nur bei einer untätigen Session, die **diese Session selbst gestartet** hat
+  (`start_session`, `hand_off_to_session`). Verweigert wird es außerdem bei angehefteten, offen
+  angezeigten und mit Remote Control verbundenen Sessions und bei solchen mit wartender Nachricht.
+  `start_session` hängt an einem serverseitigen Schalter und fehlt meist (`mechanismen.md`).
+  Arbeits-Sessions leeren sich deshalb **selbst** nach jedem Block, oder der Mensch tippt `/clear`.
+  *(Doku: Beschreibung des Werkzeugs `clear_session`, 2026-10-03)*
 - **Sessions in Desktop-WSL haben kein `clear_session`.** Dort trägt allein die Übergabe-Datei, den
   Clear tippt der Mensch (`/clear`). *(Betrieb 2026-10-03)*
 - **Windows- und WSL-Sessions erreichen sich nicht per `SendMessage`** (eigenes Home, eigener
