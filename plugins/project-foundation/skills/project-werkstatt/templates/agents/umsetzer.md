@@ -10,6 +10,11 @@ hooks:
       hooks:
         - type: command
           command: "python3 -B \"$CLAUDE_PROJECT_DIR/.claude/hooks/kette_protokoll.py\""
+  PostToolUseFailure:
+    - matcher: "Skill|Bash"
+      hooks:
+        - type: command
+          command: "python3 -B \"$CLAUDE_PROJECT_DIR/.claude/hooks/kette_protokoll.py\""
   Stop:
     - hooks:
         - type: command
@@ -23,6 +28,9 @@ Plugin-Agents ignorieren `hooks`. Keine isolation: Der Umsetzer sieht den Featur
 maxTurns: in der Quelle 200 als Vorschlag, als Ausweg aus einer Stopp-Schleife; ob er sie
 beendet, ist nicht geprüft (Probe beim Aufsetzen). Das Feld steht erst nach dieser Probe in der
 Vorlage; bis dahin ist der Ausweg die Abbruchdatei.
+PostToolUseFailure: Ein roter Testlauf (Exit ungleich 0) gilt als fehlgeschlagener Aufruf und
+feuert nicht PostToolUse. Ohne die zweite Verdrahtung entstuenden nie `tests-rot` und
+`mutant-rot`, und der Stop-Hook verweigerte bei jeder Wachposten-Liste.
 Hook-Skripte: templates/hooks/. Feuert-Nachweis: Kopf von umsetzer_stop.py.
 -->
 

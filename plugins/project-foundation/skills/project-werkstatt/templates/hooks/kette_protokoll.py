@@ -1,9 +1,13 @@
-"""PostToolUse-Hook des Umsetzers (Matcher `Skill|Bash`) -- Vorlage aus project-werkstatt.
+"""PostToolUse- und PostToolUseFailure-Hook des Umsetzers (Matcher `Skill|Bash`).
+
+Vorlage aus project-werkstatt.
 
 Ziel im Repo: `.claude/hooks/kette_protokoll.py` (Sperrpfad).
 
 Schreibt je Ereignis eine Zeile nach `.claude/run/kette.log`:
     <zeit> TAB <ereignis> TAB <baum-hash> [TAB <testfall>]
+Beide Ereignisse: Ein roter Testlauf endet mit Exit ungleich 0 und feuert PostToolUseFailure;
+das Skript wertet die Berichtsdatei aus, nicht den Exit-Code.
 Ereignisse:
 - `simplify`, `security-review`: Aufruf des Skills ueber das Skill-Werkzeug.
 - `tests-gruen`, `tests-rot`: ein Bash-Befehl mit `--junitxml=.claude/run/testbericht.xml`.

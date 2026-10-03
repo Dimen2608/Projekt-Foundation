@@ -49,7 +49,7 @@ Menschen läuft und ein fehlender Wert sonst den der Session erbt.
 
 | Rolle | Zweck | Modell / Effort | Werkzeugrechte | Isolation | Vorgeladen | Hooks |
 | --- | --- | --- | --- | --- | --- | --- |
-| **Umsetzer** | Baut, bis die Tests des Test-Autors grün sind; ruft `/simplify` und `/security-review`; öffnet den PR | `sonnet` / `high` | Read, Write, Edit, Grep, Glob, Bash, Skill, Agent — `Skill` darf nicht fehlen, `Agent` startet die Review-Agents von `/simplify` | keine (sieht den Feature-Branch) | — | `PostToolUse` auf `Skill\|Bash` protokolliert Skills, Testläufe und Mutationsproben; `Stop` verweigert bei falscher Reihenfolge oder fehlender Mutationsprobe |
+| **Umsetzer** | Baut, bis die Tests des Test-Autors grün sind; ruft `/simplify` und `/security-review`; öffnet den PR | `sonnet` / `high` | Read, Write, Edit, Grep, Glob, Bash, Skill, Agent — `Skill` darf nicht fehlen, `Agent` startet die Review-Agents von `/simplify` | keine (sieht den Feature-Branch) | — | `PostToolUse` und `PostToolUseFailure` auf `Skill\|Bash` protokollieren Skills, Testläufe und Mutationsproben; `Stop` verweigert bei falscher Reihenfolge oder fehlender Mutationsprobe |
 | **Test-Autor** | Schreibt die Tests zum Abnahmekriterium **vor** dem Bau, gegen die Schnittstelle, mit Mutationsprobe; führt die Liste der Wachposten, deren Probe erst nach dem Bau geht | `sonnet` / `high` | Read, Grep, Glob, Edit, Write, Bash | `worktree` ohne `baseRef: head` — sieht den Feature-Diff nicht | `test-qualitaet` | `Stop`: Abgabe nur im Testverzeichnis |
 | **Gate** | Urteilt zur PR-Kopf-SHA blockierend: Redundanz, tote Pfade, Abstraktionshöhe, Layer, Regelverstoß, Sicherheitsbericht | in der Quelle `claude-opus-5-5` / `high` (Prüfen eine Effort-Stufe höher) | Read, Grep, Glob, Bash (lesend, `gh pr view/diff/comment`) — kein Edit, Write, Agent | keine (muss den Endstand sehen) | `code-gutachten` | `Stop`: Arbeitsbaum unverändert, Urteil vollständig |
 | **Rückschau** | Prüft periodisch, ob Gates noch feuern, ob Lockerungen begründet sind, ob abgelehnte PRs wiederkommen | in der Quelle `claude-opus-5-5` / `medium` | Read, Grep, Glob, Bash, Agent (Fan-out lesender Agents) | `worktree` (prüft `main`, Proben bleiben im Wegwerf-Baum) | — | keine |
@@ -104,9 +104,10 @@ Test-Autor → Umsetzer → commit → /simplify → Tests → Mutationsprobe �
 9. **CI abwarten, Merge nur über das Merge-Skript.**
 10. **Staging** automatisch aus `main`. **Prod** löst nur der Mensch aus.
 
-Die Reihenfolge 3 bis 5 trägt kein Satz im Prompt, sondern ein Hook (`PostToolUse` protokolliert
-jeden Skill-Aufruf, Testlauf und jede Mutationsprobe mit Baum-Hash, `Stop` verweigert das Beenden
-bei falscher Reihenfolge). Der Hook belegt den **Aufruf**, nicht die Wirkung, und nicht die Echtheit
+Die Reihenfolge 3 bis 5 trägt kein Satz im Prompt, sondern ein Hook (`PostToolUse` und
+`PostToolUseFailure` — ein roter Testlauf ist ein fehlgeschlagener Aufruf — protokollieren jeden
+Skill-Aufruf, Testlauf und jede Mutationsprobe mit Baum-Hash, `Stop` verweigert das Beenden bei
+falscher Reihenfolge). Der Hook belegt den **Aufruf**, nicht die Wirkung, und nicht die Echtheit
 der Zeilen: `.claude/run/` ist für den Umsetzer per Bash beschreibbar. Netze: Das Gate prüft das
 Protokoll selbst nach (Punkt 0), die CI fährt die volle Suite, die Rückschau sieht einen
 Schreibbefehl auf das Protokoll im Transkript. Vorlagen: `templates/hooks/`.
@@ -146,7 +147,7 @@ hier nachgezogen, sobald sie es sind.
 
 | Teil | Stand | Folgt aus |
 | --- | --- | --- |
-| Hooks mit echtem Payload: mit und ohne Workspace-Trust, unter `claude -p`, mit Projekt-`disableAllHooks`; Name im Feld `skill`; `cwd` im Worktree-Subagent | offen — Proben | Aufsetz-Block |
+| Hooks mit echtem Payload: mit und ohne Workspace-Trust, unter `claude -p`, mit Projekt-`disableAllHooks`; Name im Feld `skill`; `cwd` im Worktree-Subagent; roter Testlauf feuert `PostToolUseFailure` | offen — Proben | Aufsetz-Block |
 | Sperr-Hooks der Leitplanken (LP-1 `sh -c`, LP-2 Shell, LP-4) | offen — Konvention LP-8 steht | Aufsetz-Block |
 | Proben der Leitplanken und der Isolation (P3b, P2b, F-10, F-11 u. a.) und die Doku-Fragen dazu | offen — Ergebnisse entscheiden über Ebene und Pfadform | [leitplanken.md](leitplanken.md), [isolation.md](isolation.md) |
 | Stufe 2 des Sicherheitskatalogs (Auswahl aus der CSV) | offen — eigener Teilblock nach Threat Model und Architektur | [asvs-baseline.md](asvs-baseline.md) |

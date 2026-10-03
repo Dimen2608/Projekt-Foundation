@@ -60,7 +60,7 @@ Commit: `.claude/agents/**`, `.claude/hooks/**`, `.claude/skills/**`, `.claude/s
 4. **Merge-Skript** mergt nur bei grün (G-1 bis G-8); danach Aufräumen und Übergabe.
 
 **Testlauf für die Kette:** Jeder Testlauf, der für die Kette zählt, schreibt JUnit-XML mit genau der
-Option `--junitxml=.claude/run/testbericht.xml`: `{{TESTBEFEHL}}`. Wächter: `{{WAECHTER_BEFEHL}}`.
+Option `--junitxml=.claude/run/testbericht.xml`: `{{TEST_BEFEHL}}`. Wächter: `{{WAECHTER_BEFEHL}}`.
 
 **Ablage:** `.claude/run/` ist gitignored. Dort liegen `kette.log`, `hook-audit.log`, Testberichte,
 Mutationsberichte (`--junitxml=.claude/run/mutationsbericht.xml`), `sicherheitsbericht-<baum>.md`,

@@ -50,11 +50,11 @@ LOCKED_PATHS = re.compile(
 # Bildvergleich byte-gleich verlangt. Regeldatei und jede CLAUDE.md deckt LOCKED_PATHS ab.
 LOCKED_FILES: tuple[str, ...] = ()
 LOCKED_DIRS = (
-    ".claude/agents",
-    ".claude/hooks",
-    ".claude/skills",
-    ".claude/output-styles",
-    ":(glob).claude/agent-memory*/**",
+    ":(icase).claude/agents",
+    ":(icase).claude/hooks",
+    ":(icase).claude/skills",
+    ":(icase).claude/output-styles",
+    ":(glob,icase).claude/agent-memory*/**",
 )
 LOADING_PATHS = (
     ":(glob,icase)**/CLAUDE.md",
@@ -62,7 +62,7 @@ LOADING_PATHS = (
     ":(glob,icase)**/AGENTS.md",
     ":(glob,icase)**/.claude/rules/**",
 )
-SETTINGS_GLOB = ":(glob).claude/settings*.json"
+SETTINGS_GLOB = ":(glob,icase).claude/settings*.json"
 SETTINGS_ALLOWED_UNTRACKED = (".claude/settings.local.json",)
 # Gate-Marker v1: erste Zeile des Kommentars, gleich dem Muster in gate_stop.py.
 GATE_MARKER = re.compile(r"\A<!-- werkstatt-gate v1 sha=([0-9a-f]{40}) urteil=(ja|nein) -->$", re.M)
