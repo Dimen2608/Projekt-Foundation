@@ -23,7 +23,7 @@ Jeder Bereich ist bewertet mit `RELEVANT`, `NOT REQUIRED`, `FUTURE` oder `UNKNOW
 | Security | RELEVANT | Secret-Hygiene in fremden Projekten (`.env`), kein Secret Scanning — und der Validator schreibt dort nie. |
 | Configuration | RELEVANT | `.project-foundation.yml` im Zielprojekt. |
 | Secrets | NOT REQUIRED | Das Toolkit selbst braucht keine Secrets. |
-| Architecture Decisions | REQUIRED | Verteilung, Sprache, Manifest-Rolle und Report-Wortlaut sind tragende Entscheidungen — ADR-0001 bis ADR-0019. |
+| Architecture Decisions | REQUIRED | Verteilung, Sprache, Manifest-Rolle und Report-Wortlaut sind tragende Entscheidungen — ADR-0001 bis ADR-0022. |
 | Storage | NOT REQUIRED | Nur Dateisystem-Lesezugriffe im Zielprojekt. |
 | Background Jobs | NOT REQUIRED | Ein Lauf ist synchron und in Millisekunden fertig. |
 | Messaging / Events | NOT REQUIRED | Kein verteiltes System. |
@@ -35,14 +35,20 @@ Jeder Bereich ist bewertet mit `RELEVANT`, `NOT REQUIRED`, `FUTURE` oder `UNKNOW
 
 ## Aufbau
 
-Das Repository enthält drei Artefakte mit klar getrennten Aufgaben:
+Das Repository enthält drei Artefakte mit klar getrennten Aufgaben, dazu eine Kopiervorlage:
 
 ```
 Projekt-Foundation
 ├── plugins/project-foundation/     Prozesswissen (4 Skills, Vorlagen, 5 Agents) → Agent liest
 ├── src/foundation_validate/        Maschinelle Prüfung               → CI/Mensch führt aus
-└── docs/, examples/                Anwendung des Prozesses auf sich selbst
+├── docs/, examples/                Anwendung des Prozesses auf sich selbst
+└── kits/pa/                        Kopiervorlage PA-Ebene             → Mensch kopiert einmal
 ```
+
+**PA-Kit.** `kits/pa/` ist kein Teil des Plugins: ein Gerüst für eine Meta-Session über allen
+Projekten, das einmal kopiert und dann gelebt wird. Die Meta-Vorlage heißt `meta-CLAUDE.md`, der
+Agent liegt unter `kits/pa/agents/`, damit keine Session in diesem Repo sie als eigene Anweisung
+lädt (ADR-0022).
 
 **Warum getrennt:** Der Skill ist Prompt-Material und verändert sich mit dem Prozess.
 Der Validator ist ausführbarer Code und verändert sich mit den prüfbaren Regeln. Beide
