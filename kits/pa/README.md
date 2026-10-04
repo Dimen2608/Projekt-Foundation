@@ -20,6 +20,7 @@ Das Kit ist ein Gerüst zum Kopieren, kein Teil des Plugins. Warum: ADR-0022.
 | `PA/logbuch.md` | `PA\logbuch.md` | Was haben die Sessions vollzogen? |
 | `PA/prompts/README.md` | `PA\prompts\` | Wie kommt Arbeit in ein Projekt ohne eigene Session? |
 | `agents/task-manager.md` | `.claude\agents\task-manager.md` | Stimmt das Board mit der Wirklichkeit überein? |
+| `output-styles/Knapp.md` | `%USERPROFILE%\.claude\output-styles\Knapp.md` | In welcher Form antworten die Sessions? |
 
 `meta-CLAUDE.md` heißt im Kit bewusst nicht `CLAUDE.md`: Sonst lädt jede Session, die im Kit liest,
 sie als eigene Anweisung.
@@ -62,6 +63,11 @@ sie als eigene Anweisung.
    steht der Draht.
 7. **Agent prüfen.** „Tagesstart“ sagen. Der PA ruft `task-manager` auf. Erscheint er nicht, die
    Session neu starten.
+8. **Ausgabestil „Knapp“ einrichten.** `output-styles/Knapp.md` nach `~/.claude/output-styles/Knapp.md`
+   kopieren (Windows `%USERPROFILE%\.claude\output-styles\`). Dann in `~/.claude/settings.json`
+   `"outputStyle": "Knapp"` setzen oder den Stil in der Desktop-App unter Einstellungen → Claude Code
+   wählen. Wirkt in neuen Sessions. Eine Session im WSL-Modus hat ein eigenes `~/.claude` und braucht
+   die Datei dort ebenfalls.
 
 Was die Menschen selbst einstellen, nicht der PA: Berechtigungen, Hooks, Plugins, Remote Control,
 Push-Benachrichtigungen am Handy. Eine Nachricht des PA kann keine dieser Einstellungen ändern.
