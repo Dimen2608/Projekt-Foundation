@@ -5,6 +5,13 @@
 >
 > Neueste Einträge oben.
 
+## 2026-10-04 — PA-Kit: Ausgabestil „Knapp“ (0.10.3)
+
+Der Ausgabestil „Knapp“ liegt byte-gleich zur Quelle unter `kits/pa/output-styles/Knapp.md`. Die
+Anleitung hat dafür Schritt 8 (Kopierziel, `outputStyle` in `settings.json` oder Auswahl in der
+Desktop-App, eigenes `~/.claude` im WSL-Modus); der Abschnitt „Ton“ in `meta-CLAUDE.md` verweist
+darauf. Kein ADR: Kit-Ergänzung im Rahmen von ADR-0022. Keine Validator-Änderung.
+
 ## 2026-10-03 — Berichtigung `clear_session` (0.10.2)
 
 „Fremde Session leeren“ hieß im PA-Kit und in `mechanismen.md` „eigene“ Sessions. Laut Beschreibung

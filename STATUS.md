@@ -61,5 +61,5 @@ Blocker durch. Das Toolkit prüft sich selbst.
 | Validator (`foundation_validate`) | vollständig, 45 mögliche Finding-IDs, Abdeckung erzwungen; seit 0.7.0 fremde ADR-Nummerierung und deutsche Gliederung gleichwertig (ADR-0017) |
 | Plugin- und Marketplace-Manifest | vollständig |
 | Beispielprojekt `examples/taskflow` | vollständig |
-| PA-Kit `kits/pa/` (ADR-0022) | gebaut (9 Dateien: Meta-`CLAUDE.md`, 7 PA-Dateien, Agent `task-manager`; dazu Anleitung mit Grenzen, gemessen 2026-10-03). Kopiervorlage, nicht Teil des Plugins; ihre Befunde zu Clear und Nachrichten stehen seit 0.10.1 auch in `mechanismen.md`. **Offen:** Einrichtung an einem zweiten Rechner nicht geprobt; Weg der Plugin-Installation ohne CLI in der Desktop-App nicht geprüft |
+| PA-Kit `kits/pa/` (ADR-0022) | gebaut (10 Dateien: Meta-`CLAUDE.md`, 7 PA-Dateien, Agent `task-manager`, seit 0.10.3 Ausgabestil `Knapp`; dazu Anleitung mit Grenzen, gemessen 2026-10-03). Kopiervorlage, nicht Teil des Plugins; ihre Befunde zu Clear und Nachrichten stehen seit 0.10.1 auch in `mechanismen.md`. **Offen:** Einrichtung an einem zweiten Rechner nicht geprobt; Weg der Plugin-Installation ohne CLI in der Desktop-App nicht geprüft |
 | Foundation dieses Repos | vollständig |
